@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("source-map-support/register");
+const cdk = require("aws-cdk-lib");
+const maturity_stack_1 = require("../lib/maturity-stack");
+const app = new cdk.App();
+const env = {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: 'eu-west-3'
+};
+// Environnement DEV
+new maturity_stack_1.MaturityAppStack(app, 'MaturityApp-Dev-V2', {
+    env,
+    environment: 'dev-v2',
+    domainName: 'dev-maturity.e-dsin.fr'
+});
+// Environnement PROD  
+new maturity_stack_1.MaturityAppStack(app, 'MaturityApp-Prod', {
+    env,
+    environment: 'prod',
+    domainName: 'maturity.e-dsin.fr'
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5mcmFzdHJ1Y3R1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJpbmZyYXN0cnVjdHVyZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLHVDQUFxQztBQUNyQyxtQ0FBbUM7QUFDbkMsMERBQXlEO0FBRXpELE1BQU0sR0FBRyxHQUFHLElBQUksR0FBRyxDQUFDLEdBQUcsRUFBRSxDQUFDO0FBRTFCLE1BQU0sR0FBRyxHQUFHO0lBQ1YsT0FBTyxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsbUJBQW1CO0lBQ3hDLE1BQU0sRUFBRSxXQUFXO0NBQ3BCLENBQUM7QUFFRixvQkFBb0I7QUFDcEIsSUFBSSxpQ0FBZ0IsQ0FBQyxHQUFHLEVBQUUsb0JBQW9CLEVBQUU7SUFDOUMsR0FBRztJQUNILFdBQVcsRUFBRSxRQUFRO0lBQ3JCLFVBQVUsRUFBRSx3QkFBd0I7Q0FDckMsQ0FBQyxDQUFDO0FBRUgsdUJBQXVCO0FBQ3ZCLElBQUksaUNBQWdCLENBQUMsR0FBRyxFQUFFLGtCQUFrQixFQUFFO0lBQzVDLEdBQUc7SUFDSCxXQUFXLEVBQUUsTUFBTTtJQUNuQixVQUFVLEVBQUUsb0JBQW9CO0NBQ2pDLENBQUMsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAnc291cmNlLW1hcC1zdXBwb3J0L3JlZ2lzdGVyJztcclxuaW1wb3J0ICogYXMgY2RrIGZyb20gJ2F3cy1jZGstbGliJztcclxuaW1wb3J0IHsgTWF0dXJpdHlBcHBTdGFjayB9IGZyb20gJy4uL2xpYi9tYXR1cml0eS1zdGFjayc7XHJcblxyXG5jb25zdCBhcHAgPSBuZXcgY2RrLkFwcCgpO1xyXG5cclxuY29uc3QgZW52ID0ge1xyXG4gIGFjY291bnQ6IHByb2Nlc3MuZW52LkNES19ERUZBVUxUX0FDQ09VTlQsXHJcbiAgcmVnaW9uOiAnZXUtd2VzdC0zJ1xyXG59O1xyXG5cclxuLy8gRW52aXJvbm5lbWVudCBERVZcclxubmV3IE1hdHVyaXR5QXBwU3RhY2soYXBwLCAnTWF0dXJpdHlBcHAtRGV2LVYyJywge1xyXG4gIGVudixcclxuICBlbnZpcm9ubWVudDogJ2Rldi12MicsXHJcbiAgZG9tYWluTmFtZTogJ2Rldi1tYXR1cml0eS5lLWRzaW4uZnInXHJcbn0pO1xyXG5cclxuLy8gRW52aXJvbm5lbWVudCBQUk9EICBcclxubmV3IE1hdHVyaXR5QXBwU3RhY2soYXBwLCAnTWF0dXJpdHlBcHAtUHJvZCcsIHtcclxuICBlbnYsXHJcbiAgZW52aXJvbm1lbnQ6ICdwcm9kJyxcclxuICBkb21haW5OYW1lOiAnbWF0dXJpdHkuZS1kc2luLmZyJ1xyXG59KTsiXX0=

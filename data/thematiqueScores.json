@@ -1,0 +1,22 @@
+[
+  {
+    "thematique": "Conformité",
+    "averageScore": 9.78,
+    "totalResponses": 104
+  },
+  {
+    "thematique": "Évolutivité",
+    "averageScore": 10.18,
+    "totalResponses": 56
+  },
+  {
+    "thematique": "Sécurité",
+    "averageScore": 11.28,
+    "totalResponses": 40
+  },
+  {
+    "thematique": "Documentation",
+    "averageScore": 12.25,
+    "totalResponses": 40
+  }
+]

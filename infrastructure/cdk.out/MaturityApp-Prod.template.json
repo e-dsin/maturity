@@ -1,0 +1,933 @@
+{
+ "Resources": {
+  "MaturityVPC0A0078D6": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/Resource"
+   }
+  },
+  "MaturityVPCPublicSubnet1SubnetF557D35A": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "AvailabilityZone": "eu-west-3a",
+    "CidrBlock": "10.0.0.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/Subnet"
+   }
+  },
+  "MaturityVPCPublicSubnet1RouteTableEAC7F102": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTable"
+   }
+  },
+  "MaturityVPCPublicSubnet1RouteTableAssociationABFFEC0C": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
+    },
+    "SubnetId": {
+     "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "MaturityVPCPublicSubnet1DefaultRoute12F9D66A": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "MaturityVPCIGW5EAEA5B1"
+    }
+   },
+   "DependsOn": [
+    "MaturityVPCVPCGW84FC1C59"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "MaturityVPCPublicSubnet1EIPB5199418": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/EIP"
+   }
+  },
+  "MaturityVPCPublicSubnet1NATGatewayAB7AFF64": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "SubnetId": {
+     "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
+    },
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "MaturityVPCPublicSubnet1EIPB5199418",
+      "AllocationId"
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "MaturityVPCPublicSubnet1DefaultRoute12F9D66A",
+    "MaturityVPCPublicSubnet1RouteTableAssociationABFFEC0C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/NATGateway"
+   }
+  },
+  "MaturityVPCPublicSubnet2SubnetFE3B0B56": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "AvailabilityZone": "eu-west-3b",
+    "CidrBlock": "10.0.64.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/Subnet"
+   }
+  },
+  "MaturityVPCPublicSubnet2RouteTableA56D3DEC": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PublicSubnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTable"
+   }
+  },
+  "MaturityVPCPublicSubnet2RouteTableAssociation587F747A": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
+    },
+    "SubnetId": {
+     "Ref": "MaturityVPCPublicSubnet2SubnetFE3B0B56"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "MaturityVPCPublicSubnet2DefaultRouteDCC614D0": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "MaturityVPCIGW5EAEA5B1"
+    }
+   },
+   "DependsOn": [
+    "MaturityVPCVPCGW84FC1C59"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "MaturityVPCPrivateSubnet1Subnet82570B1B": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "AvailabilityZone": "eu-west-3a",
+    "CidrBlock": "10.0.128.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/Subnet"
+   }
+  },
+  "MaturityVPCPrivateSubnet1RouteTableAC13222C": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTable"
+   }
+  },
+  "MaturityVPCPrivateSubnet1RouteTableAssociation1A3B8546": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
+    },
+    "SubnetId": {
+     "Ref": "MaturityVPCPrivateSubnet1Subnet82570B1B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "MaturityVPCPrivateSubnet1DefaultRoute10AED07F": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "MaturityVPCPrivateSubnet2Subnet713FC93C": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "AvailabilityZone": "eu-west-3b",
+    "CidrBlock": "10.0.192.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/Subnet"
+   }
+  },
+  "MaturityVPCPrivateSubnet2RouteTableBC0815A0": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTable"
+   }
+  },
+  "MaturityVPCPrivateSubnet2RouteTableAssociation2728632D": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
+    },
+    "SubnetId": {
+     "Ref": "MaturityVPCPrivateSubnet2Subnet713FC93C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "MaturityVPCPrivateSubnet2DefaultRoute42835276": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "MaturityVPCIGW5EAEA5B1": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/MaturityVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/IGW"
+   }
+  },
+  "MaturityVPCVPCGW84FC1C59": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "VpcId": {
+     "Ref": "MaturityVPC0A0078D6"
+    },
+    "InternetGatewayId": {
+     "Ref": "MaturityVPCIGW5EAEA5B1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/VPCGW"
+   }
+  },
+  "MaturityVPCRestrictDefaultSecurityGroupCustomResourceE8AFF68D": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "MaturityVPC0A0078D6",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "637423285771"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/MaturityVPC/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:eu-west-3:637423285771:security-group/",
+             {
+              "Fn::GetAtt": [
+               "MaturityVPC0A0078D6",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-637423285771-eu-west-3",
+     "S3Key": "e77031893275c08bcaa0a774aa8b611727afd045b3b5d8e1e6f0f04063d9d386.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs16.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.e77031893275c08bcaa0a774aa8b611727afd045b3b5d8e1e6f0f04063d9d386",
+    "aws:asset:property": "Code"
+   }
+  },
+  "Certificate4E7ABB08": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "maturity.e-dsin.fr",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "maturity.e-dsin.fr",
+      "HostedZoneId": "Z03909371P12UQ4UA00F0"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityApp-Prod/Certificate"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/Certificate/Resource"
+   }
+  },
+  "FrontendBucketEFE2E19C": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "maturity-frontend-prod-637423285771",
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ],
+    "WebsiteConfiguration": {
+     "ErrorDocument": "index.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/FrontendBucket/Resource"
+   }
+  },
+  "FrontendBucketPolicy1DFF75D9": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "FrontendBucketEFE2E19C"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FrontendBucketEFE2E19C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "OAIE1EFC67F",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FrontendBucketEFE2E19C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/FrontendBucket/Policy/Resource"
+   }
+  },
+  "FrontendBucketAutoDeleteObjectsCustomResourceDB860B32": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "FrontendBucketEFE2E19C"
+    }
+   },
+   "DependsOn": [
+    "FrontendBucketPolicy1DFF75D9"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/FrontendBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-637423285771-eu-west-3",
+     "S3Key": "d28a3fa64d0bd6c7c6f1d6fd707d3e6dc5c81fe8f47891b89459b6492586997f.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "FrontendBucketEFE2E19C"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.d28a3fa64d0bd6c7c6f1d6fd707d3e6dc5c81fe8f47891b89459b6492586997f",
+    "aws:asset:property": "Code"
+   }
+  },
+  "OAIE1EFC67F": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": {
+      "Fn::Join": [
+       "",
+       [
+        "OAI for ",
+        {
+         "Ref": "FrontendBucketEFE2E19C"
+        }
+       ]
+      ]
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/OAI/Resource"
+   }
+  },
+  "FrontendDistributionE6EAF405": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Aliases": [
+      "maturity.e-dsin.fr"
+     ],
+     "CustomErrorResponses": [
+      {
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "MaturityAppProdFrontendDistributionOrigin117D8D006",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "CustomOriginConfig": {
+        "OriginProtocolPolicy": "http-only",
+        "OriginSSLProtocols": [
+         "TLSv1.2"
+        ]
+       },
+       "DomainName": {
+        "Fn::Select": [
+         2,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "WebsiteURL"
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "Id": "MaturityAppProdFrontendDistributionOrigin117D8D006"
+      }
+     ],
+     "ViewerCertificate": {
+      "AcmCertificateArn": {
+       "Ref": "Certificate4E7ABB08"
+      },
+      "MinimumProtocolVersion": "TLSv1.2_2021",
+      "SslSupportMethod": "sni-only"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/FrontendDistribution/Resource"
+   }
+  },
+  "AliasRecord851000D2": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "Name": "dev-maturity.e-dsin.fr.",
+    "Type": "A",
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "FrontendDistributionE6EAF405",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z03909371P12UQ4UA00F0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/AliasRecord/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22QzW7CMBCEn4W7cWkQaq9p+iMOLVFSca2czSZdSOzIXoNQlHevTCjhwGlnxt/a1kTy+UkuZuro5lDu5w0Vss9ZwV6oo/vpESLZbzsQSaW3aSJSXzQEuS80csgmlRnP+K2KBqd8ymLnDJBiMvoKB/G2TsP4UvyhGI/qJFJLB8U4XbzWjFbjFRh/cnExs4LfFjUPAtAyVQSKsVVa1Whln0xZWLyxg3BL2b942I/PXNQ4UtMQnKZ49IOAxviyskaz7DeWatIxADq3LlEz8XkjCcx7YO4Sr+TYUuH/q7j1g7ChmNVS9nGGYGx5LuuscuRhEBk64y2gSLxj0042YHePUmsOVKIVsXPIOauadB34T9V1F7nx3HkehDYlyp17OESRfFzJxWzniObWa6YWZTbOPwFosugyAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityApp-Prod/CDKMetadata/Default"
+   }
+  }
+ },
+ "Mappings": {
+  "AWSCloudFrontPartitionHostedZoneIdMap": {
+   "aws": {
+    "zoneId": "Z2FDTNDATAQYW2"
+   },
+   "aws-cn": {
+    "zoneId": "Z3RFFRIM2A3IF5"
+   }
+  }
+ },
+ "Outputs": {
+  "FrontendURL": {
+   "Description": "Frontend URL avec domaine personnalisé",
+   "Value": "https://maturity.e-dsin.fr"
+  },
+  "FrontendBucketName": {
+   "Description": "S3 Bucket Name",
+   "Value": {
+    "Ref": "FrontendBucketEFE2E19C"
+   }
+  },
+  "CloudFrontURL": {
+   "Description": "URL CloudFront directe (backup)",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "FrontendDistributionE6EAF405",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "CertificateArn": {
+   "Description": "Certificate ARN utilisé",
+   "Value": {
+    "Ref": "Certificate4E7ABB08"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

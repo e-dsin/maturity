@@ -1,0 +1,282 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Plateforme d'Évaluation de la Maturité des DSIN",
+    "version": "1.0.0",
+    "description": "Documentation API pour l'application d'évaluation de la maturité DevSecOps",
+    "contact": {
+      "name": "Support API",
+      "email": "support@example.com"
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/api",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/applications": {
+      "get": {
+        "summary": "Récupère la liste des applications",
+        "tags": [
+          "Applications"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des applications récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/applications/{idApplication}": {
+      "get": {
+        "summary": "Récupère une application par son ID",
+        "tags": [
+          "Applications"
+        ],
+        "parameters": [
+          {
+            "name": "idApplication",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de l'application"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Application récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/interpretation/application/{idApplication}": {
+      "get": {
+        "summary": "Récupère l'analyse complète pour une application",
+        "tags": [
+          "Interpretation"
+        ],
+        "parameters": [
+          {
+            "name": "idApplication",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de l'application"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Analyse complète récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/interpretation/analyse/{idAnalyse}": {
+      "get": {
+        "summary": "Récupère l'interprétation globale pour une analyse",
+        "tags": [
+          "Interpretation"
+        ],
+        "parameters": [
+          {
+            "name": "idAnalyse",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de l'analyse"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Interprétation globale récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/interpretation/thematiques/{idAnalyse}": {
+      "get": {
+        "summary": "Récupère les interprétations par thématique pour une analyse",
+        "tags": [
+          "Interpretation"
+        ],
+        "parameters": [
+          {
+            "name": "idAnalyse",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de l'analyse"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Interprétations par thématique récupérées avec succès"
+          }
+        }
+      }
+    },
+    "/interpretation/organisation/{nomOrganisation}": {
+      "get": {
+        "summary": "Récupère les analyses pour toutes les applications d'une organisation",
+        "tags": [
+          "Interpretation"
+        ],
+        "parameters": [
+          {
+            "name": "nomOrganisation",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nom de l'organisation"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Analyses récupérées avec succès"
+          }
+        }
+      }
+    },
+    "/interpretation/organisation/{nomOrganisation}/scores-moyens": {
+      "get": {
+        "summary": "Récupère les scores moyens par thématique pour une organisation",
+        "tags": [
+          "Interpretation"
+        ],
+        "parameters": [
+          {
+            "name": "nomOrganisation",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nom de l'organisation"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Scores moyens récupérés avec succès"
+          }
+        }
+      }
+    },
+    "/stats/overview": {
+      "get": {
+        "summary": "Récupère un aperçu des statistiques générales",
+        "tags": [
+          "Statistiques"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées avec succès"
+          }
+        }
+      }
+    },
+    "/acteurs": {
+      "get": {
+        "summary": "Récupère la liste des acteurs",
+        "tags": [
+          "Acteurs"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des acteurs récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/questionnaires": {
+      "get": {
+        "summary": "Récupère la liste des questionnaires",
+        "tags": [
+          "Questionnaires"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des questionnaires récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/questionnaires/{idQuestionnaire}/questions": {
+      "get": {
+        "summary": "Récupère les questions d'un questionnaire",
+        "tags": [
+          "Questionnaires"
+        ],
+        "parameters": [
+          {
+            "name": "idQuestionnaire",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant du questionnaire"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Questions récupérées avec succès"
+          }
+        }
+      }
+    },
+    "/formulaires/recent": {
+      "get": {
+        "summary": "Récupère les formulaires récents",
+        "tags": [
+          "Formulaires"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Formulaires récupérés avec succès"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

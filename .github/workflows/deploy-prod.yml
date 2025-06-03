@@ -1,0 +1,204 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        default: 'latest'
+      confirm_production:
+        description: 'Type "DEPLOY" to confirm production deployment'
+        required: true
+
+env:
+  NODE_VERSION: '22'
+  AWS_REGION: eu-west-3
+  S3_BUCKET_PROD: maturity-frontend-prod-637423285771
+  ENVIRONMENT: prod
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Validate production deployment
+      run: |
+        if [ "${{ github.event.inputs.confirm_production }}" != "DEPLOY" ]; then
+          echo "❌ Production deployment not confirmed. Please type 'DEPLOY' to proceed."
+          exit 1
+        fi
+        echo "✅ Production deployment confirmed"
+
+  security-review:
+    runs-on: ubuntu-latest
+    needs: [validation]
+    if: always() && (needs.validation.result == 'success' || github.event_name == 'push')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Security audit
+      run: npm audit --audit-level=high
+    
+    - name: Build verification
+      run: npm run build
+
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    needs: [security-review]
+    environment: production
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: infrastructure/package-lock.json
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Install CDK dependencies
+      working-directory: infrastructure
+      run: npm ci
+    
+    - name: CDK Diff (Review changes)
+      working-directory: infrastructure
+      run: npx cdk diff MaturityApp-Prod
+    
+    - name: CDK Deploy Production
+      working-directory: infrastructure
+      run: npx cdk deploy MaturityApp-Prod --require-approval never
+    
+    - name: Get production outputs
+      id: prod-outputs
+      working-directory: infrastructure
+      run: |
+        BUCKET=$(npx cdk list --json | jq -r '.[] | select(.name=="MaturityApp-Prod") | .outputs.FrontendBucketName')
+        echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    environment: production
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build frontend for production
+      run: npm run build
+      env:
+        NODE_ENV: production
+        VITE_API_URL: ${{ secrets.PROD_API_URL }}
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Deploy to Production S3
+      run: |
+        # Get the actual bucket name from CDK output
+        BUCKET_NAME=$(aws cloudformation describe-stacks \
+          --stack-name MaturityApp-Prod \
+          --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
+          --output text)
+        
+        if [ -z "$BUCKET_NAME" ]; then
+          echo "❌ Could not find production bucket name"
+          exit 1
+        fi
+        
+        echo "📦 Deploying to bucket: $BUCKET_NAME"
+        
+        aws s3 sync ./dist s3://$BUCKET_NAME \
+          --delete \
+          --exclude "*.map" \
+          --cache-control "public,max-age=31536000,immutable" \
+          --exclude "index.html"
+        
+        # Upload index.html with no-cache
+        aws s3 cp ./dist/index.html s3://$BUCKET_NAME/index.html \
+          --cache-control "public,max-age=0,must-revalidate"
+    
+    - name: Invalidate Production CloudFront
+      run: |
+        DISTRIBUTION_ID=$(aws cloudfront list-distributions \
+          --query "DistributionList.Items[?contains(Origins.Items[0].DomainName, 'maturity-frontend-prod')].Id" \
+          --output text)
+        
+        if [ -n "$DISTRIBUTION_ID" ]; then
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*"
+          echo "✅ Production CloudFront invalidation created"
+        else
+          echo "❌ Production CloudFront distribution not found"
+          exit 1
+        fi
+    
+    - name: Production deployment summary
+      run: |
+        echo "🚀 PRODUCTION DEPLOYMENT COMPLETED! 🚀"
+        echo "🌐 Production URL: https://maturity.e-dsin.fr"
+        echo "📅 Deployed at: $(date)"
+        echo "🏷️ Version: ${{ github.ref_name }}"
+        
+        # Create GitHub release if triggered by tag
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+          echo "📋 Release notes should be added manually in GitHub"
+        fi
+
+  notify-success:
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend]
+    if: success()
+    
+    steps:
+    - name: Success notification
+      run: |
+        echo "✅ PRODUCTION DEPLOYMENT SUCCESSFUL!"
+        echo "Version ${{ github.ref_name }} is now live at https://maturity.e-dsin.fr"

@@ -1,0 +1,113 @@
+{
+  "name": "maturity-assessment-app",
+  "version": "1.0.0",
+  "description": "Application d'évaluation de maturité avec API Axios",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run dev\" \"npm run start:server\"",
+    "dev": "vite --host 0.0.0.0",
+    "start:server": "node server/server.js",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "setup-db": "ts-node scripts/setup-database.ts",
+    "update-db": "ts-node scripts/update-database.ts --drop --skip-backup",
+    "migrate-data": "ts-node scripts/migrate-data.ts",
+    "reset-seed:db": "ts-node scripts/resetAndSeedDatabase.ts",
+    "seedGrille:db": "ts-node scripts/seedGrilleInterpretation.ts",
+    "setup-database": "ts-node scripts/setupDatabaseWithMaturity.ts",
+    "import-devsecops": "ts-node scripts/import-devsecsops-questionnaire.ts",
+    "test-auth": "node scripts/test-auth-endpoint.js",
+    "migrate-score": "node scripts/create-enterprise-history.js",
+    "test": "vitest",
+    "test:api": "node tests/test-api.js",
+    "generate-data": "ts-node-esm ./mocks/dataGenerator.ts",
+    "generate-swagger": "node scripts/generate-swagger-docs.js",
+    "generate:postman": "node scripts/export-to-postman.js",
+    "generate-all-docs": "node scripts/generate-all-docs.js",
+    "create-admin-user": "node scripts/create-admin-user.js"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@faker-js/faker": "^8.3.1",
+    "@headlessui/react": "^2.2.3",
+    "@heroicons/react": "^2.2.0",
+    "@mui/icons-material": "^7.0.2",
+    "@mui/material": "^7.1.0",
+    "@mui/x-date-pickers": "^6.19.0",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "axios": "^1.6.7",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "concurrently": "^8.2.2",
+    "connect-redis": "^8.1.0",
+    "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "json-server": "^0.17.4",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.14.1",
+    "openapi-to-postmanv2": "^5.0.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "recharts": "^2.15.3",
+    "redis": "^5.1.0",
+    "swagger-tools": "^0.10.4",
+    "swagger-ui-express": "^5.0.1",
+    "swagger2-to-postmanv2": "^2.1.0",
+    "uuid": "^9.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/mysql": "^2.15.27",
+    "@types/node": "^22.15.3",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@types/recharts": "^1.8.29",
+    "@types/uuid": "^9.0.8",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.17",
+    "js-yaml": "^4.1.0",
+    "nodemon": "^3.0.2",
+    "postcss": "^8.4.35",
+    "swagger-jsdoc": "^6.2.8",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

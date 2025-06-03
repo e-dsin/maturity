@@ -1,0 +1,99 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Styles pour reproduire exactement l'interface demandée */
+body {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: #f9fafb;
+}
+
+.app-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+}
+
+.section-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 500;
+}
+
+.sidebar-link {
+  transition: all 0.3s;
+}
+
+.sidebar-link:hover {
+  background-color: #e5e7eb;
+}
+
+.active-link {
+  background-color: #e5e7eb;
+  border-left: 4px solid #3b82f6;
+}
+
+.card {
+  transition: all 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.stats-card {
+  transition: all 0.2s;
+}
+
+.stats-card:hover {
+  transform: scale(1.02);
+}
+
+.btn-primary {
+  transition: all 0.2s;
+  background-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* Vous pouvez copier ces styles dans votre fichier App.css existant */

@@ -1,0 +1,11 @@
+{
+  "availability-zones:account=637423285771:region=eu-west-3": [
+    "eu-west-3a",
+    "eu-west-3b",
+    "eu-west-3c"
+  ],
+  "hosted-zone:account=637423285771:domainName=dev-maturity.e-dsin.fr:region=eu-west-3": {
+    "Id": "/hostedzone/Z03909371P12UQ4UA00F0",
+    "Name": "dev-maturity.e-dsin.fr."
+  }
+}

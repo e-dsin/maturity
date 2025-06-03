@@ -1,0 +1,34 @@
+{
+  "version": "32.0.0",
+  "files": {
+    "e77031893275c08bcaa0a774aa8b611727afd045b3b5d8e1e6f0f04063d9d386": {
+      "source": {
+        "path": "asset.e77031893275c08bcaa0a774aa8b611727afd045b3b5d8e1e6f0f04063d9d386",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "637423285771-eu-west-3": {
+          "bucketName": "cdk-hnb659fds-assets-637423285771-eu-west-3",
+          "objectKey": "e77031893275c08bcaa0a774aa8b611727afd045b3b5d8e1e6f0f04063d9d386.zip",
+          "region": "eu-west-3",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-file-publishing-role-637423285771-eu-west-3"
+        }
+      }
+    },
+    "b59f005c97fb756284dbd7691278e510d070dcc0e7a424e57a45455d0f57865a": {
+      "source": {
+        "path": "MaturityApp-Dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "637423285771-eu-west-3": {
+          "bucketName": "cdk-hnb659fds-assets-637423285771-eu-west-3",
+          "objectKey": "b59f005c97fb756284dbd7691278e510d070dcc0e7a424e57a45455d0f57865a.json",
+          "region": "eu-west-3",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-file-publishing-role-637423285771-eu-west-3"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

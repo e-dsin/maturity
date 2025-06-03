@@ -1,0 +1,205 @@
+// scripts/swagger/config.js
+/**
+ * Configuration pour la génération de la documentation Swagger
+ */
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Charger les variables d'environnement
+dotenv.config();
+
+/**
+ * Options de base pour Swagger
+ */
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: process.env.VITE_APP_NAME || 'Plateforme d\'Évaluation de la Maturité des DSIN',
+      version: process.env.VITE_APP_VERSION || '1.0.0',
+      description: 'Documentation API pour l\'application d\'évaluation de la maturité DevSecOps',
+      contact: {
+        name: 'Support API',
+        email: 'support@example.com'
+      }
+    },
+    servers: [
+      {
+        url: process.env.VITE_API_URL || 'http://localhost:5000/api',
+        description: 'Serveur de développement'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
+      schemas: {
+        // Schémas communs
+        Application: {
+          type: 'object',
+          properties: {
+            id_application: { type: 'string', format: 'uuid' },
+            nom_application: { type: 'string' },
+            statut: { type: 'string', enum: ['Projet', 'Run'] },
+            type: { type: 'string', enum: ['Build', 'Buy'] },
+            hebergement: { type: 'string', enum: ['Cloud', 'Prem', 'Hybrid'] },
+            architecture_logicielle: { type: 'string' },
+            date_creation: { type: 'string', format: 'date-time' },
+            date_modification: { type: 'string', format: 'date-time' }
+          }
+        },
+        Analyse: {
+          type: 'object',
+          properties: {
+            id_analyse: { type: 'string', format: 'uuid' },
+            id_application: { type: 'string', format: 'uuid' },
+            date_analyse: { type: 'string', format: 'date-time' },
+            score_global: { type: 'number', format: 'float' },
+            thematiques: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ThematiqueScore'
+              }
+            }
+          }
+        },
+        ThematiqueScore: {
+          type: 'object',
+          properties: {
+            id_score: { type: 'string', format: 'uuid' },
+            thematique: { type: 'string' },
+            score: { type: 'number', format: 'float' },
+            nombre_reponses: { type: 'integer' }
+          }
+        },
+        Questionnaire: {
+          type: 'object',
+          properties: {
+            id_questionnaire: { type: 'string', format: 'uuid' },
+            fonction: { type: 'string' },
+            thematique: { type: 'string' },
+            description: { type: 'string' },
+            date_creation: { type: 'string', format: 'date-time' },
+            date_modification: { type: 'string', format: 'date-time' }
+          }
+        },
+        Formulaire: {
+          type: 'object',
+          properties: {
+            id_formulaire: { type: 'string', format: 'uuid' },
+            id_application: { type: 'string', format: 'uuid' },
+            id_questionnaire: { type: 'string', format: 'uuid' },
+            id_acteur: { type: 'string', format: 'uuid' },
+            statut: { type: 'string', enum: ['Brouillon', 'Soumis', 'Validé'] },
+            date_creation: { type: 'string', format: 'date-time' },
+            date_modification: { type: 'string', format: 'date-time' }
+          }
+        },
+        Interpretation: {
+          type: 'object',
+          properties: {
+            id_analyse: { type: 'string', format: 'uuid' },
+            score_global: { type: 'number', format: 'float' },
+            niveau_global: { type: 'string' },
+            description_globale: { type: 'string' },
+            recommandations_globales: { type: 'string' }
+          }
+        },
+        Entreprise: {
+          type: 'object',
+          properties: {
+            id_entreprise: { type: 'string', format: 'uuid' },
+            nom_entreprise: { type: 'string' },
+            secteur: { type: 'string' },
+            score_global: { type: 'number', format: 'float' }
+          }
+        },
+        Question: {
+          type: 'object',
+          properties: {
+            id_question: { type: 'string', format: 'uuid' },
+            id_questionnaire: { type: 'string', format: 'uuid' },
+            texte: { type: 'string' },
+            type: { type: 'string' },
+            ordre: { type: 'integer' },
+            options: { type: 'array', items: { type: 'string' } },
+            obligatoire: { type: 'boolean' },
+            aide: { type: 'string' },
+            points_max: { type: 'number' }
+          }
+        },
+        Reponse: {
+          type: 'object',
+          properties: {
+            id_reponse: { type: 'string', format: 'uuid' },
+            id_formulaire: { type: 'string', format: 'uuid' },
+            id_question: { type: 'string', format: 'uuid' },
+            valeur: { type: 'string' },
+            commentaire: { type: 'string' },
+            score: { type: 'number' },
+            date_creation: { type: 'string', format: 'date-time' },
+            date_modification: { type: 'string', format: 'date-time' }
+          }
+        },
+        Acteur: {
+          type: 'object',
+          properties: {
+            id_acteur: { type: 'string', format: 'uuid' },
+            nom_acteur: { type: 'string' },
+            type_acteur: { type: 'string' },
+            role: { type: 'string' },
+            organisation: { type: 'string' },
+            email: { type: 'string' },
+            telephone: { type: 'string' }
+          }
+        },
+        Permission: {
+          type: 'object',
+          properties: {
+            id_permission: { type: 'string', format: 'uuid' },
+            id_acteur: { type: 'string', format: 'uuid' },
+            ressource: { type: 'string' },
+            action: { type: 'string' },
+            conditions: { type: 'object' }
+          }
+        },
+        Log: {
+          type: 'object',
+          properties: {
+            level: { type: 'string', enum: ['DEBUG', 'INFO', 'WARN', 'ERROR'] },
+            message: { type: 'string' },
+            timestamp: { type: 'string', format: 'date-time' },
+            details: { type: 'object' }
+          }
+        }
+      }
+    },
+    tags: [
+      { name: 'Applications', description: 'Opérations liées aux applications' },
+      { name: 'Analyses', description: 'Opérations liées aux analyses de maturité' },
+      { name: 'Interprétations', description: 'Interprétations des scores de maturité' },
+      { name: 'Questionnaires', description: 'Opérations liées aux questionnaires' },
+      { name: 'Formulaires', description: 'Opérations liées aux formulaires d\'évaluation' },
+      { name: 'Entreprises', description: 'Opérations liées aux entreprises' },
+      { name: 'Historique', description: 'Opérations liées à l\'historique des scores' },
+      { name: 'Statistiques', description: 'Statistiques générales et rapports' },
+      { name: 'Questions', description: 'Opérations liées aux questions' },
+      { name: 'Réponses', description: 'Opérations liées aux réponses' },
+      { name: 'Acteurs', description: 'Gestion des utilisateurs' },
+      { name: 'Permissions', description: 'Gestion des permissions' },
+      { name: 'Logs', description: 'Gestion des logs' }
+    ]
+  },
+  // Chemins vers les fichiers contenant les annotations Swagger
+  apis: [
+    './server/routes/*.js',
+    './server/models/*.js',
+    './server/swagger/*.js'
+  ]
+};
+
+module.exports = swaggerOptions;

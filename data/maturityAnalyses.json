@@ -1,0 +1,322 @@
+[
+  {
+    "application": {
+      "IdApplication": "cdf5d8a7-f2f2-4361-8fae-0c445dc81902",
+      "NomApplication": "Artisanal Fromage 101",
+      "Statut": "Projet",
+      "Type": "Buy",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "Multitenant SAAS",
+      "DateMiseEnProd": "2017-09-27",
+      "Language": "Go",
+      "Editeur": "ServiceNow"
+    },
+    "scores": [
+      {
+        "thematique": "Conformité",
+        "score": 9.33
+      },
+      {
+        "thematique": "Évolutivité",
+        "score": 10.5
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "b2e4b90b-0200-4438-aa05-0c1f7aeceaed",
+      "NomApplication": "Sans marque Gants 179",
+      "Statut": "Run",
+      "Type": "Build",
+      "Hebergement": "Hybrid",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2021-06-10",
+      "Language": "PHP",
+      "Editeur": "ServiceNow"
+    },
+    "scores": [
+      {
+        "thematique": "Documentation",
+        "score": 13.13
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "596f1f57-f3d9-48f5-81b1-8c8cba0d71fe",
+      "NomApplication": "Rustique Gants 283",
+      "Statut": "Run",
+      "Type": "Buy",
+      "Hebergement": "Hybrid",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2019-05-08",
+      "Language": "Go",
+      "Editeur": "Adobe"
+    },
+    "scores": [
+      {
+        "thematique": "Sécurité",
+        "score": 9.63
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "f2165eb0-5fde-4be0-9bd3-e7218d5db653",
+      "NomApplication": "Oriental Voiture 572",
+      "Statut": "Projet",
+      "Type": "Build",
+      "Hebergement": "Prem",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2022-07-18",
+      "Language": "C#",
+      "Editeur": "Adobe"
+    },
+    "scores": [
+      {
+        "thematique": "Documentation",
+        "score": 16
+      },
+      {
+        "thematique": "Évolutivité",
+        "score": 9
+      },
+      {
+        "thematique": "Sécurité",
+        "score": 11.75
+      },
+      {
+        "thematique": "Conformité",
+        "score": 11.38
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "0d36acfc-48a2-4425-b422-13a8968e959f",
+      "NomApplication": "Moderne Gants 899",
+      "Statut": "Run",
+      "Type": "Build",
+      "Hebergement": "Hybrid",
+      "ArchitectureLogicielle": "ERP",
+      "DateMiseEnProd": "2018-02-16",
+      "Language": "TypeScript",
+      "Editeur": "Oracle"
+    },
+    "scores": [
+      {
+        "thematique": "Documentation",
+        "score": 8.25
+      },
+      {
+        "thematique": "Conformité",
+        "score": 6.88
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "cc5eee96-20ad-4bdd-b1b9-a8cfd28bb4b0",
+      "NomApplication": "Incroyable Gants 606",
+      "Statut": "Projet",
+      "Type": "Build",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2023-06-19",
+      "Language": "Go",
+      "Editeur": "Microsoft"
+    },
+    "scores": [
+      {
+        "thematique": "Sécurité",
+        "score": 12.13
+      },
+      {
+        "thematique": "Conformité",
+        "score": 10.42
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "b9b9892e-cd2a-4972-8351-745819e99b6d",
+      "NomApplication": "Oriental Chemise 803",
+      "Statut": "Run",
+      "Type": "Buy",
+      "Hebergement": "Hybrid",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2025-04-14",
+      "Language": "Python",
+      "Editeur": "Atlassian"
+    },
+    "scores": [
+      {
+        "thematique": "Sécurité",
+        "score": 12
+      },
+      {
+        "thematique": "Évolutivité",
+        "score": 10.75
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "1d83c53a-b39b-4b6e-8a9d-0861684cdd8e",
+      "NomApplication": "Fait main Table 842",
+      "Statut": "Run",
+      "Type": "Build",
+      "Hebergement": "Prem",
+      "ArchitectureLogicielle": "Monolithique",
+      "DateMiseEnProd": "2025-03-14",
+      "Language": "C#",
+      "Editeur": "ServiceNow"
+    },
+    "scores": []
+  },
+  {
+    "application": {
+      "IdApplication": "d5f6cd9d-f323-45b6-8407-ff3650720e65",
+      "NomApplication": "Rustique Vélo 882",
+      "Statut": "Projet",
+      "Type": "Build",
+      "Hebergement": "Hybrid",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2023-12-13",
+      "Language": "Java",
+      "Editeur": "Workday"
+    },
+    "scores": [
+      {
+        "thematique": "Conformité",
+        "score": 10.13
+      },
+      {
+        "thematique": "Évolutivité",
+        "score": 10
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "1eb725f0-57d8-4e3a-8ce7-9b39405877a1",
+      "NomApplication": "Savoureux Boule 719",
+      "Statut": "Run",
+      "Type": "Build",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "Multitenant SAAS",
+      "DateMiseEnProd": "2018-01-29",
+      "Language": "TypeScript",
+      "Editeur": "Adobe"
+    },
+    "scores": [
+      {
+        "thematique": "Évolutivité",
+        "score": 12.38
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "97e65c80-4613-4734-a055-0f1aa25f9c18",
+      "NomApplication": "Moderne Table 623",
+      "Statut": "Projet",
+      "Type": "Build",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "Monolithique",
+      "DateMiseEnProd": "2022-12-21",
+      "Language": "C#",
+      "Editeur": "Atlassian"
+    },
+    "scores": [
+      {
+        "thematique": "Évolutivité",
+        "score": 7.25
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "b5e6cb3c-2cb1-4c37-bd11-31c0b942610d",
+      "NomApplication": "Fait main Chaise 640",
+      "Statut": "Projet",
+      "Type": "Build",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "ERP",
+      "DateMiseEnProd": "2015-12-18",
+      "Language": "Swift",
+      "Editeur": "Microsoft"
+    },
+    "scores": [
+      {
+        "thematique": "Évolutivité",
+        "score": 11.38
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "3768410b-6b8d-4e7c-8f71-15959b89b4e7",
+      "NomApplication": "Oriental Chemise 594",
+      "Statut": "Projet",
+      "Type": "Buy",
+      "Hebergement": "Prem",
+      "ArchitectureLogicielle": "MVC",
+      "DateMiseEnProd": "2017-12-25",
+      "Language": "TypeScript",
+      "Editeur": "Adobe"
+    },
+    "scores": [
+      {
+        "thematique": "Conformité",
+        "score": 10.38
+      },
+      {
+        "thematique": "Documentation",
+        "score": 10.75
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "54ab6d19-4ae5-4a1c-8d2a-e2f0b6f5b874",
+      "NomApplication": "Luxueux Pizza 980",
+      "Statut": "Projet",
+      "Type": "Buy",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "Multitenant SAAS",
+      "DateMiseEnProd": "2021-07-08",
+      "Language": "Java",
+      "Editeur": "Microsoft"
+    },
+    "scores": [
+      {
+        "thematique": "Conformité",
+        "score": 9.63
+      },
+      {
+        "thematique": "Sécurité",
+        "score": 10.88
+      }
+    ]
+  },
+  {
+    "application": {
+      "IdApplication": "6ba01c11-3597-4327-b065-44afa3cd03df",
+      "NomApplication": "Fait main Clavier 674",
+      "Statut": "Run",
+      "Type": "Build",
+      "Hebergement": "Cloud",
+      "ArchitectureLogicielle": "Multitenant SAAS",
+      "DateMiseEnProd": "2020-03-19",
+      "Language": "PHP",
+      "Editeur": "ServiceNow"
+    },
+    "scores": [
+      {
+        "thematique": "Conformité",
+        "score": 9.13
+      }
+    ]
+  }
+]

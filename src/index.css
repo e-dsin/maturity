@@ -1,0 +1,418 @@
+/* Importation des polices */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===================================
+   Root variables
+=================================== */
+:root {
+  --font-family: 'Ubuntu', sans-serif;
+  --font-family-title: 'Poppins', sans-serif;
+  --color-primary: #0B4E87;
+  --color-secondary: #09C4B8;
+  padding-top: var(--header-height);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===================================
+   Base styles
+=================================== */
+html {
+  font-family: var(--font-family);
+  background-color: #f8fafc;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-family);
+  background-color: #f9fafb;
+}
+
+/* ===================================
+   Scrollbar personnalisée
+=================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ===================================
+   Styles spécifiques à l'interface DSIN
+=================================== */
+.app-title {
+  font-family: var(--font-family-title);
+  font-weight: 600;
+}
+
+.section-title {
+  font-family: var(--font-family-title);
+  font-weight: 500;
+}
+
+.sidebar-link {
+  transition: all 0.3s;
+}
+
+.sidebar-link:hover {
+  background-color: #e5e7eb;
+}
+
+.active-link {
+  background-color: #e5e7eb;
+  border-left: 4px solid #3b82f6;
+}
+
+.card {
+  transition: all 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.stats-card {
+  transition: all 0.2s;
+}
+
+.stats-card:hover {
+  transform: scale(1.02);
+}
+
+.btn-primary {
+  transition: all 0.2s;
+  background-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* ===================================
+   Utility classes
+=================================== */
+.icon-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-md {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon-lg {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* ===================================
+   Composants personnalisés
+=================================== */
+@layer components {
+  /* Styles pour les tableaux */
+  .table-container {
+    @apply overflow-x-auto rounded-lg shadow-sm;
+  }
+  
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+  
+  .table-header {
+    @apply bg-gray-50;
+  }
+  
+  .table-header-cell {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+  
+  .table-body {
+    @apply bg-white divide-y divide-gray-200;
+  }
+  
+  .table-row {
+    @apply hover:bg-gray-50 transition-colors duration-150;
+  }
+  
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-700;
+  }
+  
+  /* Stats cards */
+  .stats-card {
+    @apply bg-white rounded-lg shadow-card p-5 border-l-4 transition-transform hover:transform hover:scale-105;
+  }
+  
+  .stats-card-primary {
+    @apply border-primary-600;
+  }
+  
+  .stats-card-secondary {
+    @apply border-secondary-600;
+  }
+  
+  .stats-card-accent1 {
+    @apply border-accent1-DEFAULT;
+  }
+  
+  .stats-card-accent2 {
+    @apply border-accent2-DEFAULT;
+  }
+  
+  /* Badges pour les statuts */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success    { @apply bg-success-100 text-success-800; }
+  .badge-warning    { @apply bg-warning-100 text-warning-800; }
+  .badge-danger     { @apply bg-danger-100 text-danger-800; }
+  .badge-primary    { @apply bg-primary-400 text-primary-900; }
+  .badge-secondary  { @apply bg-secondary-500 text-secondary-900; }
+  
+  /* Barres de progression */
+  .progress-bar {
+    @apply w-full h-1.5 bg-gray-200 rounded-full overflow-hidden;
+  }
+
+  .progress-bar-value {
+    @apply h-full rounded-full transition-all duration-500 ease-in-out;
+  }
+
+  .progress-bar-success   { @apply bg-success-500; }
+  .progress-bar-warning   { @apply bg-warning-500; }
+  .progress-bar-danger    { @apply bg-danger-500; }
+  .progress-bar-primary   { @apply bg-primary-600; }
+  .progress-bar-secondary { @apply bg-secondary-700; }
+}
+
+/* ===================================
+   Animations
+=================================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-in-out;
+}
+
+/* ===================================
+   Media queries
+=================================== */
+@media (max-width: 640px) {
+  .stats-card {
+    @apply p-4;
+  }
+  
+  .stats-card h3 {
+    @apply text-xs;
+  }
+  
+  .stats-card p {
+    @apply text-xl;
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .stats-card, .card, .btn-primary, .sidebar-link {
+    transition: none;
+  }
+  
+  .animate-fadeIn, .animate-slideInLeft {
+    animation: none;
+  }
+}
+
+body {
+  font-family: 'Ubuntu', sans-serif;
+  color: var(--text-color);
+  overflow-x: hidden;
+  background-color: var(--light-bg);
+}
+
+
+:root {
+  --primary-color: #00548A;
+  --secondary-color: #0EB0AA;
+  --accent-color: #C0504D;
+  --text-color: #333333;
+  --light-bg: #f8f9fa;
+  --white: #ffffff;
+  --transition: all 0.3s ease;
+  --header-height: 60px;
+}
+
+* {
+  margin: 10;
+  padding: 10;
+  box-sizing: border-box;
+  font-family:'Ubuntu';
+
+}
+
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
+
+#splash-screen .logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#splash-screen img {
+  width: 120px;
+  height: auto;
+  animation: pulse 1.5s infinite;
+}
+
+#splash-screen .loading-bar {
+  width: 200px;
+  height: 4px;
+  background-color: #eaeaea;
+  border-radius: 2px;
+  margin-top: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+#splash-screen .loading-progress {
+  height: 100%;
+  background-color: var(--primary-color);
+  width: 0%;
+  border-radius: 2px;
+  animation: loading 2s ease-in-out infinite;
+}
+
+/* Style pour le logo fixe en haut à gauche */
+.header-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  background-color: var(--white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  transition: var(--transition);
+}
+
+.header-logo img {
+  height: 30px;
+  width: auto;
+}
+
+.header-logo .logo-text {
+  margin-left: 100px;
+  font-weight: 600;
+  font-family:'Ubuntu';
+  font-size: 24px;
+  color: var(--primary-color);
+  display: none;
+}
+
+.app-container {
+  margin-top: calc(var(--header-height) + 20px);
+  min-height: calc(100vh - var(--header-height));
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header-logo {
+    top: 24px;
+    left: 24px;
+  }
+  
+  .header-logo img {
+    height: 48px;
+  }
+  
+  .header-logo .logo-text {
+    display: block;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes loading {
+  0% { width: 0%; }
+  50% { width: 100%; }
+  100% { width: 0%; }
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+noscript {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--light-bg);
+  color: var(--text-color);
+  text-align: center;
+  padding: 20px;
+}
+
+.app-wrapper,
+.main-layout,
+.dashboard-container,
+.page-container {
+  padding-top: var(--header-height); 
+  position: relative;
+  z-index: 1;
+}

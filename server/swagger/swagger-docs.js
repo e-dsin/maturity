@@ -1,0 +1,1955 @@
+// server/swagger/swagger-docs.js
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Acteur:
+ *       type: object
+ *       properties:
+ *         id_acteur:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de l'acteur
+ *         nom_prenom:
+ *           type: string
+ *           maxLength: 100
+ *           description: Nom et prénom de l'acteur
+ *         role:
+ *           type: string
+ *           maxLength: 50
+ *           description: Rôle de l'acteur (Admin, User, etc.)
+ *         organisation:
+ *           type: string
+ *           maxLength: 50
+ *           description: Organisation à laquelle appartient l'acteur
+ *         anciennete_role:
+ *           type: integer
+ *           description: Ancienneté dans le rôle en années
+ *         email:
+ *           type: string
+ *           format: email
+ *           maxLength: 100
+ *           description: Adresse email de l'acteur
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création de l'enregistrement
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification de l'enregistrement
+ *       required:
+ *         - nom_prenom
+ *         - role
+ *         - organisation
+ *         - anciennete_role
+ *       example:
+ *         id_acteur: "550e8400-e29b-41d4-a716-446655440000"
+ *         nom_prenom: "Jean Dupont"
+ *         role: "Admin"
+ *         organisation: "Direction Informatique"
+ *         anciennete_role: 5
+ *         email: "jean.dupont@example.com"
+ *         date_creation: "2025-04-15T10:30:00Z"
+ *         date_modification: "2025-04-15T10:30:00Z"
+ *     
+ *     Application:
+ *       type: object
+ *       properties:
+ *         id_application:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de l'application
+ *         nom_application:
+ *           type: string
+ *           maxLength: 100
+ *           description: Nom de l'application
+ *         statut:
+ *           type: string
+ *           enum: [Projet, Run]
+ *           description: Statut de l'application
+ *         type:
+ *           type: string
+ *           enum: [Build, Buy]
+ *           description: Type d'application (développée en interne ou achetée)
+ *         hebergement:
+ *           type: string
+ *           enum: [Cloud, Prem, Hybrid]
+ *           description: Type d'hébergement de l'application
+ *         architecture_logicielle:
+ *           type: string
+ *           enum: [ERP, Multitenant SAAS, MVC, Monolithique]
+ *           description: Architecture logicielle de l'application
+ *         date_mise_en_prod:
+ *           type: string
+ *           format: date
+ *           description: Date de mise en production
+ *         language:
+ *           type: string
+ *           maxLength: 50
+ *           description: Langage de programmation principal
+ *         editeur:
+ *           type: string
+ *           maxLength: 50
+ *           description: Éditeur ou développeur de l'application
+ *         description:
+ *           type: string
+ *           description: Description détaillée de l'application
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création de l'enregistrement
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification de l'enregistrement
+ *       required:
+ *         - nom_application
+ *         - statut
+ *         - type
+ *         - hebergement
+ *         - architecture_logicielle
+ *       example:
+ *         id_application: "550e8400-e29b-41d4-a716-446655440001"
+ *         nom_application: "CRM Finance"
+ *         statut: "Run"
+ *         type: "Build"
+ *         hebergement: "Cloud"
+ *         architecture_logicielle: "MVC"
+ *         date_mise_en_prod: "2024-01-15"
+ *         language: "JavaScript"
+ *         editeur: "InternalDev"
+ *         description: "Application de gestion de la relation client pour le département finance"
+ *         date_creation: "2024-01-10T08:30:00Z"
+ *         date_modification: "2024-01-15T14:45:00Z"
+ *     
+ *     Questionnaire:
+ *       type: object
+ *       properties:
+ *         id_questionnaire:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique du questionnaire
+ *         fonction:
+ *           type: string
+ *           maxLength: 100
+ *           description: Fonction ou objectif du questionnaire
+ *         thematique:
+ *           type: string
+ *           maxLength: 50
+ *           description: Thématique principale du questionnaire
+ *         description:
+ *           type: string
+ *           description: Description détaillée du questionnaire
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création de l'enregistrement
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification de l'enregistrement
+ *       required:
+ *         - fonction
+ *         - thematique
+ *       example:
+ *         id_questionnaire: "550e8400-e29b-41d4-a716-446655440002"
+ *         fonction: "Évaluation DevSecOps"
+ *         thematique: "DevSecOps"
+ *         description: "Questionnaire complet d'évaluation de la maturité DevSecOps"
+ *         date_creation: "2024-01-15T09:00:00Z"
+ *         date_modification: "2024-01-15T09:00:00Z"
+ *     
+ *     Question:
+ *       type: object
+ *       properties:
+ *         id_question:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de la question
+ *         id_questionnaire:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant du questionnaire auquel appartient la question
+ *         texte:
+ *           type: string
+ *           description: Texte de la question
+ *         ponderation:
+ *           type: integer
+ *           description: Pondération ou importance de la question
+ *         ordre:
+ *           type: integer
+ *           description: Ordre d'affichage de la question dans le questionnaire
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création de l'enregistrement
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification de l'enregistrement
+ *       required:
+ *         - id_questionnaire
+ *         - texte
+ *         - ponderation
+ *       example:
+ *         id_question: "550e8400-e29b-41d4-a716-446655440003"
+ *         id_questionnaire: "550e8400-e29b-41d4-a716-446655440002"
+ *         texte: "Avez-vous mis en place des tests automatisés ?"
+ *         ponderation: 10
+ *         ordre: 1
+ *         date_creation: "2024-01-15T09:30:00Z"
+ *         date_modification: "2024-01-15T09:30:00Z"
+ *     
+ *     Formulaire:
+ *       type: object
+ *       properties:
+ *         id_formulaire:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique du formulaire
+ *         id_acteur:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'acteur qui a rempli le formulaire
+ *         id_application:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'application concernée
+ *         id_questionnaire:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant du questionnaire utilisé
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création du formulaire
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification du formulaire
+ *         statut:
+ *           type: string
+ *           enum: [Brouillon, Soumis, Validé]
+ *           description: Statut du formulaire
+ *       required:
+ *         - id_acteur
+ *         - id_application
+ *         - id_questionnaire
+ *         - date_creation
+ *         - date_modification
+ *       example:
+ *         id_formulaire: "550e8400-e29b-41d4-a716-446655440004"
+ *         id_acteur: "550e8400-e29b-41d4-a716-446655440000"
+ *         id_application: "550e8400-e29b-41d4-a716-446655440001"
+ *         id_questionnaire: "550e8400-e29b-41d4-a716-446655440002"
+ *         date_creation: "2025-04-20T14:30:00Z"
+ *         date_modification: "2025-04-21T10:15:00Z"
+ *         statut: "Validé"
+ *     
+ *     Reponse:
+ *       type: object
+ *       properties:
+ *         id_reponse:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de la réponse
+ *         id_formulaire:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant du formulaire auquel appartient la réponse
+ *         id_question:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de la question
+ *         valeur_reponse:
+ *           type: string
+ *           maxLength: 255
+ *           description: Valeur de la réponse donnée
+ *         score:
+ *           type: integer
+ *           description: Score attribué à la réponse
+ *         commentaire:
+ *           type: string
+ *           description: Commentaire optionnel sur la réponse
+ *         date_creation:
+ *           type: string
+ *           format: date-time
+ *           description: Date de création de l'enregistrement
+ *         date_modification:
+ *           type: string
+ *           format: date-time
+ *           description: Date de dernière modification de l'enregistrement
+ *       required:
+ *         - id_formulaire
+ *         - id_question
+ *         - valeur_reponse
+ *         - score
+ *       example:
+ *         id_reponse: "550e8400-e29b-41d4-a716-446655440005"
+ *         id_formulaire: "550e8400-e29b-41d4-a716-446655440004"
+ *         id_question: "550e8400-e29b-41d4-a716-446655440003"
+ *         valeur_reponse: "Oui"
+ *         score: 10
+ *         commentaire: "Nous avons une couverture de tests de 80%"
+ *         date_creation: "2025-04-20T15:00:00Z"
+ *         date_modification: "2025-04-20T15:00:00Z"
+ *     
+ *     MaturityAnalysis:
+ *       type: object
+ *       properties:
+ *         id_analyse:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de l'analyse
+ *         id_application:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'application analysée
+ *         date_analyse:
+ *           type: string
+ *           format: date-time
+ *           description: Date de l'analyse
+ *         score_global:
+ *           type: number
+ *           format: float
+ *           description: Score global de maturité
+ *       required:
+ *         - id_application
+ *       example:
+ *         id_analyse: "550e8400-e29b-41d4-a716-446655440006"
+ *         id_application: "550e8400-e29b-41d4-a716-446655440001"
+ *         date_analyse: "2025-04-22T09:00:00Z"
+ *         score_global: 375.50
+ *     
+ *     ThematiqueScore:
+ *       type: object
+ *       properties:
+ *         id_score:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique du score
+ *         id_analyse:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'analyse
+ *         thematique:
+ *           type: string
+ *           maxLength: 50
+ *           description: Nom de la thématique
+ *         score:
+ *           type: number
+ *           format: float
+ *           description: Score pour cette thématique
+ *         nombre_reponses:
+ *           type: integer
+ *           description: Nombre de réponses pour cette thématique
+ *       required:
+ *         - id_analyse
+ *         - thematique
+ *         - score
+ *         - nombre_reponses
+ *       example:
+ *         id_score: "550e8400-e29b-41d4-a716-446655440007"
+ *         id_analyse: "550e8400-e29b-41d4-a716-446655440006"
+ *         thematique: "Sécurité"
+ *         score: 80.50
+ *         nombre_reponses: 15
+ *     
+ *     HistoriqueScore:
+ *       type: object
+ *       properties:
+ *         id_historique:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de l'entrée historique
+ *         id_application:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'application
+ *         thematique:
+ *           type: string
+ *           maxLength: 50
+ *           description: Nom de la thématique
+ *         score:
+ *           type: number
+ *           format: float
+ *           description: Score pour cette thématique
+ *         date_mesure:
+ *           type: string
+ *           format: date
+ *           description: Date de la mesure
+ *       required:
+ *         - id_application
+ *         - thematique
+ *         - score
+ *         - date_mesure
+ *       example:
+ *         id_historique: "550e8400-e29b-41d4-a716-446655440008"
+ *         id_application: "550e8400-e29b-41d4-a716-446655440001"
+ *         thematique: "Sécurité"
+ *         score: 80.50
+ *         date_mesure: "2025-04-22"
+ *     
+ *     Permission:
+ *       type: object
+ *       properties:
+ *         id_permission:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant unique de la permission
+ *         id_acteur:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de l'acteur
+ *         type_ressource:
+ *           type: string
+ *           enum: [APPLICATION, QUESTIONNAIRE, FORMULAIRE, RAPPORT]
+ *           description: Type de ressource concernée
+ *         id_ressource:
+ *           type: string
+ *           format: uuid
+ *           description: Identifiant de la ressource concernée
+ *         peut_voir:
+ *           type: boolean
+ *           description: L'acteur peut voir la ressource
+ *         peut_editer:
+ *           type: boolean
+ *           description: L'acteur peut éditer la ressource
+ *         peut_supprimer:
+ *           type: boolean
+ *           description: L'acteur peut supprimer la ressource
+ *         peut_administrer:
+ *           type: boolean
+ *           description: L'acteur peut administrer la ressource
+ *       required:
+ *         - id_acteur
+ *         - type_ressource
+ *       example:
+ *         id_permission: "550e8400-e29b-41d4-a716-446655440009"
+ *         id_acteur: "550e8400-e29b-41d4-a716-446655440000"
+ *         type_ressource: "APPLICATION"
+ *         id_ressource: "550e8400-e29b-41d4-a716-446655440001"
+ *         peut_voir: true
+ *         peut_editer: true
+ *         peut_supprimer: false
+ *         peut_administrer: false
+ *     
+ *     StatsOverview:
+ *       type: object
+ *       properties:
+ *         totalApplications:
+ *           type: integer
+ *           description: Nombre total d'applications
+ *         totalQuestionnaires:
+ *           type: integer
+ *           description: Nombre total de questionnaires
+ *         totalFormulaires:
+ *           type: integer
+ *           description: Nombre total de formulaires
+ *         completionRate:
+ *           type: integer
+ *           description: Taux de complétion des questionnaires en pourcentage
+ *       example:
+ *         totalApplications: 8
+ *         totalQuestionnaires: 15
+ *         totalFormulaires: 24
+ *         completionRate: 67
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Acteurs
+ *     description: Gestion des utilisateurs du système
+ *   - name: Applications
+ *     description: Gestion des applications à évaluer
+ *   - name: Questionnaires
+ *     description: Gestion des questionnaires d'évaluation
+ *   - name: Questions
+ *     description: Gestion des questions des questionnaires
+ *   - name: Formulaires
+ *     description: Gestion des formulaires remplis
+ *   - name: Reponses
+ *     description: Gestion des réponses aux questions
+ *   - name: Analyses
+ *     description: Analyse de maturité des applications
+ *   - name: Thematiques
+ *     description: Gestion des scores par thématique
+ *   - name: Historique
+ *     description: Historique des scores de maturité
+ *   - name: Permissions
+ *     description: Gestion des permissions utilisateurs
+ *   - name: Statistiques
+ *     description: Récupération des statistiques et métriques
+ */
+
+/**
+ * @swagger
+ * /api/acteurs:
+ *   get:
+ *     summary: Récupère la liste des acteurs
+ *     tags: [Acteurs]
+ *     responses:
+ *       200:
+ *         description: Liste des acteurs récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Acteur'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée un nouvel acteur
+ *     tags: [Acteurs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Acteur'
+ *     responses:
+ *       201:
+ *         description: Acteur créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Acteur'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/acteurs/{idActeur}:
+ *   get:
+ *     summary: Récupère un acteur par son ID
+ *     tags: [Acteurs]
+ *     parameters:
+ *       - in: path
+ *         name: idActeur
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'acteur
+ *     responses:
+ *       200:
+ *         description: Acteur récupéré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Acteur'
+ *       404:
+ *         description: Acteur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour un acteur
+ *     tags: [Acteurs]
+ *     parameters:
+ *       - in: path
+ *         name: idActeur
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'acteur
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Acteur'
+ *     responses:
+ *       200:
+ *         description: Acteur mis à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Acteur'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Acteur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime un acteur
+ *     tags: [Acteurs]
+ *     parameters:
+ *       - in: path
+ *         name: idActeur
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'acteur
+ *     responses:
+ *       200:
+ *         description: Acteur supprimé avec succès
+ *       404:
+ *         description: Acteur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/applications:
+ *   get:
+ *     summary: Récupère la liste des applications
+ *     tags: [Applications]
+ *     responses:
+ *       200:
+ *         description: Liste des applications récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Application'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée une nouvelle application
+ *     tags: [Applications]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Application'
+ *     responses:
+ *       201:
+ *         description: Application créée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Application'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/applications/{idApplication}:
+ *   get:
+ *     summary: Récupère une application par son ID
+ *     tags: [Applications]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Application récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Application'
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour une application
+ *     tags: [Applications]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Application'
+ *     responses:
+ *       200:
+ *         description: Application mise à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Application'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime une application
+ *     tags: [Applications]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Application supprimée avec succès
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/questionnaires:
+ *   get:
+ *     summary: Récupère la liste des questionnaires
+ *     tags: [Questionnaires]
+ *     responses:
+ *       200:
+ *         description: Liste des questionnaires récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Questionnaire'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée un nouveau questionnaire
+ *     tags: [Questionnaires]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Questionnaire'
+ *     responses:
+ *       201:
+ *         description: Questionnaire créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Questionnaire'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/questionnaires/{idQuestionnaire}:
+ *   get:
+ *     summary: Récupère un questionnaire par son ID
+ *     tags: [Questionnaires]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestionnaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du questionnaire
+ *     responses:
+ *       200:
+ *         description: Questionnaire récupéré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Questionnaire'
+ *       404:
+ *         description: Questionnaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour un questionnaire
+ *     tags: [Questionnaires]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestionnaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du questionnaire
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Questionnaire'
+ *     responses:
+ *       200:
+ *         description: Questionnaire mis à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Questionnaire'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Questionnaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime un questionnaire
+ *     tags: [Questionnaires]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestionnaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du questionnaire
+ *     responses:
+ *       200:
+ *         description: Questionnaire supprimé avec succès
+ *       404:
+ *         description: Questionnaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/questionnaires/{idQuestionnaire}/questions:
+ *   get:
+ *     summary: Récupère les questions d'un questionnaire
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestionnaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du questionnaire
+ *     responses:
+ *       200:
+ *         description: Questions récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Question'
+ *       404:
+ *         description: Questionnaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Ajoute une question à un questionnaire
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestionnaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du questionnaire
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Question'
+ *     responses:
+ *       201:
+ *         description: Question ajoutée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Question'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Questionnaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/questions/{idQuestion}:
+ *   get:
+ *     summary: Récupère une question par son ID
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestion
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la question
+ *     responses:
+ *       200:
+ *         description: Question récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Question'
+ *       404:
+ *         description: Question non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour une question
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestion
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la question
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Question'
+ *     responses:
+ *       200:
+ *         description: Question mise à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Question'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Question non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime une question
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: idQuestion
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la question
+ *     responses:
+ *       200:
+ *         description: Question supprimée avec succès
+ *       404:
+ *         description: Question non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/formulaires:
+ *   get:
+ *     summary: Récupère la liste des formulaires
+ *     tags: [Formulaires]
+ *     responses:
+ *       200:
+ *         description: Liste des formulaires récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Formulaire'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée un nouveau formulaire
+ *     tags: [Formulaires]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Formulaire'
+ *     responses:
+ *       201:
+ *         description: Formulaire créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formulaire'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/formulaires/recent:
+ *   get:
+ *     summary: Récupère les formulaires récents
+ *     tags: [Formulaires]
+ *     responses:
+ *       200:
+ *         description: Formulaires récents récupérés avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Formulaire'
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/formulaires/{idFormulaire}:
+ *   get:
+ *     summary: Récupère un formulaire par son ID
+ *     tags: [Formulaires]
+ *     parameters:
+ *       - in: path
+ *         name: idFormulaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du formulaire
+ *     responses:
+ *       200:
+ *         description: Formulaire récupéré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formulaire'
+ *       404:
+ *         description: Formulaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour un formulaire
+ *     tags: [Formulaires]
+ *     parameters:
+ *       - in: path
+ *         name: idFormulaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du formulaire
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Formulaire'
+ *     responses:
+ *       200:
+ *         description: Formulaire mis à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formulaire'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Formulaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime un formulaire
+ *     tags: [Formulaires]
+ *     parameters:
+ *       - in: path
+ *         name: idFormulaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du formulaire
+ *     responses:
+ *       200:
+ *         description: Formulaire supprimé avec succès
+ *       404:
+ *         description: Formulaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/formulaires/{idFormulaire}/reponses:
+ *   get:
+ *     summary: Récupère les réponses d'un formulaire
+ *     tags: [Reponses]
+ *     parameters:
+ *       - in: path
+ *         name: idFormulaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du formulaire
+ *     responses:
+ *       200:
+ *         description: Réponses récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Reponse'
+ *       404:
+ *         description: Formulaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Ajoute une réponse à un formulaire
+ *     tags: [Reponses]
+ *     parameters:
+ *       - in: path
+ *         name: idFormulaire
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant du formulaire
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Reponse'
+ *     responses:
+ *       201:
+ *         description: Réponse ajoutée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reponse'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Formulaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/reponses/{idReponse}:
+ *   get:
+ *     summary: Récupère une réponse par son ID
+ *     tags: [Reponses]
+ *     parameters:
+ *       - in: path
+ *         name: idReponse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la réponse
+ *     responses:
+ *       200:
+ *         description: Réponse récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reponse'
+ *       404:
+ *         description: Réponse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour une réponse
+ *     tags: [Reponses]
+ *     parameters:
+ *       - in: path
+ *         name: idReponse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la réponse
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Reponse'
+ *     responses:
+ *       200:
+ *         description: Réponse mise à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reponse'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Réponse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime une réponse
+ *     tags: [Reponses]
+ *     parameters:
+ *       - in: path
+ *         name: idReponse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la réponse
+ *     responses:
+ *       200:
+ *         description: Réponse supprimée avec succès
+ *       404:
+ *         description: Réponse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/analyses:
+ *   get:
+ *     summary: Récupère la liste des analyses de maturité
+ *     tags: [Analyses]
+ *     responses:
+ *       200:
+ *         description: Liste des analyses récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/MaturityAnalysis'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée une nouvelle analyse de maturité
+ *     tags: [Analyses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MaturityAnalysis'
+ *     responses:
+ *       201:
+ *         description: Analyse créée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MaturityAnalysis'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/analyses/{idAnalyse}:
+ *   get:
+ *     summary: Récupère une analyse par son ID
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idAnalyse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'analyse
+ *     responses:
+ *       200:
+ *         description: Analyse récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MaturityAnalysis'
+ *       404:
+ *         description: Analyse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/analyses/{idAnalyse}/thematiques:
+ *   get:
+ *     summary: Récupère les scores par thématique d'une analyse
+ *     tags: [Thematiques]
+ *     parameters:
+ *       - in: path
+ *         name: idAnalyse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'analyse
+ *     responses:
+ *       200:
+ *         description: Scores par thématique récupérés avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ThematiqueScore'
+ *       404:
+ *         description: Analyse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/historique/{idApplication}:
+ *   get:
+ *     summary: Récupère l'historique des scores d'une application
+ *     tags: [Historique]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Historique récupéré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/HistoriqueScore'
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/permissions:
+ *   get:
+ *     summary: Récupère la liste des permissions
+ *     tags: [Permissions]
+ *     responses:
+ *       200:
+ *         description: Liste des permissions récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Permission'
+ *       500:
+ *         description: Erreur serveur
+ *   post:
+ *     summary: Crée une nouvelle permission
+ *     tags: [Permissions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Permission'
+ *     responses:
+ *       201:
+ *         description: Permission créée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Permission'
+ *       400:
+ *         description: Données invalides
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/permissions/{idPermission}:
+ *   get:
+ *     summary: Récupère une permission par son ID
+ *     tags: [Permissions]
+ *     parameters:
+ *       - in: path
+ *         name: idPermission
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la permission
+ *     responses:
+ *       200:
+ *         description: Permission récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Permission'
+ *       404:
+ *         description: Permission non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   put:
+ *     summary: Met à jour une permission
+ *     tags: [Permissions]
+ *     parameters:
+ *       - in: path
+ *         name: idPermission
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la permission
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Permission'
+ *     responses:
+ *       200:
+ *         description: Permission mise à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Permission'
+ *       400:
+ *         description: Données invalides
+ *       404:
+ *         description: Permission non trouvée
+ *       500:
+ *         description: Erreur serveur
+ *   delete:
+ *     summary: Supprime une permission
+ *     tags: [Permissions]
+ *     parameters:
+ *       - in: path
+ *         name: idPermission
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de la permission
+ *     responses:
+ *       200:
+ *         description: Permission supprimée avec succès
+ *       404:
+ *         description: Permission non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/permissions/acteur/{idActeur}:
+ *   get:
+ *     summary: Récupère les permissions d'un acteur
+ *     tags: [Permissions]
+ *     parameters:
+ *       - in: path
+ *         name: idActeur
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'acteur
+ *     responses:
+ *       200:
+ *         description: Permissions récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Permission'
+ *       404:
+ *         description: Acteur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/stats/overview:
+ *   get:
+ *     summary: Récupère un aperçu des statistiques générales
+ *     tags: [Statistiques]
+ *     responses:
+ *       200:
+ *         description: Statistiques récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StatsOverview'
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/stats/questionnaires:
+ *   get:
+ *     summary: Récupère les statistiques des questionnaires
+ *     tags: [Statistiques]
+ *     responses:
+ *       200:
+ *         description: Statistiques des questionnaires récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   idQuestionnaire:
+ *                     type: string
+ *                     format: uuid
+ *                   fonction:
+ *                     type: string
+ *                   thematique:
+ *                     type: string
+ *                   numQuestions:
+ *                     type: integer
+ *                   numReponses:
+ *                     type: integer
+ *                   numUtilisateurs:
+ *                     type: integer
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/stats/thematiques:
+ *   get:
+ *     summary: Récupère les statistiques par thématique
+ *     tags: [Statistiques]
+ *     responses:
+ *       200:
+ *         description: Statistiques par thématique récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   thematique:
+ *                     type: string
+ *                   scoreMoyen:
+ *                     type: number
+ *                     format: float
+ *                   totalReponses:
+ *                     type: integer
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/analyse/{idAnalyse}:
+ *   get:
+ *     summary: Récupère l'interprétation globale pour une analyse
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idAnalyse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'analyse
+ *     responses:
+ *       200:
+ *         description: Interprétation globale récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 niveau:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 recommandations:
+ *                   type: string
+ *                 score:
+ *                   type: number
+ *                   format: float
+ *       404:
+ *         description: Analyse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/thematiques/{idAnalyse}:
+ *   get:
+ *     summary: Récupère les interprétations par thématique pour une analyse
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idAnalyse
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'analyse
+ *     responses:
+ *       200:
+ *         description: Interprétations par thématique récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   thematique:
+ *                     type: string
+ *                   score:
+ *                     type: number
+ *                     format: float
+ *                   niveau:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   recommandations:
+ *                     type: string
+ *       404:
+ *         description: Analyse non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/application/{idApplication}:
+ *   get:
+ *     summary: Récupère l'analyse complète pour une application
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Analyse complète récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idAnalyse:
+ *                   type: string
+ *                   format: uuid
+ *                 idApplication:
+ *                   type: string
+ *                   format: uuid
+ *                 nomApplication:
+ *                   type: string
+ *                 scoreGlobal:
+ *                   type: number
+ *                   format: float
+ *                 interpretation:
+ *                   type: object
+ *                   properties:
+ *                     niveau:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     recommandations:
+ *                       type: string
+ *                     score:
+ *                       type: number
+ *                       format: float
+ *                 thematiques:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       thematique:
+ *                         type: string
+ *                       score:
+ *                         type: number
+ *                         format: float
+ *                 dateAnalyse:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/organisation/{nomOrganisation}:
+ *   get:
+ *     summary: Récupère les analyses pour toutes les applications d'une organisation
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: nomOrganisation
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nom de l'organisation
+ *     responses:
+ *       200:
+ *         description: Analyses récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   idAnalyse:
+ *                     type: string
+ *                     format: uuid
+ *                   idApplication:
+ *                     type: string
+ *                     format: uuid
+ *                   nomApplication:
+ *                     type: string
+ *                   scoreGlobal:
+ *                     type: number
+ *                     format: float
+ *                   interpretation:
+ *                     type: object
+ *                     properties:
+ *                       niveau:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       recommandations:
+ *                         type: string
+ *                       score:
+ *                         type: number
+ *                         format: float
+ *                   thematiques:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         thematique:
+ *                           type: string
+ *                         score:
+ *                           type: number
+ *                           format: float
+ *                   dateAnalyse:
+ *                     type: string
+ *                     format: date-time
+ *       404:
+ *         description: Organisation non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/organisation/{nomOrganisation}/scores-moyens:
+ *   get:
+ *     summary: Récupère les scores moyens par thématique pour une organisation
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: nomOrganisation
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nom de l'organisation
+ *     responses:
+ *       200:
+ *         description: Scores moyens récupérés avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   thematique:
+ *                     type: string
+ *                   score:
+ *                     type: number
+ *                     format: float
+ *       404:
+ *         description: Organisation non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/interpretation/llm/application/{idApplication}:
+ *   get:
+ *     summary: Prépare les données d'analyse pour une interface LLM
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Données préparées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 application:
+ *                   $ref: '#/components/schemas/Application'
+ *                 analyse:
+ *                   $ref: '#/components/schemas/MaturityAnalysis'
+ *                 thematiques:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ThematiqueScore'
+ *                 historique:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/HistoriqueScore'
+ *                 formulaires:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Formulaire'
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/calcul/maturite/{idApplication}:
+ *   post:
+ *     summary: Déclenche le calcul des scores de maturité pour une application
+ *     tags: [Analyses]
+ *     parameters:
+ *       - in: path
+ *         name: idApplication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Identifiant de l'application
+ *     responses:
+ *       200:
+ *         description: Calcul effectué avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MaturityAnalysis'
+ *       404:
+ *         description: Application non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Vérifie que le serveur fonctionne correctement
+ *     tags: [Système]
+ *     responses:
+ *       200:
+ *         description: Le serveur fonctionne correctement
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Le serveur fonctionne correctement
+ */
+
+/**
+ * @swagger
+ * /api/db/test:
+ *   get:
+ *     summary: Teste la connexion à la base de données
+ *     tags: [Système]
+ *     responses:
+ *       200:
+ *         description: Connexion à la base de données réussie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Connexion à la base de données réussie
+ *       500:
+ *         description: Erreur de connexion à la base de données
+ */
+
+/**
+ * @swagger
+ * /api/db/init:
+ *   post:
+ *     summary: Initialise la base de données
+ *     tags: [Système]
+ *     responses:
+ *       200:
+ *         description: Base de données initialisée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Base de données initialisée avec succès
+ *       500:
+ *         description: Erreur lors de l'initialisation de la base de données
+ */

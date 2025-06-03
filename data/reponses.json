@@ -1,0 +1,1682 @@
+[
+  {
+    "IdReponse": "2281dda0-155b-449e-acae-cbe778f786a0",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "23d0c44c-d020-42b2-8e81-d2d078b5f798",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "54f0ae0f-f73b-4611-a0e6-ae3157f92343",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "d19bfb94-36c0-42af-9f9e-399f905e85a8",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "4a98e235-c1bc-4572-97af-1e1b6a58c81c",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "f2433ff3-415b-4eca-9c91-9ba047177097",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "20a481d2-c54e-4c96-a07e-a50966c7d6de",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "27369ca0-fe8d-45f1-81dc-4763181410ef",
+    "IdFormulaire": "7393699b-6226-45ee-97a4-4f7fe2830006",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "3a6c7378-594c-49d4-b1bf-7a658ea84324",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "05258f0a-bba7-46d6-b941-d62c50c4a53e",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "501748b3-5507-4f25-b1ba-81822fc37746",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "7249abbb-aac8-48f8-a6e2-4713cbca3e3c",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "27f01d04-93b1-47b9-8467-7b5a7391fe28",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "33fdec37-435f-4103-a165-79c4bd82c09d",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "372b7641-4d7d-40d0-afcf-848e037933d7",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "4328965c-0875-4741-9d7d-36e08e72118b",
+    "IdFormulaire": "9b6a91ea-0e11-440f-8f1f-282090620217",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "d374a07b-fa5c-425a-a2f0-e1e52daa423f",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "447a3269-075f-45ec-b4bb-15bb8b76aace",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "f457d423-b579-4259-9bb2-dc905ac56c14",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "09879f0f-c1b1-4f85-9d6e-2708d5ae2cf6",
+    "ValeurReponse": "5",
+    "Score": 15
+  },
+  {
+    "IdReponse": "c96ce557-a70b-43a8-ab29-315e95d5b419",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "fa882b21-3c78-4bfd-bf51-4b65475a4e3c",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "f8764137-c30b-421e-9fd7-fd18c13eb69f",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "17e3c132-c161-4f9f-a15b-3d23b1e26de1",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "738c3cb7-1400-4bc2-8f8b-cdf6b215ba21",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "d7241c12-028f-4d6e-89e8-b004f014d613",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "da29969e-21df-4772-ada1-a8ca72e7d698",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "e93fd56e-b0be-4487-b364-6bf113608c1f",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "8c5785a6-765a-4a7f-b6b8-f6cace701ffd",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "d453656b-d9ab-458a-8240-3956f2f61954",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "3ae69720-3744-4fec-b652-2ddacf29d92e",
+    "IdFormulaire": "d3f8c6f8-aac5-42dd-b247-5fbb66246245",
+    "IdQuestion": "9fa0a503-db3c-487e-a1f8-4156f2008d29",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "7f041474-6473-45ee-a5eb-8333d21ad7e9",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "256cfb44-706b-4494-a339-257e88d71292",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "e16dcbee-bda0-43f6-acef-0020d8442365",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "fe0e34a0-359d-49c2-93fe-1ad368fab4be",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "63b05c9e-558d-4422-a35b-27e5a5b2abfa",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "ce527823-f771-44c0-b495-f116a5407cc0",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "984f7c36-342b-4407-a65a-9a13616a480f",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "65f54010-99c5-4233-94ee-d43b46a90ebc",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "3b2f279c-003d-4145-95b7-912b11a20f51",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "10f06c7f-c27a-4e5b-b6d4-0a8a772b08ee",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "48c504e1-626a-467b-9d3a-dafe8ed741f3",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "8f3ad57f-7918-4d79-87d9-7f505e330788",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "1c4fb2fa-641f-49c4-8d5a-17967c6b5bd7",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "e5ecc6d7-cb55-4160-99c6-0704a2c2daab",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "c659bdb1-2fc3-4d21-81a6-1e6174884d17",
+    "IdFormulaire": "b0474170-628a-45d2-b506-5ea871654e64",
+    "IdQuestion": "7a68dbfc-746c-4f07-b714-5cecf24767f9",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "7e373007-3f5f-4ef7-81b1-7bebbc0d32f9",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "256cfb44-706b-4494-a339-257e88d71292",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "cb5899fe-1beb-4323-a087-676160644025",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "fe0e34a0-359d-49c2-93fe-1ad368fab4be",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "8a6a64ae-7569-4bfd-9f0d-50617ce9340a",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "ce527823-f771-44c0-b495-f116a5407cc0",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "974aa8fd-9eac-431d-befc-4677c638134f",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "65f54010-99c5-4233-94ee-d43b46a90ebc",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "a8c636e9-0a6e-469b-a61f-4468928668e4",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "10f06c7f-c27a-4e5b-b6d4-0a8a772b08ee",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "5b3d966c-7585-43ca-887b-822a6a9536f1",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "8f3ad57f-7918-4d79-87d9-7f505e330788",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "49660157-01db-4a87-bdb7-848f45f9628f",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "e5ecc6d7-cb55-4160-99c6-0704a2c2daab",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "b801d4c0-b67b-45f5-b041-3923ce93c131",
+    "IdFormulaire": "2936872b-535c-4bb2-bf43-a7cc4e2b8a2f",
+    "IdQuestion": "7a68dbfc-746c-4f07-b714-5cecf24767f9",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "a4e6ca2e-6d5d-4702-aabe-68a8cf482a31",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "447a3269-075f-45ec-b4bb-15bb8b76aace",
+    "ValeurReponse": "1",
+    "Score": 1
+  },
+  {
+    "IdReponse": "2239840a-3f23-433c-bbf4-8b90c25b0e76",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "09879f0f-c1b1-4f85-9d6e-2708d5ae2cf6",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "aa36edd7-b39f-4dec-af5f-bc98e27e4474",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "fa882b21-3c78-4bfd-bf51-4b65475a4e3c",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "49f4d701-4db8-452c-aa95-470914091d66",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "17e3c132-c161-4f9f-a15b-3d23b1e26de1",
+    "ValeurReponse": "4",
+    "Score": 16
+  },
+  {
+    "IdReponse": "eb51f30e-c281-42c3-9c9b-4061bc0d1aa4",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "d7241c12-028f-4d6e-89e8-b004f014d613",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "d43441fb-83f6-4c4d-b96b-90a9f072de4e",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "e93fd56e-b0be-4487-b364-6bf113608c1f",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "f13154e6-97de-4def-824c-042576abcf9e",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "d453656b-d9ab-458a-8240-3956f2f61954",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "dc01581d-9f8a-463e-83fe-281e440f6260",
+    "IdFormulaire": "fca335c9-27fc-4418-9854-c76c6dbf97e3",
+    "IdQuestion": "9fa0a503-db3c-487e-a1f8-4156f2008d29",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "64d848e3-a5c6-4053-8d80-8f2ec1d7bc8c",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "6163a3d6-7a9f-4dba-9eaf-4c4ecf860212",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "81543126-43c9-4742-888c-48110aeb46a4",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "8fa8642d-e4cf-4801-beca-05139cf8cc38",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "c21c3edb-377a-44de-821d-548ca9a54d34",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "5c3aeea8-5999-4e87-a938-4cecfec064ac",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "704bc3c3-060a-4dbe-a283-51d7805d13ba",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "6cda799e-4446-41e8-a237-11218a57668a",
+    "IdFormulaire": "42a773ca-7ebe-4dc1-9bde-8a83ba2feaa5",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "c1e1c0f7-5fdc-44ff-b1c0-8f03a8b61372",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "c66e9ea4-cd23-4c8f-89cf-1a3c192cbeeb",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "2",
+    "Score": 4
+  },
+  {
+    "IdReponse": "26db9592-e9a9-4d34-b181-519b7c2eb8ac",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "fd97c9b8-4212-49be-a010-c9ecfc445a33",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "bd6e8fe8-46bb-4614-954f-c4cde3f8199a",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "df142f89-921e-44bb-a7d5-a02ce90362cb",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "b4e3e30c-6896-4e5e-b075-db45f3057b51",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "af607d41-e915-42c7-9c55-6d6e166041e3",
+    "IdFormulaire": "d4af298d-e2c7-4d5b-90f6-0f30c318afc4",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "e915acc2-776f-49d3-955b-57537d9ecfc9",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "4f053b1f-90b4-4cfa-b0fa-9eb6d8b57ec4",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "d6620d40-c5ce-4c80-87bb-0f06cef06151",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "a8dd53df-3766-4d7b-a622-22d5ab10dd90",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "f2e30022-9996-4815-817d-8a590c7ee3ff",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "84776e93-d488-433b-b82b-0444e65c1307",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "5",
+    "Score": 15
+  },
+  {
+    "IdReponse": "a5c8fe16-a653-444b-afcb-4aad4c9a0843",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "19cc1c39-4e87-48ea-959a-83b4b5f9efae",
+    "IdFormulaire": "b4f1b12c-b23f-42b2-ac7c-2cb9fbe86c86",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "e465abfe-7f84-4d7f-bd19-d7fdc26953cb",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "d8d1a657-d273-4753-bd1f-69040b512ea2",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "e20bb8bf-442e-47d1-95fc-2823d73a7d29",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "6b58c8e7-0376-4192-8fd9-bab3b8b51e62",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "680306f2-06cc-42a1-a9df-21f636b1c33d",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "ba1d2466-804e-4ed5-8f73-de85d7518e74",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "0ee65b25-714f-4013-8093-8f0783de1278",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "2eb2abb3-6bb7-4a88-8400-1d7d387995cb",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "35873705-b862-4c52-a51b-1937c92e2ab9",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "af4688a6-f6e1-466a-af23-e59c622e9539",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "fc9ee441-e819-437d-a9e5-1f26116d07c1",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "336dedcb-9c6f-4900-89ac-ab0c4ea0bfef",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "61137fb8-f3c6-4970-b92d-fbe563befaaa",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "c42f2492-5424-49a3-983d-ee421b188e39",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "f1cc49ef-6d3e-45aa-ae20-4b3f02e35573",
+    "IdFormulaire": "165bcf1e-35c3-428c-b2bf-720ef166d92e",
+    "IdQuestion": "ff482a0b-23dd-41e8-855e-2eda887aac96",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "bb160891-a6db-40f1-9a26-cddd5b1d778a",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "256cfb44-706b-4494-a339-257e88d71292",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "d821fd00-36c0-4daa-bdf9-aa6d80537247",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "fe0e34a0-359d-49c2-93fe-1ad368fab4be",
+    "ValeurReponse": "5",
+    "Score": 5
+  },
+  {
+    "IdReponse": "c19c82e7-b939-4a52-8213-f8f057d9b6c4",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "ce527823-f771-44c0-b495-f116a5407cc0",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "8323d4c9-2ec4-4cc1-9ed8-9e4ace1fbfbf",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "65f54010-99c5-4233-94ee-d43b46a90ebc",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "a4246152-b24a-45dd-b509-bd15ea978222",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "10f06c7f-c27a-4e5b-b6d4-0a8a772b08ee",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "8135b04f-0945-4040-bcd7-0177312c4b26",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "8f3ad57f-7918-4d79-87d9-7f505e330788",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "56f98859-bda8-41c1-b86f-f090427aa41b",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "e5ecc6d7-cb55-4160-99c6-0704a2c2daab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "b5a23f6a-dcbe-4006-9fa5-afdefd399b54",
+    "IdFormulaire": "c9a3539e-aabd-47d5-af6a-de0982ae6938",
+    "IdQuestion": "7a68dbfc-746c-4f07-b714-5cecf24767f9",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "200e5af0-a4b4-4741-a3f8-c63e9f1d183e",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "4",
+    "Score": 16
+  },
+  {
+    "IdReponse": "bd2e28cd-0276-4e54-8ef0-f437a330645e",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "d5906771-1a31-4a51-a489-ca7de65d3665",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "4",
+    "Score": 4
+  },
+  {
+    "IdReponse": "e0d3717a-9465-4db3-8e05-5f664765b8bd",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "fc001244-43f5-413d-a086-e3ddec5a668d",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "ef5d4bb3-6149-48be-bcf1-f5b39cd9272f",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "8ac8fdff-bc88-4d9f-9e66-70f98228f577",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "6f1f9496-2ec4-446c-baf3-5e290873f04c",
+    "IdFormulaire": "2cbca1ea-d8e5-40d5-a984-ec1f48fa0f3a",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "e1f1a3c4-bcce-4634-aa65-65d8ea8a7bf8",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "447a3269-075f-45ec-b4bb-15bb8b76aace",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "3f6c9b9c-0fd5-4b94-82e3-c0955611013b",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "09879f0f-c1b1-4f85-9d6e-2708d5ae2cf6",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "1dd4db40-3335-4f08-94b0-11ead36067e8",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "fa882b21-3c78-4bfd-bf51-4b65475a4e3c",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "ee4efe14-a25a-4897-8998-e618fa2781ca",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "17e3c132-c161-4f9f-a15b-3d23b1e26de1",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "9eb281c9-5d00-4bf2-a819-e7c92810b2cf",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "d7241c12-028f-4d6e-89e8-b004f014d613",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "2020d576-5b41-4389-9fb4-2643b8cf8a82",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "e93fd56e-b0be-4487-b364-6bf113608c1f",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "130434a8-502f-4169-b964-96fd0343b33d",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "d453656b-d9ab-458a-8240-3956f2f61954",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "cb22dac8-ff63-4b04-bfc3-6c278707ddc8",
+    "IdFormulaire": "ccf97c7e-9290-4d71-b759-e4e59bd822c6",
+    "IdQuestion": "9fa0a503-db3c-487e-a1f8-4156f2008d29",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "70b73f0b-0523-41c7-ba18-07d490219da8",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "8ca3d62c-c493-461e-a66f-7ddc1038d279",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "385faa0f-c1f4-42f8-acb5-ade527bfc1e4",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "1",
+    "Score": 1
+  },
+  {
+    "IdReponse": "385b1951-171b-4fd7-9d6f-08ab97211abc",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "563f6919-cc1e-4e89-9855-59e02c662b9f",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "f11cf42d-5a5d-410b-9a32-613bd2796927",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "e44add69-53d1-45ec-9e7e-6bef63476a52",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "60a65e75-ae79-40e9-b98e-1b4fc8e81cab",
+    "IdFormulaire": "7b9318c8-d4cb-40bf-824c-408c565f3b28",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "aa443e10-4a71-436c-91c1-d2545cb36a69",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "4",
+    "Score": 16
+  },
+  {
+    "IdReponse": "d7e1c64f-9f5b-4d00-9ffe-6d45561565ec",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "21a792bb-2128-43a0-80cd-cced1b9d873c",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "4",
+    "Score": 4
+  },
+  {
+    "IdReponse": "379e19fd-53be-46f0-aa3d-38d5bf9109da",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "7886020a-4e83-4408-89f4-4deb7cee42aa",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "68aa2655-99a9-43a3-a432-852ca699f7bf",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "98bc2375-2c56-4001-945e-7c8502fc6f42",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "7848a6a7-c6de-4200-b89d-d2a9ba46230f",
+    "IdFormulaire": "2c24fea4-7ac5-487b-9ccd-60b8951170ce",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "14c84e62-95e6-4f70-bdf3-53593a82d8d6",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "dc4567b5-7ff6-464e-9c2f-0e12d20f691b",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "86c77571-756a-4560-a361-555579783c5e",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "6fb77393-ac6a-4fcd-bbb7-ddd1087c2a8c",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "a38528e1-7c7c-4f45-8aaa-08060758501e",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "cec5c628-df6f-4a50-91cd-8fd42d1dfbe4",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "16bb6764-0779-44f6-bd71-f126f1ea2614",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "e3e5e1cf-3bdd-4ed6-b65e-16273e752553",
+    "IdFormulaire": "3e43061c-f200-45e1-8188-d1c91e8d0714",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "6e6515d0-80c7-406e-b8a9-c7eaccfaeca2",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "80791490-e3f0-4032-9668-f160140e9489",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "50a8c677-38a3-4542-ab8a-da4e17ab5f9c",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "d845d1c8-c843-495c-9386-db094779aae3",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "8cc9fc18-3360-404b-ae38-a95a0996c520",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "5",
+    "Score": 15
+  },
+  {
+    "IdReponse": "3f863ef5-1baf-4c67-bfb4-65024f621ba5",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "cd5d7443-b485-4fa6-9b2a-7bf387acf4c9",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "4a31df78-60a1-4734-8547-17042feed996",
+    "IdFormulaire": "f38a4e5d-c105-406d-a143-342bd9a28676",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "5",
+    "Score": 15
+  },
+  {
+    "IdReponse": "9bc5ad4b-1ba0-4b4a-b138-13e243e2e8e6",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "4d082f81-d809-4816-8332-0134a5677a7b",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "8bc50aca-92ba-462f-99eb-257b5f3a5518",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "7a5e8430-31d5-474e-b0cc-cd5c25cc3336",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "89db06b2-3427-493b-b8d8-24ed874e0f3e",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "8088f70e-8e69-4aec-a0b0-3da7bf90d4a9",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "5",
+    "Score": 15
+  },
+  {
+    "IdReponse": "5f48bd12-78c7-4c9c-a9c2-86f36879400d",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "a200da32-3545-4e47-9b4f-3e54ec4eca28",
+    "IdFormulaire": "cd86e4d5-6ee5-4fc8-9aa6-e1d681879846",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "ed352a4e-7adf-46e9-80e0-99eb7c958539",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "447a3269-075f-45ec-b4bb-15bb8b76aace",
+    "ValeurReponse": "5",
+    "Score": 5
+  },
+  {
+    "IdReponse": "758031e0-1ece-4585-b35b-f42fc5f4cf0a",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "09879f0f-c1b1-4f85-9d6e-2708d5ae2cf6",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "c1e99924-2c5b-49ce-806b-b65ecc6603fd",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "fa882b21-3c78-4bfd-bf51-4b65475a4e3c",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "e9601b82-c719-4660-b9c8-4e8355210e61",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "17e3c132-c161-4f9f-a15b-3d23b1e26de1",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "f251142d-9073-4e41-a578-59fc21157a2c",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "d7241c12-028f-4d6e-89e8-b004f014d613",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "86f19701-c43a-4f0e-8036-7e63af3a72f4",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "e93fd56e-b0be-4487-b364-6bf113608c1f",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "6bf1e90f-77e5-4d79-a972-d1aa8bb65706",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "d453656b-d9ab-458a-8240-3956f2f61954",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "116e181d-804a-4673-a7ac-bf0966d582ee",
+    "IdFormulaire": "41ece2c5-8a08-4f20-b166-3ab455b5d140",
+    "IdQuestion": "9fa0a503-db3c-487e-a1f8-4156f2008d29",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "1aae20da-cafa-4d52-828c-8fd4650b680c",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "3f9c4b9c-fa64-4735-adcf-e1c54f9ec398",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "dae45d83-da98-41fa-a30e-b7bae7351751",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "4",
+    "Score": 4
+  },
+  {
+    "IdReponse": "158f68d0-626d-45e0-86b9-b17df05db61f",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "30d1f8ab-3168-4cf6-976a-22ac8bba58f0",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "ee1702f2-aaa2-402b-9233-156db665f4dc",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "e0d8ca8c-48cc-4d36-98b2-8782f62d7cbd",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "68a202fb-a1fb-4cb6-9b4d-5a77d7694409",
+    "IdFormulaire": "eed1a5ae-bdd4-4ef5-8b1b-e1f75c349b83",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "e005c5af-400c-4685-9ae8-d0b83bc72372",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "447a3269-075f-45ec-b4bb-15bb8b76aace",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "0d02f37c-e500-4ec9-9de0-2d7244450cd2",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "09879f0f-c1b1-4f85-9d6e-2708d5ae2cf6",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "3df376ed-ed69-4e2b-bf06-e97b6b5fb110",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "fa882b21-3c78-4bfd-bf51-4b65475a4e3c",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "f2c72a2f-3cba-42ee-bb03-bdba6007247b",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "17e3c132-c161-4f9f-a15b-3d23b1e26de1",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "ba267d4a-2627-44fe-bcea-7da9046f9ebf",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "d7241c12-028f-4d6e-89e8-b004f014d613",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "b6b039ae-8efd-46f7-a65e-405ad9985630",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "e93fd56e-b0be-4487-b364-6bf113608c1f",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "8b6258f1-4887-4a86-bb8e-99a2be85516f",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "d453656b-d9ab-458a-8240-3956f2f61954",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "b786ae0f-b2cf-423c-a2ec-49e669295a94",
+    "IdFormulaire": "641128b8-b2c4-4d1e-b5e9-f996d9e0e306",
+    "IdQuestion": "9fa0a503-db3c-487e-a1f8-4156f2008d29",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "f134ad94-b5b5-46b3-8b28-7dd3644f2843",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "d8d1a657-d273-4753-bd1f-69040b512ea2",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "3fc36d93-068f-4be1-a394-a316a8d21de1",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "6b58c8e7-0376-4192-8fd9-bab3b8b51e62",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "f5ec1582-bd37-457a-8569-c2a545eb978d",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "ba1d2466-804e-4ed5-8f73-de85d7518e74",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "13089e64-ec17-485e-8b65-e36a417721a6",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "2eb2abb3-6bb7-4a88-8400-1d7d387995cb",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "96ae79ba-157a-4acc-b0c3-7500566463c5",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "af4688a6-f6e1-466a-af23-e59c622e9539",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "2fdf2120-347a-42f5-802a-19b3f671a83e",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "336dedcb-9c6f-4900-89ac-ab0c4ea0bfef",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "2d654b67-64a6-40a3-8847-0bf6ad27e67a",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "c42f2492-5424-49a3-983d-ee421b188e39",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "ece26f1d-81e4-474a-b8bc-f2ffcd532832",
+    "IdFormulaire": "5f3eecae-cbbc-4a5f-9f74-0ee0387b3329",
+    "IdQuestion": "ff482a0b-23dd-41e8-855e-2eda887aac96",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "513b62d5-93a3-494b-a881-4a1d7d546e20",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "d8d1a657-d273-4753-bd1f-69040b512ea2",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "dc8f0f2c-2069-4a86-9179-52d126e36c1f",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "6b58c8e7-0376-4192-8fd9-bab3b8b51e62",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "b925dfbe-84d5-494b-8d16-867b12cd2e9b",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "ba1d2466-804e-4ed5-8f73-de85d7518e74",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "99847cb0-04df-4f47-87a8-2968b87a711b",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "2eb2abb3-6bb7-4a88-8400-1d7d387995cb",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "d40bc485-751b-4b49-85b2-1efeb3687e58",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "af4688a6-f6e1-466a-af23-e59c622e9539",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "96513604-bb9a-4734-99a5-285f1eb2b1b1",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "336dedcb-9c6f-4900-89ac-ab0c4ea0bfef",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "58974108-1382-4dd0-8d46-880a2f597ad1",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "c42f2492-5424-49a3-983d-ee421b188e39",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "ef35aad0-75cc-46b6-9b2e-4530ef8629b7",
+    "IdFormulaire": "5192f490-2bac-4f23-988c-69370d0b2cca",
+    "IdQuestion": "ff482a0b-23dd-41e8-855e-2eda887aac96",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "ec4aa525-da72-43a7-aecd-1764fa542afc",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "234fe77a-f977-49af-8c84-97f2d7b67964",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "e7035e43-3e7c-4f7e-a38a-f57da73a39b1",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "9ad73687-2b2b-4356-acd8-0c25d2931784",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "2",
+    "Score": 4
+  },
+  {
+    "IdReponse": "6c097f38-8406-42e3-820d-aa116c2136f9",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "03744acc-a68e-469b-b952-3e32767abf99",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "fbd7af56-d006-406f-94e0-01c13f50d532",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "66c194b3-2e5d-46d3-b903-4a6f81cd0a42",
+    "IdFormulaire": "52352af7-f972-4081-83d2-c27e52ef1cd6",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "d24ba207-8808-4d13-9793-b6de9528fc17",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "08439547-e8ec-4f34-960f-102ff3473a58",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "fc2948bf-39ea-4fa2-8851-a0de146b2122",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "ffe62ec9-34e8-4a65-9f8e-a247a87bad59",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "87a675df-2bd5-457b-b57b-e0440cf2598e",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "8d1307dd-a533-4135-9993-152a7b00daec",
+    "ValeurReponse": "1",
+    "Score": 2
+  },
+  {
+    "IdReponse": "37dd12e2-33f7-454f-ada5-cd172aac852c",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "5208e469-2753-45b4-be69-38649a64f615",
+    "ValeurReponse": "3",
+    "Score": 6
+  },
+  {
+    "IdReponse": "587d3c65-08f2-4c8c-886b-13e92663d187",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "3134bac8-b353-486e-83de-7e11e3a5d4f1",
+    "ValeurReponse": "1",
+    "Score": 3
+  },
+  {
+    "IdReponse": "a723d6cd-fb05-4788-b06f-2c3ea66ee2fb",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "765f72c5-bd0e-4f76-a83c-5b8aa0db2ac7",
+    "ValeurReponse": "4",
+    "Score": 12
+  },
+  {
+    "IdReponse": "22c03b0d-de1c-4da9-9e52-edb440b2f642",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "73fc276f-1bbd-4d1f-a505-b81565d51602",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "b965756a-f93f-4d1b-b736-a678b5ba1cf7",
+    "IdFormulaire": "0dfcdd5c-a246-4258-ba74-45f4d08b171c",
+    "IdQuestion": "aaf9c121-0493-4e64-be2c-f30e13126b7e",
+    "ValeurReponse": "2",
+    "Score": 6
+  },
+  {
+    "IdReponse": "5f039b04-f08f-4a4b-b2d6-755ea0f2e1eb",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "256cfb44-706b-4494-a339-257e88d71292",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "a589882b-3d13-4ecc-b1d8-1d5a8d53b7cc",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "fe0e34a0-359d-49c2-93fe-1ad368fab4be",
+    "ValeurReponse": "1",
+    "Score": 1
+  },
+  {
+    "IdReponse": "9067ed96-017d-43b4-9d99-8f86fdf8d436",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "ce527823-f771-44c0-b495-f116a5407cc0",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "dd78e515-b485-4317-8963-c4655d0d8a7f",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "65f54010-99c5-4233-94ee-d43b46a90ebc",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "e95173c9-d1c0-42a3-8bc5-5c9d95a2799c",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "10f06c7f-c27a-4e5b-b6d4-0a8a772b08ee",
+    "ValeurReponse": "4",
+    "Score": 16
+  },
+  {
+    "IdReponse": "83f2dafb-c570-48cd-ba11-4be1a392346f",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "8f3ad57f-7918-4d79-87d9-7f505e330788",
+    "ValeurReponse": "3",
+    "Score": 12
+  },
+  {
+    "IdReponse": "d7cf4836-b7e6-4a6e-ac10-28e46b73d3e9",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "e5ecc6d7-cb55-4160-99c6-0704a2c2daab",
+    "ValeurReponse": "2",
+    "Score": 4
+  },
+  {
+    "IdReponse": "3718bc9c-ca08-4b8d-a4cc-38479c3c682f",
+    "IdFormulaire": "ee17bb97-0f6a-4c16-bfcc-b5f9b153232b",
+    "IdQuestion": "7a68dbfc-746c-4f07-b714-5cecf24767f9",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "12d13732-04be-47a7-9bfa-fecf7fb61162",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "256cfb44-706b-4494-a339-257e88d71292",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "6f73fd6e-2545-4569-8a15-1f6f6849f98d",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "fe0e34a0-359d-49c2-93fe-1ad368fab4be",
+    "ValeurReponse": "1",
+    "Score": 1
+  },
+  {
+    "IdReponse": "c9c690b4-41f2-4063-9b93-f19ca77e6428",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "ce527823-f771-44c0-b495-f116a5407cc0",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "7d937769-4578-47ed-a6e4-ea55984bdc74",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "65f54010-99c5-4233-94ee-d43b46a90ebc",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "b7ed0355-401b-4153-8334-baa6f7cf27d9",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "10f06c7f-c27a-4e5b-b6d4-0a8a772b08ee",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "682884e5-b83c-42e2-ac20-fe784ea8aede",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "8f3ad57f-7918-4d79-87d9-7f505e330788",
+    "ValeurReponse": "4",
+    "Score": 16
+  },
+  {
+    "IdReponse": "9b584623-bb5d-4102-ab60-15aade7132d1",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "e5ecc6d7-cb55-4160-99c6-0704a2c2daab",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "21d0a02a-951f-48a9-9479-73fee4b2a678",
+    "IdFormulaire": "fd78adeb-4402-4525-8751-5ccd47a748c5",
+    "IdQuestion": "7a68dbfc-746c-4f07-b714-5cecf24767f9",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "e25a5b8b-f48c-4f6b-8380-8d5ac24819c1",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "d8d1a657-d273-4753-bd1f-69040b512ea2",
+    "ValeurReponse": "2",
+    "Score": 8
+  },
+  {
+    "IdReponse": "6ae12df7-31e1-43ab-8ea1-d6d0665fc9d3",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "6b58c8e7-0376-4192-8fd9-bab3b8b51e62",
+    "ValeurReponse": "2",
+    "Score": 4
+  },
+  {
+    "IdReponse": "f391d037-d1f4-4449-850d-f9cdaec2f933",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "ba1d2466-804e-4ed5-8f73-de85d7518e74",
+    "ValeurReponse": "5",
+    "Score": 25
+  },
+  {
+    "IdReponse": "117ba9c9-80e8-4ae0-8337-74b2cc856fff",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "2eb2abb3-6bb7-4a88-8400-1d7d387995cb",
+    "ValeurReponse": "3",
+    "Score": 3
+  },
+  {
+    "IdReponse": "fab19fb4-b009-41da-be73-77db24634c15",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "af4688a6-f6e1-466a-af23-e59c622e9539",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "e1f9a558-3f93-487e-b30b-3ccab92f2b0b",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "336dedcb-9c6f-4900-89ac-ab0c4ea0bfef",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "809b613a-f674-4acd-a6a0-597a21c08fba",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "c42f2492-5424-49a3-983d-ee421b188e39",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "85906de6-f89d-4d41-82d7-6d45ad24ff3b",
+    "IdFormulaire": "a042950c-055a-45cf-a3e7-5a836012672b",
+    "IdQuestion": "ff482a0b-23dd-41e8-855e-2eda887aac96",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "e0fc0db3-cb6a-42b0-af38-aa5c723aaeb2",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "10bd29e5-1482-4179-ad3f-c30a55a72582",
+    "ValeurReponse": "5",
+    "Score": 20
+  },
+  {
+    "IdReponse": "6364dd10-0914-4906-bafb-74c3e31c4c85",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "e7f05be0-14e2-415b-ae77-b033917286ab",
+    "ValeurReponse": "4",
+    "Score": 8
+  },
+  {
+    "IdReponse": "fd74833f-4651-476a-90c5-681ab2e69a9f",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "6f82673d-6cf8-40b8-8089-dcec81224e45",
+    "ValeurReponse": "4",
+    "Score": 4
+  },
+  {
+    "IdReponse": "3f855968-939b-4fec-a4c2-eab447c99b46",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "57e66bf5-6cdd-4e31-9009-5cac794dc3f9",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "8de3e5c7-196f-497e-aa94-83b3bf856cb6",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "0505d0da-7cde-478f-b377-0dfd890b8f75",
+    "ValeurReponse": "3",
+    "Score": 9
+  },
+  {
+    "IdReponse": "9833172d-107d-4f7f-9125-7bc764fb94d2",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "ef952cfe-638b-4a73-a9ac-dbcb48b38792",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "f212c3ba-dbd3-4d1a-aac0-6090456fb324",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "87ecfe92-bf25-4f7e-baf0-5a8087c71c49",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "c631d1e2-2150-4087-b30b-d46b2955945a",
+    "IdFormulaire": "4dfafb51-5598-4a14-a65e-4cb4f21d7e84",
+    "IdQuestion": "255f847b-4945-46f6-9fc7-4c740f1cacbc",
+    "ValeurReponse": "4",
+    "Score": 20
+  },
+  {
+    "IdReponse": "2c36cec0-9cf3-4f2b-acd0-8240df8b424d",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "d8d1a657-d273-4753-bd1f-69040b512ea2",
+    "ValeurReponse": "1",
+    "Score": 4
+  },
+  {
+    "IdReponse": "33389fdc-a878-47e6-93a6-4cd948686aa0",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "6b58c8e7-0376-4192-8fd9-bab3b8b51e62",
+    "ValeurReponse": "5",
+    "Score": 10
+  },
+  {
+    "IdReponse": "1f213a6a-5356-4f45-b738-6929d7ae3efd",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "ba1d2466-804e-4ed5-8f73-de85d7518e74",
+    "ValeurReponse": "2",
+    "Score": 10
+  },
+  {
+    "IdReponse": "08e65e5b-bbcd-4c31-b206-629f80a00eb6",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "2eb2abb3-6bb7-4a88-8400-1d7d387995cb",
+    "ValeurReponse": "2",
+    "Score": 2
+  },
+  {
+    "IdReponse": "09184b40-6926-46d5-aac7-87be448013ac",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "af4688a6-f6e1-466a-af23-e59c622e9539",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "9509e5c2-b595-473e-8455-73c821717c65",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "336dedcb-9c6f-4900-89ac-ab0c4ea0bfef",
+    "ValeurReponse": "1",
+    "Score": 5
+  },
+  {
+    "IdReponse": "9cc097f1-3606-4d6e-a510-d3816b8b1bca",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "c42f2492-5424-49a3-983d-ee421b188e39",
+    "ValeurReponse": "3",
+    "Score": 15
+  },
+  {
+    "IdReponse": "dcb0a643-c02b-4567-8904-26c5e4a66f84",
+    "IdFormulaire": "cc18741c-bf02-4aad-87b1-71217b2242b2",
+    "IdQuestion": "ff482a0b-23dd-41e8-855e-2eda887aac96",
+    "ValeurReponse": "2",
+    "Score": 4
+  }
+]
