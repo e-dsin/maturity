@@ -1,0 +1,116 @@
+name: Deploy Backend to Development
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'server/**'
+      - 'package.json'
+      - 'Dockerfile'
+      - 'infrastructure/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+  AWS_REGION: eu-west-3
+  ENVIRONMENT: dev
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    environment: development
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+    
+    - name: Install CDK dependencies
+      working-directory: infrastructure
+      run: npm ci --legacy-peer-deps
+    
+    - name: Deploy infrastructure
+      working-directory: infrastructure
+      run: |
+        npx cdk deploy MaturityApp-Backend-Dev --require-approval never
+    
+    - name: Get ECR repository URI
+      id: ecr
+      run: |
+        REPO_URI=$(aws ecr describe-repositories \
+          --repository-names maturity-backend-dev \
+          --query 'repositories[0].repositoryUri' \
+          --output text)
+        echo "uri=$REPO_URI" >> $GITHUB_OUTPUT
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+    
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ steps.ecr.outputs.uri }}:latest .
+        docker push ${{ steps.ecr.outputs.uri }}:latest
+    
+    - name: Deploy to ECS
+      run: |
+        aws ecs update-service \
+          --cluster maturity-backend-dev \
+          --service maturity-backend-dev \
+          --force-new-deployment \
+          --region ${{ env.AWS_REGION }}
+    
+    - name: Wait for deployment
+      run: |
+        aws ecs wait services-stable \
+          --cluster maturity-backend-dev \
+          --services maturity-backend-dev \
+          --region ${{ env.AWS_REGION }}
+    
+    - name: Run database migration
+      run: |
+        # Récupérer les credentials de la base de données
+        DB_SECRET=$(aws secretsmanager get-secret-value \
+          --secret-id maturity-db-dev \
+          --query SecretString --output text)
+        
+        DB_HOST=$(aws rds describe-db-instances \
+          --query 'DBInstances[?DBName==`maturity_assessment`].Endpoint.Address' \
+          --output text)
+        
+        export DB_HOST=$DB_HOST
+        export DB_USER=$(echo $DB_SECRET | jq -r .username)
+        export DB_PASSWORD=$(echo $DB_SECRET | jq -r .password)
+        export ENVIRONMENT=dev
+        
+        node scripts/migrate-database.js
+    
+    - name: Test API health
+      run: |
+        sleep 30
+        curl -f https://api-dev.e-dsin.fr/health || exit 1
+    
+    - name: Deployment summary
+      run: |
+        echo "🚀 Backend déployé avec succès!"
+        echo "🌐 API URL: https://api-dev.e-dsin.fr"
+        echo "🔗 Health Check: https://api-dev.e-dsin.fr/health"

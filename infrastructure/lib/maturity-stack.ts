@@ -10,6 +10,9 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
+//import Backend Stack
+import { BackendStack } from './backend-stack';
+
 export interface MaturityAppStackProps extends cdk.StackProps {
   environment: string;
   domainName: string;
@@ -108,6 +111,14 @@ export class MaturityAppStack extends cdk.Stack {
       ),
     });
 
+    // Ajouter le backend
+    const backendStack = new BackendStack(this, 'Backend', {
+      environment,
+      domainName: `api-${domainName}`,
+      hostedZone,
+      certificate,
+    });
+
     // Outputs
     new cdk.CfnOutput(this, 'FrontendURL', {
       value: `https://${domainName}`,
@@ -127,6 +138,11 @@ export class MaturityAppStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'CertificateArn', {
       value: certificate.certificateArn,
       description: 'Certificate ARN utilisé',
+    });
+
+    new cdk.CfnOutput(this, 'BackendApiUrl', {
+      value: backendStack.apiUrl,
+      description: 'Backend API URL pour le frontend',
     });
   }
 }
