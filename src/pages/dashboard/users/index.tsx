@@ -66,6 +66,7 @@ interface ActeurFormValues {
   email: string;
   fonction: string;
   organisation: string;
+  entreprise: string;
   mot_de_passe?: string;
   est_admin: boolean;
 }
@@ -95,6 +96,11 @@ interface PermissionFormValues {
 interface RessourceOption {
   id: string;
   nom: string;
+}
+
+interface Entreprise {
+  id_entreprise: string;
+  nom_entreprise: string;
 }
 
 interface TabPanelProps {
@@ -128,6 +134,7 @@ const initialActeurFormValues: ActeurFormValues = {
   email: '',
   fonction: '',
   organisation: '',
+  entreprise: 'DSIN', // Valeur par défaut
   mot_de_passe: '',
   est_admin: false
 };
@@ -157,6 +164,7 @@ const Users: React.FC = () => {
   // États pour les ressources disponibles
   const [applications, setApplications] = useState<RessourceOption[]>([]);
   const [questionnaires, setQuestionnaires] = useState<RessourceOption[]>([]);
+  const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
   
   // États pour les formulaires
   const [acteurFormValues, setActeurFormValues] = useState<ActeurFormValues>(initialActeurFormValues);
@@ -184,6 +192,9 @@ const Users: React.FC = () => {
     
     // Charger les ressources disponibles pour les permissions
     fetchResources();
+    
+    // Charger les entreprises
+    fetchEntreprises();
   }, [id]);
 
   // Récupérer tous les acteurs
@@ -240,6 +251,47 @@ const Users: React.FC = () => {
     }
   };
 
+  // Récupérer les entreprises depuis l'API
+  const fetchEntreprises = async () => {
+    try {
+      console.log('🔍 Tentative de chargement des entreprises...');
+      const response = await api.get('entreprises');
+      console.log('✅ Réponse API entreprises:', response);
+      
+      const entreprisesData = response.map((ent: any) => ({
+        id_entreprise: ent.id_entreprise,
+        nom_entreprise: ent.nom_entreprise
+      }));
+      
+      console.log('📋 Entreprises formatées:', entreprisesData);
+      
+      // Ajouter DSIN en premier si pas présent
+      const dsinExists = entreprisesData.some((ent: Entreprise) => 
+        ent.nom_entreprise === 'DSIN' || ent.id_entreprise === 'DSIN'
+      );
+      
+      if (!dsinExists) {
+        entreprisesData.unshift({
+          id_entreprise: 'DSIN',
+          nom_entreprise: 'DSIN'
+        });
+      }
+      
+      console.log('🏢 Entreprises finales avec DSIN:', entreprisesData);
+      setEntreprises(entreprisesData);
+      console.log('✅ État entreprises mis à jour');
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des entreprises:', error);
+      // En cas d'erreur, utiliser une liste par défaut
+      const fallbackEntreprises = [
+        { id_entreprise: 'DSIN', nom_entreprise: 'DSIN' },
+        { id_entreprise: 'AUTRE', nom_entreprise: 'Autre' }
+      ];
+      console.log('🔄 Utilisation des entreprises par défaut:', fallbackEntreprises);
+      setEntreprises(fallbackEntreprises);
+    }
+  };
+
   // Gérer l'ouverture du dialogue de création d'acteur
   const handleOpenCreateActeurDialog = () => {
     setDialogMode('create');
@@ -255,6 +307,7 @@ const Users: React.FC = () => {
       email: acteur.email,
       fonction: acteur.fonction,
       organisation: acteur.organisation,
+      entreprise: acteur.organisation, // Utiliser organisation comme entreprise pour l'édition
       est_admin: acteur.est_admin || false
     });
     setOpenActeurDialog(true);
@@ -266,7 +319,7 @@ const Users: React.FC = () => {
   };
 
   // Gérer les changements dans le formulaire d'acteur
-  const handleActeurFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleActeurFormChange = (event: React.ChangeEvent<HTMLInputElement> | any) => {
     const { name, value, checked } = event.target;
     
     if (name === 'est_admin') {
@@ -285,13 +338,19 @@ const Users: React.FC = () => {
   // Soumettre le formulaire d'acteur
   const handleSubmitActeur = async () => {
     try {
+      // Préparer les données pour l'API - mapper entreprise vers organisation
+      const apiData = {
+        ...acteurFormValues,
+        organisation: acteurFormValues.entreprise // Envoyer l'entreprise sélectionnée dans le champ organisation
+      };
+      
       if (dialogMode === 'create') {
-        const response = await api.post('acteurs', acteurFormValues);
+        const response = await api.post('acteurs', apiData);
         fetchActeurs();
       } else if (dialogMode === 'edit' && selectedActeur) {
         const response = await api.put(
           `acteurs/${selectedActeur.id_acteur}`, 
-          acteurFormValues
+          apiData
         );
         if (viewMode === 'detail') {
           fetchActeurById(selectedActeur.id_acteur);
@@ -457,6 +516,12 @@ const Users: React.FC = () => {
     return id;
   };
 
+  // Obtenir le nom d'une entreprise
+  const getEntrepriseName = (id: string) => {
+    const entreprise = entreprises.find(ent => ent.id_entreprise === id);
+    return entreprise ? entreprise.nom_entreprise : id;
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -471,11 +536,11 @@ const Users: React.FC = () => {
       {viewMode === 'list' && (
         <Grid container spacing={3}>
           {/* En-tête */}
-          <Grid item style={{ gridColumn: 'span 12' }}>
+          <Grid size={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography component="h1" variant="h5" color="primary">
-                  Gestion des Utilisateurs
+                  Gestion Utilisateurs
                 </Typography>
                 <Button
                   variant="contained"
@@ -490,7 +555,7 @@ const Users: React.FC = () => {
           </Grid>
 
           {/* Liste des acteurs */}
-          <Grid item style={{ gridColumn: 'span 12' }}>
+          <Grid size={12}>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
@@ -499,6 +564,7 @@ const Users: React.FC = () => {
                     <TableCell>Email</TableCell>
                     <TableCell>Fonction</TableCell>
                     <TableCell>Organisation</TableCell>
+                    <TableCell>Entreprise</TableCell>
                     <TableCell>Rôle</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
@@ -510,6 +576,7 @@ const Users: React.FC = () => {
                       <TableCell>{acteur.email}</TableCell>
                       <TableCell>{acteur.fonction}</TableCell>
                       <TableCell>{acteur.organisation}</TableCell>
+                      <TableCell>{getEntrepriseName(acteur.organisation)}</TableCell>
                       <TableCell>
                         {acteur.est_admin ? (
                           <Chip label="Administrateur" color="primary" icon={<SecurityIcon />} />
@@ -553,7 +620,7 @@ const Users: React.FC = () => {
       {viewMode === 'detail' && selectedActeur && (
         <Grid container spacing={3}>
           {/* En-tête */}
-          <Grid item style={{ gridColumn: 'span 12' }}>
+          <Grid size={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Box display="flex" alignItems="center">
@@ -586,7 +653,7 @@ const Users: React.FC = () => {
               </Box>
               
               <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Card>
                     <CardHeader title="Informations" />
                     <CardContent>
@@ -600,12 +667,15 @@ const Users: React.FC = () => {
                         <strong>Organisation:</strong> {selectedActeur.organisation}
                       </Typography>
                       <Typography variant="body1">
+                        <strong>Entreprise:</strong> {getEntrepriseName(selectedActeur.organisation)}
+                      </Typography>
+                      <Typography variant="body1">
                         <strong>Rôle:</strong> {selectedActeur.est_admin ? 'Administrateur' : 'Utilisateur'}
                       </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 8' } }}>
+                <Grid size={{ xs: 12, md: 8 }}>
                   <Card>
                     <CardHeader title="Permissions" />
                     <CardContent>
@@ -622,7 +692,7 @@ const Users: React.FC = () => {
           </Grid>
 
           {/* Onglets */}
-          <Grid item style={{ gridColumn: 'span 12' }}>
+          <Grid size={12}>
             <Paper sx={{ width: '100%' }}>
               <Tabs
                 value={tabValue}
@@ -715,9 +785,14 @@ const Users: React.FC = () => {
           {dialogMode === 'create' ? 'Créer un nouvel utilisateur' : 'Modifier l\'utilisateur'}
         </DialogTitle>
         <DialogContent>
+          {/* DEBUG TEMPORAIRE */}
+          <Typography color="red" variant="caption">
+            DEBUG: {entreprises.length} entreprises chargées
+          </Typography>
+          
           <Box component="form" noValidate sx={{ mt: 2 }}>
             <Grid container spacing={2}>
-              <Grid item style={{ gridColumn: 'span 12' }}>
+              <Grid size={12}>
                 <TextField
                   required
                   fullWidth
@@ -728,7 +803,8 @@ const Users: React.FC = () => {
                   onChange={handleActeurFormChange}
                 />
               </Grid>
-              <Grid item style={{ gridColumn: 'span 12' }}>
+              
+              <Grid size={12}>
                 <TextField
                   required
                   fullWidth
@@ -740,7 +816,8 @@ const Users: React.FC = () => {
                   onChange={handleActeurFormChange}
                 />
               </Grid>
-              <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 6' } }}>
+              
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   id="fonction"
@@ -750,7 +827,8 @@ const Users: React.FC = () => {
                   onChange={handleActeurFormChange}
                 />
               </Grid>
-              <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 6' } }}>
+              
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   id="organisation"
@@ -760,8 +838,29 @@ const Users: React.FC = () => {
                   onChange={handleActeurFormChange}
                 />
               </Grid>
+              
+              <Grid size={12}>
+                <FormControl fullWidth required>
+                  <InputLabel id="entreprise-label">Entreprise</InputLabel>
+                  <Select
+                    labelId="entreprise-label"
+                    id="entreprise"
+                    name="entreprise"
+                    value={acteurFormValues.entreprise}
+                    label="Entreprise"
+                    onChange={handleActeurFormChange}
+                  >
+                    {entreprises.map((entreprise) => (
+                      <MenuItem key={entreprise.id_entreprise} value={entreprise.id_entreprise}>
+                        {entreprise.nom_entreprise}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
               {dialogMode === 'create' && (
-                <Grid item style={{ gridColumn: 'span 12' }}>
+                <Grid size={12}>
                   <TextField
                     fullWidth
                     id="mot_de_passe"
@@ -773,7 +872,8 @@ const Users: React.FC = () => {
                   />
                 </Grid>
               )}
-              <Grid item style={{ gridColumn: 'span 12' }}>
+              
+              <Grid size={12}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -805,7 +905,7 @@ const Users: React.FC = () => {
         <DialogContent>
           <Box component="form" noValidate sx={{ mt: 2 }}>
             <Grid container spacing={2}>
-              <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 6' } }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <FormControl fullWidth>
                   <InputLabel id="type-ressource-label">Type de Ressource</InputLabel>
                   <Select
@@ -823,7 +923,7 @@ const Users: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item style={{ gridColumn: { xs: 'span 12', md: 'span 6' } }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <FormControl fullWidth>
                   <InputLabel id="id-ressource-label">Ressource</InputLabel>
                   <Select
@@ -850,12 +950,12 @@ const Users: React.FC = () => {
                 </FormControl>
               </Grid>
               
-              <Grid item style={{ gridColumn: 'span 12' }}>
+              <Grid size={12}>
                 <Typography variant="subtitle1" gutterBottom>
                   Permissions
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item style={{ gridColumn: { xs: 'span 6', md: 'span 3' } }}>
+                  <Grid size={{ xs: 6, md: 3 }}>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -868,7 +968,7 @@ const Users: React.FC = () => {
                       label="Voir"
                     />
                   </Grid>
-                  <Grid item style={{ gridColumn: { xs: 'span 6', md: 'span 3' } }}>
+                  <Grid size={{ xs: 6, md: 3 }}>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -881,7 +981,7 @@ const Users: React.FC = () => {
                       label="Éditer"
                     />
                   </Grid>
-                  <Grid item style={{ gridColumn: { xs: 'span 6', md: 'span 3' } }}>
+                  <Grid size={{ xs: 6, md: 3 }}>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -894,7 +994,7 @@ const Users: React.FC = () => {
                       label="Supprimer"
                     />
                   </Grid>
-                  <Grid item style={{ gridColumn: { xs: 'span 6', md: 'span 3' } }}>
+                  <Grid size={{ xs: 6, md: 3 }}>
                     <FormControlLabel
                       control={
                         <Checkbox

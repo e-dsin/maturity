@@ -1,561 +1,479 @@
 {
-  "version": "32.0.0",
+  "version": "35.0.0",
   "artifacts": {
-    "MaturityApp-Dev-V2.assets": {
+    "MaturityBackend-dev.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "MaturityApp-Dev-V2.assets.json",
+        "file": "MaturityBackend-dev.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "MaturityApp-Dev-V2": {
+    "MaturityBackend-dev": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://637423285771/eu-west-3",
+      "environment": "aws://637423285771/eu-west-1",
       "properties": {
-        "templateFile": "MaturityApp-Dev-V2.template.json",
+        "templateFile": "MaturityBackend-dev.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "dev",
+          "Owner": "DSIN",
+          "Project": "MaturityAssessment"
+        },
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-deploy-role-637423285771-eu-west-3",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-cfn-exec-role-637423285771-eu-west-3",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-637423285771-eu-west-3/9aa1c8af9ad205e5ae1004fd87d3876da5d17027e3f823b676b0f2a39023e9c4.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-deploy-role-637423285771-eu-west-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-cfn-exec-role-637423285771-eu-west-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-637423285771-eu-west-1/be6b121daf33237ae079146327cdb0a52d5ba0544dd274db05f36496312b3028.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "MaturityApp-Dev-V2.assets"
+          "MaturityBackend-dev.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-lookup-role-637423285771-eu-west-3",
+          "arn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-lookup-role-637423285771-eu-west-1",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
       },
       "dependencies": [
-        "MaturityApp-Dev-V2.assets"
+        "MaturityBackend-dev.assets"
       ],
       "metadata": {
-        "/MaturityApp-Dev-V2/MaturityVPC/Resource": [
+        "/MaturityBackend-dev": [
           {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPC0A0078D6"
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "dev"
+              },
+              {
+                "Key": "Owner",
+                "Value": "DSIN"
+              },
+              {
+                "Key": "Project",
+                "Value": "MaturityAssessment"
+              }
+            ]
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/Subnet": [
+        "/MaturityBackend-dev/BackendVPC/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1SubnetF557D35A"
+            "data": "BackendVPC5F3A56B6"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/RouteTable": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
+            "data": "BackendVPCpublicSubnet1SubnetBABFA9C2"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/RouteTableAssociation": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1RouteTableAssociationABFFEC0C"
+            "data": "BackendVPCpublicSubnet1RouteTable9EC3C63B"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/DefaultRoute": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1DefaultRoute12F9D66A"
+            "data": "BackendVPCpublicSubnet1RouteTableAssociationCAC74DAD"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/EIP": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1EIPB5199418"
+            "data": "BackendVPCpublicSubnet1DefaultRoute9E41DACE"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/NATGateway": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/EIP": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
+            "data": "BackendVPCpublicSubnet1EIPC30B88B9"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/Subnet": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet1/NATGateway": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2SubnetFE3B0B56"
+            "data": "BackendVPCpublicSubnet1NATGateway61BCF2F3"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/RouteTable": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet2/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
+            "data": "BackendVPCpublicSubnet2Subnet9A5C2AEA"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/RouteTableAssociation": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2RouteTableAssociation587F747A"
+            "data": "BackendVPCpublicSubnet2RouteTable86F66152"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/DefaultRoute": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2DefaultRouteDCC614D0"
+            "data": "BackendVPCpublicSubnet2RouteTableAssociationF6FF4EF0"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/Subnet": [
+        "/MaturityBackend-dev/BackendVPC/publicSubnet2/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1Subnet82570B1B"
+            "data": "BackendVPCpublicSubnet2DefaultRoute4D05EB88"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/RouteTable": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet1/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
+            "data": "BackendVPCprivateSubnet1Subnet67E2236E"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/RouteTableAssociation": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1RouteTableAssociation1A3B8546"
+            "data": "BackendVPCprivateSubnet1RouteTable27CC2AF4"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/DefaultRoute": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1DefaultRoute10AED07F"
+            "data": "BackendVPCprivateSubnet1RouteTableAssociation6EF4274A"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/Subnet": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet1/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2Subnet713FC93C"
+            "data": "BackendVPCprivateSubnet1DefaultRoute10EF6D01"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/RouteTable": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet2/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
+            "data": "BackendVPCprivateSubnet2SubnetA60CAE2F"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/RouteTableAssociation": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2RouteTableAssociation2728632D"
+            "data": "BackendVPCprivateSubnet2RouteTableB699B6EA"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/DefaultRoute": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2DefaultRoute42835276"
+            "data": "BackendVPCprivateSubnet2RouteTableAssociationC57397AB"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/IGW": [
+        "/MaturityBackend-dev/BackendVPC/privateSubnet2/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCIGW5EAEA5B1"
+            "data": "BackendVPCprivateSubnet2DefaultRoute8AD1F1AF"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/VPCGW": [
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet1/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCVPCGW84FC1C59"
+            "data": "BackendVPCdatabaseSubnet1Subnet263DE46D"
           }
         ],
-        "/MaturityApp-Dev-V2/MaturityVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCRestrictDefaultSecurityGroupCustomResourceE8AFF68D"
+            "data": "BackendVPCdatabaseSubnet1RouteTable89DBED06"
           }
         ],
-        "/MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCdatabaseSubnet1RouteTableAssociation0CFB2C05"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCdatabaseSubnet2Subnet50DE5D5A"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCdatabaseSubnet2RouteTableEDB40AEF"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCdatabaseSubnet2RouteTableAssociation3BF4E1EF"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCIGWBDB487F3"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCVPCGW1A2F763B"
+          }
+        ],
+        "/MaturityBackend-dev/BackendVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendVPCRestrictDefaultSecurityGroupCustomResourceCF54D8E6"
+          }
+        ],
+        "/MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
           }
         ],
-        "/MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+        "/MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendBucket/Resource": [
+        "/MaturityBackend-dev/DatabaseSG/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketEFE2E19C"
+            "data": "DatabaseSG2A23C222"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendBucket/Policy/Resource": [
+        "/MaturityBackend-dev/DatabaseSG/from MaturityBackenddevApplicationSGCCE6A93E:3306": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketPolicy1DFF75D9"
+            "data": "DatabaseSGfromMaturityBackenddevApplicationSGCCE6A93E3306B9DEABE9"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendBucket/AutoDeleteObjectsCustomResource/Default": [
+        "/MaturityBackend-dev/ApplicationSG/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketAutoDeleteObjectsCustomResourceDB860B32"
+            "data": "ApplicationSGE6EB7629"
           }
         ],
-        "/MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+        "/MaturityBackend-dev/ApplicationSG/from MaturityBackenddevALBSGA910B7D1:3000": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+            "data": "ApplicationSGfromMaturityBackenddevALBSGA910B7D13000F073D4E3"
           }
         ],
-        "/MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+        "/MaturityBackend-dev/ApplicationSG/from MaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B:3000": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+            "data": "ApplicationSGfromMaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B3000A942CE5E"
           }
         ],
-        "/MaturityApp-Dev-V2/OAI/Resource": [
+        "/MaturityBackend-dev/ALBSG/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "OAIE1EFC67F"
+            "data": "ALBSGB173E466"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendDistribution/Resource": [
+        "/MaturityBackend-dev/DatabaseSecret/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendDistributionE6EAF405"
+            "data": "DatabaseSecret86DBB7B3"
           }
         ],
-        "/MaturityApp-Dev-V2/AliasRecord/Resource": [
+        "/MaturityBackend-dev/DatabaseSecret/Attachment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AliasRecord851000D2"
+            "data": "DatabaseSecretAttachment9A63A3D4"
           }
         ],
-        "/MaturityApp-Dev-V2/AWSCloudFrontPartitionHostedZoneIdMap": [
+        "/MaturityBackend-dev/JWTSecret/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AWSCloudFrontPartitionHostedZoneIdMap"
+            "data": "JWTSecretF6F1CBF0"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendURL": [
+        "/MaturityBackend-dev/Database/SubnetGroup/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendURL"
+            "data": "DatabaseSubnetGroup7D60F180"
           }
         ],
-        "/MaturityApp-Dev-V2/FrontendBucketName": [
+        "/MaturityBackend-dev/Database/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketName"
+            "data": "DatabaseB269D8BB"
           }
         ],
-        "/MaturityApp-Dev-V2/CloudFrontURL": [
+        "/MaturityBackend-dev/BackendCluster/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CloudFrontURL"
+            "data": "BackendCluster5086059C"
           }
         ],
-        "/MaturityApp-Dev-V2/CertificateArn": [
+        "/MaturityBackend-dev/BackendLogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CertificateArn"
+            "data": "BackendLogGroupDA10F1B2"
           }
         ],
-        "/MaturityApp-Dev-V2/CDKMetadata/Default": [
+        "/MaturityBackend-dev/BackendTaskDefinition/TaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendTaskDefinitionTaskRoleE757CE00"
+          }
+        ],
+        "/MaturityBackend-dev/BackendTaskDefinition/TaskRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2"
+          }
+        ],
+        "/MaturityBackend-dev/BackendTaskDefinition/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendTaskDefinitionEC224DE6"
+          }
+        ],
+        "/MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendTaskDefinitionExecutionRoleDA72B768"
+          }
+        ],
+        "/MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendTaskDefinitionExecutionRoleDefaultPolicy0750C44A"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLB09608E98"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBSecurityGroup2B9BA648"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/SecurityGroup/to MaturityBackenddevApplicationSGCCE6A93E:3000": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBSecurityGrouptoMaturityBackenddevApplicationSGCCE6A93E30002F69BD86"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/PublicListener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBPublicListener2FA7FC98"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/PublicListener/ECSGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LB/PublicRedirectListener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBPublicRedirectListenerA2A7EC53"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/DNS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceDNS07B9A993"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/LoadBalancerDNS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLoadBalancerDNSE742582D"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/ServiceURL": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceServiceURLB1770053"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/Service/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendService2147DAF9"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/Service/TaskCount/Target/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskCountTarget2134EDB2"
+          }
+        ],
+        "/MaturityBackend-dev/BackendService/Service/TaskCount/Target/CpuScaling/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskCountTargetCpuScalingB44CAB95"
+          }
+        ],
+        "/MaturityBackend-dev/ApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiUrl"
+          }
+        ],
+        "/MaturityBackend-dev/DatabaseEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseEndpoint"
+          }
+        ],
+        "/MaturityBackend-dev/ECRRepositoryURI": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ECRRepositoryURI"
+          }
+        ],
+        "/MaturityBackend-dev/DatabaseSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecretArn"
+          }
+        ],
+        "/MaturityBackend-dev/ClusterName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ClusterName"
+          }
+        ],
+        "/MaturityBackend-dev/ServiceName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ServiceName"
+          }
+        ],
+        "/MaturityBackend-dev/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/MaturityApp-Dev-V2/BootstrapVersion": [
+        "/MaturityBackend-dev/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/MaturityApp-Dev-V2/CheckBootstrapVersion": [
+        "/MaturityBackend-dev/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "MaturityApp-Dev-V2"
-    },
-    "MaturityApp-Prod.assets": {
-      "type": "cdk:asset-manifest",
-      "properties": {
-        "file": "MaturityApp-Prod.assets.json",
-        "requiresBootstrapStackVersion": 6,
-        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
-      }
-    },
-    "MaturityApp-Prod": {
-      "type": "aws:cloudformation:stack",
-      "environment": "aws://637423285771/eu-west-3",
-      "properties": {
-        "templateFile": "MaturityApp-Prod.template.json",
-        "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-deploy-role-637423285771-eu-west-3",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-cfn-exec-role-637423285771-eu-west-3",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-637423285771-eu-west-3/dae8e143edfb52af98c8425f4d4f4d41f9062aa260ae096c04a256284f361017.json",
-        "requiresBootstrapStackVersion": 6,
-        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
-        "additionalDependencies": [
-          "MaturityApp-Prod.assets"
-        ],
-        "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::637423285771:role/cdk-hnb659fds-lookup-role-637423285771-eu-west-3",
-          "requiresBootstrapStackVersion": 8,
-          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
-        }
-      },
-      "dependencies": [
-        "MaturityApp-Prod.assets"
-      ],
-      "metadata": {
-        "/MaturityApp-Prod/MaturityVPC/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPC0A0078D6"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/Subnet": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1SubnetF557D35A"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTable": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTableAssociation": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1RouteTableAssociationABFFEC0C"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/DefaultRoute": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1DefaultRoute12F9D66A"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/EIP": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1EIPB5199418"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet1/NATGateway": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet2/Subnet": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2SubnetFE3B0B56"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTable": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTableAssociation": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2RouteTableAssociation587F747A"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PublicSubnet2/DefaultRoute": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPublicSubnet2DefaultRouteDCC614D0"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet1/Subnet": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1Subnet82570B1B"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTable": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTableAssociation": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1RouteTableAssociation1A3B8546"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet1/DefaultRoute": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet1DefaultRoute10AED07F"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet2/Subnet": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2Subnet713FC93C"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTable": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTableAssociation": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2RouteTableAssociation2728632D"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/PrivateSubnet2/DefaultRoute": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCPrivateSubnet2DefaultRoute42835276"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/IGW": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCIGW5EAEA5B1"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/VPCGW": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCVPCGW84FC1C59"
-          }
-        ],
-        "/MaturityApp-Prod/MaturityVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "MaturityVPCRestrictDefaultSecurityGroupCustomResourceE8AFF68D"
-          }
-        ],
-        "/MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
-          }
-        ],
-        "/MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
-          }
-        ],
-        "/MaturityApp-Prod/Certificate/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "Certificate4E7ABB08"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendBucket/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketEFE2E19C"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendBucket/Policy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketPolicy1DFF75D9"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendBucket/AutoDeleteObjectsCustomResource/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketAutoDeleteObjectsCustomResourceDB860B32"
-          }
-        ],
-        "/MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
-          }
-        ],
-        "/MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
-          }
-        ],
-        "/MaturityApp-Prod/OAI/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "OAIE1EFC67F"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendDistribution/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendDistributionE6EAF405"
-          }
-        ],
-        "/MaturityApp-Prod/AliasRecord/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "AliasRecord851000D2"
-          }
-        ],
-        "/MaturityApp-Prod/AWSCloudFrontPartitionHostedZoneIdMap": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "AWSCloudFrontPartitionHostedZoneIdMap"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendURL": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendURL"
-          }
-        ],
-        "/MaturityApp-Prod/FrontendBucketName": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendBucketName"
-          }
-        ],
-        "/MaturityApp-Prod/CloudFrontURL": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CloudFrontURL"
-          }
-        ],
-        "/MaturityApp-Prod/CertificateArn": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CertificateArn"
-          }
-        ],
-        "/MaturityApp-Prod/CDKMetadata/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CDKMetadata"
-          }
-        ],
-        "/MaturityApp-Prod/BootstrapVersion": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "BootstrapVersion"
-          }
-        ],
-        "/MaturityApp-Prod/CheckBootstrapVersion": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CheckBootstrapVersion"
-          }
-        ]
-      },
-      "displayName": "MaturityApp-Prod"
+      "displayName": "MaturityBackend-dev"
     },
     "Tree": {
       "type": "cdk:tree",

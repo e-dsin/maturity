@@ -4,1881 +4,1313 @@
     "id": "App",
     "path": "",
     "children": {
-      "MaturityApp-Dev-V2": {
-        "id": "MaturityApp-Dev-V2",
-        "path": "MaturityApp-Dev-V2",
+      "MaturityBackend-dev": {
+        "id": "MaturityBackend-dev",
+        "path": "MaturityBackend-dev",
         "children": {
-          "MaturityVPC": {
-            "id": "MaturityVPC",
-            "path": "MaturityApp-Dev-V2/MaturityVPC",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::VPC",
-                  "aws:cdk:cloudformation:props": {
-                    "cidrBlock": "10.0.0.0/16",
-                    "enableDnsHostnames": true,
-                    "enableDnsSupport": true,
-                    "instanceTenancy": "default",
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "MaturityApp-Dev-V2/MaturityVPC"
-                      }
-                    ]
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPC",
-                  "version": "2.87.0"
-                }
-              },
-              "PublicSubnet1": {
-                "id": "PublicSubnet1",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3a",
-                        "cidrBlock": "10.0.0.0/18",
-                        "mapPublicIpOnLaunch": true,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "gatewayId": {
-                          "Ref": "MaturityVPCIGW5EAEA5B1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "EIP": {
-                    "id": "EIP",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/EIP",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::EIP",
-                      "aws:cdk:cloudformation:props": {
-                        "domain": "vpc",
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnEIP",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "NATGateway": {
-                    "id": "NATGateway",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1/NATGateway",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::NatGateway",
-                      "aws:cdk:cloudformation:props": {
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
-                        },
-                        "allocationId": {
-                          "Fn::GetAtt": [
-                            "MaturityVPCPublicSubnet1EIPB5199418",
-                            "AllocationId"
-                          ]
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnNatGateway",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PublicSubnet2": {
-                "id": "PublicSubnet2",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3b",
-                        "cidrBlock": "10.0.64.0/18",
-                        "mapPublicIpOnLaunch": true,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet2SubnetFE3B0B56"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PublicSubnet2/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "gatewayId": {
-                          "Ref": "MaturityVPCIGW5EAEA5B1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PrivateSubnet1": {
-                "id": "PrivateSubnet1",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3a",
-                        "cidrBlock": "10.0.128.0/18",
-                        "mapPublicIpOnLaunch": false,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPrivateSubnet1Subnet82570B1B"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet1/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "natGatewayId": {
-                          "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PrivateSubnet2": {
-                "id": "PrivateSubnet2",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3b",
-                        "cidrBlock": "10.0.192.0/18",
-                        "mapPublicIpOnLaunch": false,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPrivateSubnet2Subnet713FC93C"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/PrivateSubnet2/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "natGatewayId": {
-                          "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "IGW": {
-                "id": "IGW",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/IGW",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::InternetGateway",
-                  "aws:cdk:cloudformation:props": {
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "MaturityApp-Dev-V2/MaturityVPC"
-                      }
-                    ]
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnInternetGateway",
-                  "version": "2.87.0"
-                }
-              },
-              "VPCGW": {
-                "id": "VPCGW",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/VPCGW",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::VPCGatewayAttachment",
-                  "aws:cdk:cloudformation:props": {
-                    "vpcId": {
-                      "Ref": "MaturityVPC0A0078D6"
-                    },
-                    "internetGatewayId": {
-                      "Ref": "MaturityVPCIGW5EAEA5B1"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPCGatewayAttachment",
-                  "version": "2.87.0"
-                }
-              },
-              "RestrictDefaultSecurityGroupCustomResource": {
-                "id": "RestrictDefaultSecurityGroupCustomResource",
-                "path": "MaturityApp-Dev-V2/MaturityVPC/RestrictDefaultSecurityGroupCustomResource",
-                "children": {
-                  "Default": {
-                    "id": "Default",
-                    "path": "MaturityApp-Dev-V2/MaturityVPC/RestrictDefaultSecurityGroupCustomResource/Default",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.CfnResource",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CustomResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_ec2.Vpc",
-              "version": "2.87.0"
-            }
-          },
-          "Custom::VpcRestrictDefaultSGCustomResourceProvider": {
-            "id": "Custom::VpcRestrictDefaultSGCustomResourceProvider",
-            "path": "MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider",
-            "children": {
-              "Staging": {
-                "id": "Staging",
-                "path": "MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider/Staging",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.AssetStaging",
-                  "version": "2.87.0"
-                }
-              },
-              "Role": {
-                "id": "Role",
-                "path": "MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              },
-              "Handler": {
-                "id": "Handler",
-                "path": "MaturityApp-Dev-V2/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CustomResourceProvider",
-              "version": "2.87.0"
-            }
-          },
           "HostedZone": {
             "id": "HostedZone",
-            "path": "MaturityApp-Dev-V2/HostedZone",
+            "path": "MaturityBackend-dev/HostedZone",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
-              "version": "2.87.0"
-            }
-          },
-          "DevCertificate": {
-            "id": "DevCertificate",
-            "path": "MaturityApp-Dev-V2/DevCertificate",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.Resource",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendBucket": {
-            "id": "FrontendBucket",
-            "path": "MaturityApp-Dev-V2/FrontendBucket",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Dev-V2/FrontendBucket/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
-                  "aws:cdk:cloudformation:props": {
-                    "bucketName": "maturity-frontend-dev-637423285771",
-                    "publicAccessBlockConfiguration": {
-                      "blockPublicAcls": true,
-                      "blockPublicPolicy": true,
-                      "ignorePublicAcls": true,
-                      "restrictPublicBuckets": true
-                    },
-                    "tags": [
-                      {
-                        "key": "aws-cdk:auto-delete-objects",
-                        "value": "true"
-                      }
-                    ],
-                    "websiteConfiguration": {
-                      "indexDocument": "index.html",
-                      "errorDocument": "index.html"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3.CfnBucket",
-                  "version": "2.87.0"
-                }
-              },
-              "Policy": {
-                "id": "Policy",
-                "path": "MaturityApp-Dev-V2/FrontendBucket/Policy",
-                "children": {
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "MaturityApp-Dev-V2/FrontendBucket/Policy/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
-                      "aws:cdk:cloudformation:props": {
-                        "bucket": {
-                          "Ref": "FrontendBucketEFE2E19C"
-                        },
-                        "policyDocument": {
-                          "Statement": [
-                            {
-                              "Action": [
-                                "s3:DeleteObject*",
-                                "s3:GetBucket*",
-                                "s3:List*"
-                              ],
-                              "Effect": "Allow",
-                              "Principal": {
-                                "AWS": {
-                                  "Fn::GetAtt": [
-                                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                                    "Arn"
-                                  ]
-                                }
-                              },
-                              "Resource": [
-                                {
-                                  "Fn::GetAtt": [
-                                    "FrontendBucketEFE2E19C",
-                                    "Arn"
-                                  ]
-                                },
-                                {
-                                  "Fn::Join": [
-                                    "",
-                                    [
-                                      {
-                                        "Fn::GetAtt": [
-                                          "FrontendBucketEFE2E19C",
-                                          "Arn"
-                                        ]
-                                      },
-                                      "/*"
-                                    ]
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "Action": [
-                                "s3:GetBucket*",
-                                "s3:GetObject*",
-                                "s3:List*"
-                              ],
-                              "Effect": "Allow",
-                              "Principal": {
-                                "CanonicalUser": {
-                                  "Fn::GetAtt": [
-                                    "OAIE1EFC67F",
-                                    "S3CanonicalUserId"
-                                  ]
-                                }
-                              },
-                              "Resource": [
-                                {
-                                  "Fn::GetAtt": [
-                                    "FrontendBucketEFE2E19C",
-                                    "Arn"
-                                  ]
-                                },
-                                {
-                                  "Fn::Join": [
-                                    "",
-                                    [
-                                      {
-                                        "Fn::GetAtt": [
-                                          "FrontendBucketEFE2E19C",
-                                          "Arn"
-                                        ]
-                                      },
-                                      "/*"
-                                    ]
-                                  ]
-                                }
-                              ]
-                            }
-                          ],
-                          "Version": "2012-10-17"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.CfnBucketPolicy",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3.BucketPolicy",
-                  "version": "2.87.0"
-                }
-              },
-              "AutoDeleteObjectsCustomResource": {
-                "id": "AutoDeleteObjectsCustomResource",
-                "path": "MaturityApp-Dev-V2/FrontendBucket/AutoDeleteObjectsCustomResource",
-                "children": {
-                  "Default": {
-                    "id": "Default",
-                    "path": "MaturityApp-Dev-V2/FrontendBucket/AutoDeleteObjectsCustomResource/Default",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.CfnResource",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CustomResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_s3.Bucket",
-              "version": "2.87.0"
-            }
-          },
-          "Custom::S3AutoDeleteObjectsCustomResourceProvider": {
-            "id": "Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "path": "MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "children": {
-              "Staging": {
-                "id": "Staging",
-                "path": "MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.AssetStaging",
-                  "version": "2.87.0"
-                }
-              },
-              "Role": {
-                "id": "Role",
-                "path": "MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              },
-              "Handler": {
-                "id": "Handler",
-                "path": "MaturityApp-Dev-V2/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CustomResourceProvider",
-              "version": "2.87.0"
-            }
-          },
-          "OAI": {
-            "id": "OAI",
-            "path": "MaturityApp-Dev-V2/OAI",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Dev-V2/OAI/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
-                  "aws:cdk:cloudformation:props": {
-                    "cloudFrontOriginAccessIdentityConfig": {
-                      "comment": {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "OAI for ",
-                            {
-                              "Ref": "FrontendBucketEFE2E19C"
-                            }
-                          ]
-                        ]
-                      }
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnCloudFrontOriginAccessIdentity",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_cloudfront.OriginAccessIdentity",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendDistribution": {
-            "id": "FrontendDistribution",
-            "path": "MaturityApp-Dev-V2/FrontendDistribution",
-            "children": {
-              "Origin1": {
-                "id": "Origin1",
-                "path": "MaturityApp-Dev-V2/FrontendDistribution/Origin1",
-                "constructInfo": {
-                  "fqn": "constructs.Construct",
-                  "version": "10.4.2"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Dev-V2/FrontendDistribution/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
-                  "aws:cdk:cloudformation:props": {
-                    "distributionConfig": {
-                      "enabled": true,
-                      "origins": [
-                        {
-                          "domainName": {
-                            "Fn::Select": [
-                              2,
-                              {
-                                "Fn::Split": [
-                                  "/",
-                                  {
-                                    "Fn::GetAtt": [
-                                      "FrontendBucketEFE2E19C",
-                                      "WebsiteURL"
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          "id": "MaturityAppDevV2FrontendDistributionOrigin1BFED9833",
-                          "customOriginConfig": {
-                            "originSslProtocols": [
-                              "TLSv1.2"
-                            ],
-                            "originProtocolPolicy": "http-only"
-                          }
-                        }
-                      ],
-                      "defaultCacheBehavior": {
-                        "pathPattern": "*",
-                        "targetOriginId": "MaturityAppDevV2FrontendDistributionOrigin1BFED9833",
-                        "cachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
-                        "compress": true,
-                        "viewerProtocolPolicy": "redirect-to-https"
-                      },
-                      "aliases": [
-                        "dev-maturity.e-dsin.fr"
-                      ],
-                      "customErrorResponses": [
-                        {
-                          "errorCode": 404,
-                          "responseCode": 200,
-                          "responsePagePath": "/index.html"
-                        }
-                      ],
-                      "defaultRootObject": "index.html",
-                      "httpVersion": "http2",
-                      "ipv6Enabled": true,
-                      "viewerCertificate": {
-                        "acmCertificateArn": "arn:aws:acm:us-east-1:637423285771:certificate/5c67fed5-1acc-418e-a2de-307a32f7db66",
-                        "minimumProtocolVersion": "TLSv1.2_2021",
-                        "sslSupportMethod": "sni-only"
-                      }
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnDistribution",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_cloudfront.Distribution",
-              "version": "2.87.0"
-            }
-          },
-          "AliasRecord": {
-            "id": "AliasRecord",
-            "path": "MaturityApp-Dev-V2/AliasRecord",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Dev-V2/AliasRecord/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
-                  "aws:cdk:cloudformation:props": {
-                    "name": "dev-maturity.e-dsin.fr.",
-                    "type": "A",
-                    "aliasTarget": {
-                      "hostedZoneId": {
-                        "Fn::FindInMap": [
-                          "AWSCloudFrontPartitionHostedZoneIdMap",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          "zoneId"
-                        ]
-                      },
-                      "dnsName": {
-                        "Fn::GetAtt": [
-                          "FrontendDistributionE6EAF405",
-                          "DomainName"
-                        ]
-                      }
-                    },
-                    "hostedZoneId": "Z03909371P12UQ4UA00F0"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_route53.CfnRecordSet",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_route53.ARecord",
-              "version": "2.87.0"
-            }
-          },
-          "AWSCloudFrontPartitionHostedZoneIdMap": {
-            "id": "AWSCloudFrontPartitionHostedZoneIdMap",
-            "path": "MaturityApp-Dev-V2/AWSCloudFrontPartitionHostedZoneIdMap",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnMapping",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendURL": {
-            "id": "FrontendURL",
-            "path": "MaturityApp-Dev-V2/FrontendURL",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendBucketName": {
-            "id": "FrontendBucketName",
-            "path": "MaturityApp-Dev-V2/FrontendBucketName",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
-            }
-          },
-          "CloudFrontURL": {
-            "id": "CloudFrontURL",
-            "path": "MaturityApp-Dev-V2/CloudFrontURL",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
-            }
-          },
-          "CertificateArn": {
-            "id": "CertificateArn",
-            "path": "MaturityApp-Dev-V2/CertificateArn",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
-            }
-          },
-          "CDKMetadata": {
-            "id": "CDKMetadata",
-            "path": "MaturityApp-Dev-V2/CDKMetadata",
-            "children": {
-              "Default": {
-                "id": "Default",
-                "path": "MaturityApp-Dev-V2/CDKMetadata/Default",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "constructs.Construct",
-              "version": "10.4.2"
-            }
-          },
-          "BootstrapVersion": {
-            "id": "BootstrapVersion",
-            "path": "MaturityApp-Dev-V2/BootstrapVersion",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnParameter",
-              "version": "2.87.0"
-            }
-          },
-          "CheckBootstrapVersion": {
-            "id": "CheckBootstrapVersion",
-            "path": "MaturityApp-Dev-V2/CheckBootstrapVersion",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnRule",
-              "version": "2.87.0"
-            }
-          }
-        },
-        "constructInfo": {
-          "fqn": "aws-cdk-lib.Stack",
-          "version": "2.87.0"
-        }
-      },
-      "MaturityApp-Prod": {
-        "id": "MaturityApp-Prod",
-        "path": "MaturityApp-Prod",
-        "children": {
-          "MaturityVPC": {
-            "id": "MaturityVPC",
-            "path": "MaturityApp-Prod/MaturityVPC",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Prod/MaturityVPC/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::VPC",
-                  "aws:cdk:cloudformation:props": {
-                    "cidrBlock": "10.0.0.0/16",
-                    "enableDnsHostnames": true,
-                    "enableDnsSupport": true,
-                    "instanceTenancy": "default",
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "MaturityApp-Prod/MaturityVPC"
-                      }
-                    ]
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPC",
-                  "version": "2.87.0"
-                }
-              },
-              "PublicSubnet1": {
-                "id": "PublicSubnet1",
-                "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3a",
-                        "cidrBlock": "10.0.0.0/18",
-                        "mapPublicIpOnLaunch": true,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet1RouteTableEAC7F102"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "gatewayId": {
-                          "Ref": "MaturityVPCIGW5EAEA5B1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "EIP": {
-                    "id": "EIP",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/EIP",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::EIP",
-                      "aws:cdk:cloudformation:props": {
-                        "domain": "vpc",
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnEIP",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "NATGateway": {
-                    "id": "NATGateway",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet1/NATGateway",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::NatGateway",
-                      "aws:cdk:cloudformation:props": {
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet1SubnetF557D35A"
-                        },
-                        "allocationId": {
-                          "Fn::GetAtt": [
-                            "MaturityVPCPublicSubnet1EIPB5199418",
-                            "AllocationId"
-                          ]
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnNatGateway",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PublicSubnet2": {
-                "id": "PublicSubnet2",
-                "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3b",
-                        "cidrBlock": "10.0.64.0/18",
-                        "mapPublicIpOnLaunch": true,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Public"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PublicSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPublicSubnet2SubnetFE3B0B56"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Prod/MaturityVPC/PublicSubnet2/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPublicSubnet2RouteTableA56D3DEC"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "gatewayId": {
-                          "Ref": "MaturityVPCIGW5EAEA5B1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PrivateSubnet1": {
-                "id": "PrivateSubnet1",
-                "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3a",
-                        "cidrBlock": "10.0.128.0/18",
-                        "mapPublicIpOnLaunch": false,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPrivateSubnet1Subnet82570B1B"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet1/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet1RouteTableAC13222C"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "natGatewayId": {
-                          "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "PrivateSubnet2": {
-                "id": "PrivateSubnet2",
-                "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2",
-                "children": {
-                  "Subnet": {
-                    "id": "Subnet",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/Subnet",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "availabilityZone": "eu-west-3b",
-                        "cidrBlock": "10.0.192.0/18",
-                        "mapPublicIpOnLaunch": false,
-                        "tags": [
-                          {
-                            "key": "aws-cdk:subnet-name",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "aws-cdk:subnet-type",
-                            "value": "Private"
-                          },
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "Acl": {
-                    "id": "Acl",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/Acl",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTable": {
-                    "id": "RouteTable",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTable",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
-                      "aws:cdk:cloudformation:props": {
-                        "vpcId": {
-                          "Ref": "MaturityVPC0A0078D6"
-                        },
-                        "tags": [
-                          {
-                            "key": "Name",
-                            "value": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2"
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "RouteTableAssociation": {
-                    "id": "RouteTableAssociation",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/RouteTableAssociation",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
-                        },
-                        "subnetId": {
-                          "Ref": "MaturityVPCPrivateSubnet2Subnet713FC93C"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
-                      "version": "2.87.0"
-                    }
-                  },
-                  "DefaultRoute": {
-                    "id": "DefaultRoute",
-                    "path": "MaturityApp-Prod/MaturityVPC/PrivateSubnet2/DefaultRoute",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
-                      "aws:cdk:cloudformation:props": {
-                        "routeTableId": {
-                          "Ref": "MaturityVPCPrivateSubnet2RouteTableBC0815A0"
-                        },
-                        "destinationCidrBlock": "0.0.0.0/0",
-                        "natGatewayId": {
-                          "Ref": "MaturityVPCPublicSubnet1NATGatewayAB7AFF64"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
-                  "version": "2.87.0"
-                }
-              },
-              "IGW": {
-                "id": "IGW",
-                "path": "MaturityApp-Prod/MaturityVPC/IGW",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::InternetGateway",
-                  "aws:cdk:cloudformation:props": {
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "MaturityApp-Prod/MaturityVPC"
-                      }
-                    ]
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnInternetGateway",
-                  "version": "2.87.0"
-                }
-              },
-              "VPCGW": {
-                "id": "VPCGW",
-                "path": "MaturityApp-Prod/MaturityVPC/VPCGW",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::VPCGatewayAttachment",
-                  "aws:cdk:cloudformation:props": {
-                    "vpcId": {
-                      "Ref": "MaturityVPC0A0078D6"
-                    },
-                    "internetGatewayId": {
-                      "Ref": "MaturityVPCIGW5EAEA5B1"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPCGatewayAttachment",
-                  "version": "2.87.0"
-                }
-              },
-              "RestrictDefaultSecurityGroupCustomResource": {
-                "id": "RestrictDefaultSecurityGroupCustomResource",
-                "path": "MaturityApp-Prod/MaturityVPC/RestrictDefaultSecurityGroupCustomResource",
-                "children": {
-                  "Default": {
-                    "id": "Default",
-                    "path": "MaturityApp-Prod/MaturityVPC/RestrictDefaultSecurityGroupCustomResource/Default",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.CfnResource",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CustomResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_ec2.Vpc",
-              "version": "2.87.0"
-            }
-          },
-          "Custom::VpcRestrictDefaultSGCustomResourceProvider": {
-            "id": "Custom::VpcRestrictDefaultSGCustomResourceProvider",
-            "path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider",
-            "children": {
-              "Staging": {
-                "id": "Staging",
-                "path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Staging",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.AssetStaging",
-                  "version": "2.87.0"
-                }
-              },
-              "Role": {
-                "id": "Role",
-                "path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              },
-              "Handler": {
-                "id": "Handler",
-                "path": "MaturityApp-Prod/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CustomResourceProvider",
-              "version": "2.87.0"
-            }
-          },
-          "HostedZone": {
-            "id": "HostedZone",
-            "path": "MaturityApp-Prod/HostedZone",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.Resource",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           },
           "Certificate": {
             "id": "Certificate",
-            "path": "MaturityApp-Prod/Certificate",
+            "path": "MaturityBackend-dev/Certificate",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.108.0"
+            }
+          },
+          "BackendVPC": {
+            "id": "BackendVPC",
+            "path": "MaturityBackend-dev/BackendVPC",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "MaturityApp-Prod/Certificate/Resource",
+                "path": "MaturityBackend-dev/BackendVPC/Resource",
                 "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CertificateManager::Certificate",
+                  "aws:cdk:cloudformation:type": "AWS::EC2::VPC",
                   "aws:cdk:cloudformation:props": {
-                    "domainName": "maturity.e-dsin.fr",
-                    "domainValidationOptions": [
-                      {
-                        "domainName": "maturity.e-dsin.fr",
-                        "hostedZoneId": "Z03909371P12UQ4UA00F0"
-                      }
-                    ],
+                    "cidrBlock": "10.0.0.0/16",
+                    "enableDnsHostnames": true,
+                    "enableDnsSupport": true,
+                    "instanceTenancy": "default",
                     "tags": [
                       {
                         "key": "Name",
-                        "value": "MaturityApp-Prod/Certificate"
+                        "value": "MaturityBackend-dev/BackendVPC"
                       }
-                    ],
-                    "validationMethod": "DNS"
+                    ]
                   }
                 },
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_certificatemanager.CfnCertificate",
-                  "version": "2.87.0"
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPC",
+                  "version": "2.108.0"
                 }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_certificatemanager.Certificate",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendBucket": {
-            "id": "FrontendBucket",
-            "path": "MaturityApp-Prod/FrontendBucket",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Prod/FrontendBucket/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
-                  "aws:cdk:cloudformation:props": {
-                    "bucketName": "maturity-frontend-prod-637423285771",
-                    "publicAccessBlockConfiguration": {
-                      "blockPublicAcls": true,
-                      "blockPublicPolicy": true,
-                      "ignorePublicAcls": true,
-                      "restrictPublicBuckets": true
-                    },
-                    "tags": [
-                      {
-                        "key": "aws-cdk:auto-delete-objects",
-                        "value": "true"
+              },
+              "publicSubnet1": {
+                "id": "publicSubnet1",
+                "path": "MaturityBackend-dev/BackendVPC/publicSubnet1",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1a",
+                        "cidrBlock": "10.0.0.0/24",
+                        "mapPublicIpOnLaunch": true,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "public"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Public"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
                       }
-                    ],
-                    "websiteConfiguration": {
-                      "indexDocument": "index.html",
-                      "errorDocument": "index.html"
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCpublicSubnet1RouteTable9EC3C63B"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "DefaultRoute": {
+                    "id": "DefaultRoute",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/DefaultRoute",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
+                      "aws:cdk:cloudformation:props": {
+                        "destinationCidrBlock": "0.0.0.0/0",
+                        "gatewayId": {
+                          "Ref": "BackendVPCIGWBDB487F3"
+                        },
+                        "routeTableId": {
+                          "Ref": "BackendVPCpublicSubnet1RouteTable9EC3C63B"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "EIP": {
+                    "id": "EIP",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/EIP",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::EIP",
+                      "aws:cdk:cloudformation:props": {
+                        "domain": "vpc",
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnEIP",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "NATGateway": {
+                    "id": "NATGateway",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet1/NATGateway",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::NatGateway",
+                      "aws:cdk:cloudformation:props": {
+                        "allocationId": {
+                          "Fn::GetAtt": [
+                            "BackendVPCpublicSubnet1EIPC30B88B9",
+                            "AllocationId"
+                          ]
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+                        },
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnNatGateway",
+                      "version": "2.108.0"
                     }
                   }
                 },
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3.CfnBucket",
-                  "version": "2.87.0"
+                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
+                  "version": "2.108.0"
                 }
               },
-              "Policy": {
-                "id": "Policy",
-                "path": "MaturityApp-Prod/FrontendBucket/Policy",
+              "publicSubnet2": {
+                "id": "publicSubnet2",
+                "path": "MaturityBackend-dev/BackendVPC/publicSubnet2",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet2/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1b",
+                        "cidrBlock": "10.0.1.0/24",
+                        "mapPublicIpOnLaunch": true,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "public"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Public"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet2/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/publicSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCpublicSubnet2RouteTable86F66152"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCpublicSubnet2Subnet9A5C2AEA"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "DefaultRoute": {
+                    "id": "DefaultRoute",
+                    "path": "MaturityBackend-dev/BackendVPC/publicSubnet2/DefaultRoute",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
+                      "aws:cdk:cloudformation:props": {
+                        "destinationCidrBlock": "0.0.0.0/0",
+                        "gatewayId": {
+                          "Ref": "BackendVPCIGWBDB487F3"
+                        },
+                        "routeTableId": {
+                          "Ref": "BackendVPCpublicSubnet2RouteTable86F66152"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.PublicSubnet",
+                  "version": "2.108.0"
+                }
+              },
+              "privateSubnet1": {
+                "id": "privateSubnet1",
+                "path": "MaturityBackend-dev/BackendVPC/privateSubnet1",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet1/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1a",
+                        "cidrBlock": "10.0.2.0/24",
+                        "mapPublicIpOnLaunch": false,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "private"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Private"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/privateSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet1/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/privateSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCprivateSubnet1RouteTable27CC2AF4"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCprivateSubnet1Subnet67E2236E"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "DefaultRoute": {
+                    "id": "DefaultRoute",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet1/DefaultRoute",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
+                      "aws:cdk:cloudformation:props": {
+                        "destinationCidrBlock": "0.0.0.0/0",
+                        "natGatewayId": {
+                          "Ref": "BackendVPCpublicSubnet1NATGateway61BCF2F3"
+                        },
+                        "routeTableId": {
+                          "Ref": "BackendVPCprivateSubnet1RouteTable27CC2AF4"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
+                  "version": "2.108.0"
+                }
+              },
+              "privateSubnet2": {
+                "id": "privateSubnet2",
+                "path": "MaturityBackend-dev/BackendVPC/privateSubnet2",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet2/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1b",
+                        "cidrBlock": "10.0.3.0/24",
+                        "mapPublicIpOnLaunch": false,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "private"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Private"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/privateSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet2/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/privateSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCprivateSubnet2RouteTableB699B6EA"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCprivateSubnet2SubnetA60CAE2F"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "DefaultRoute": {
+                    "id": "DefaultRoute",
+                    "path": "MaturityBackend-dev/BackendVPC/privateSubnet2/DefaultRoute",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Route",
+                      "aws:cdk:cloudformation:props": {
+                        "destinationCidrBlock": "0.0.0.0/0",
+                        "natGatewayId": {
+                          "Ref": "BackendVPCpublicSubnet1NATGateway61BCF2F3"
+                        },
+                        "routeTableId": {
+                          "Ref": "BackendVPCprivateSubnet2RouteTableB699B6EA"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRoute",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
+                  "version": "2.108.0"
+                }
+              },
+              "databaseSubnet1": {
+                "id": "databaseSubnet1",
+                "path": "MaturityBackend-dev/BackendVPC/databaseSubnet1",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1a",
+                        "cidrBlock": "10.0.4.0/28",
+                        "mapPublicIpOnLaunch": false,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "database"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Isolated"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/databaseSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/databaseSubnet1"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCdatabaseSubnet1RouteTable89DBED06"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCdatabaseSubnet1Subnet263DE46D"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
+                  "version": "2.108.0"
+                }
+              },
+              "databaseSubnet2": {
+                "id": "databaseSubnet2",
+                "path": "MaturityBackend-dev/BackendVPC/databaseSubnet2",
+                "children": {
+                  "Subnet": {
+                    "id": "Subnet",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/Subnet",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
+                      "aws:cdk:cloudformation:props": {
+                        "availabilityZone": "eu-west-1b",
+                        "cidrBlock": "10.0.4.16/28",
+                        "mapPublicIpOnLaunch": false,
+                        "tags": [
+                          {
+                            "key": "aws-cdk:subnet-name",
+                            "value": "database"
+                          },
+                          {
+                            "key": "aws-cdk:subnet-type",
+                            "value": "Isolated"
+                          },
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/databaseSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnet",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Acl": {
+                    "id": "Acl",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/Acl",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTable": {
+                    "id": "RouteTable",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTable",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
+                      "aws:cdk:cloudformation:props": {
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "MaturityBackend-dev/BackendVPC/databaseSubnet2"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "BackendVPC5F3A56B6"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnRouteTable",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "RouteTableAssociation": {
+                    "id": "RouteTableAssociation",
+                    "path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTableAssociation",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
+                      "aws:cdk:cloudformation:props": {
+                        "routeTableId": {
+                          "Ref": "BackendVPCdatabaseSubnet2RouteTableEDB40AEF"
+                        },
+                        "subnetId": {
+                          "Ref": "BackendVPCdatabaseSubnet2Subnet50DE5D5A"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSubnetRouteTableAssociation",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.PrivateSubnet",
+                  "version": "2.108.0"
+                }
+              },
+              "IGW": {
+                "id": "IGW",
+                "path": "MaturityBackend-dev/BackendVPC/IGW",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::InternetGateway",
+                  "aws:cdk:cloudformation:props": {
+                    "tags": [
+                      {
+                        "key": "Name",
+                        "value": "MaturityBackend-dev/BackendVPC"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnInternetGateway",
+                  "version": "2.108.0"
+                }
+              },
+              "VPCGW": {
+                "id": "VPCGW",
+                "path": "MaturityBackend-dev/BackendVPC/VPCGW",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::VPCGatewayAttachment",
+                  "aws:cdk:cloudformation:props": {
+                    "internetGatewayId": {
+                      "Ref": "BackendVPCIGWBDB487F3"
+                    },
+                    "vpcId": {
+                      "Ref": "BackendVPC5F3A56B6"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnVPCGatewayAttachment",
+                  "version": "2.108.0"
+                }
+              },
+              "RestrictDefaultSecurityGroupCustomResource": {
+                "id": "RestrictDefaultSecurityGroupCustomResource",
+                "path": "MaturityBackend-dev/BackendVPC/RestrictDefaultSecurityGroupCustomResource",
+                "children": {
+                  "Default": {
+                    "id": "Default",
+                    "path": "MaturityBackend-dev/BackendVPC/RestrictDefaultSecurityGroupCustomResource/Default",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnResource",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CustomResource",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ec2.Vpc",
+              "version": "2.108.0"
+            }
+          },
+          "Custom::VpcRestrictDefaultSGCustomResourceProvider": {
+            "id": "Custom::VpcRestrictDefaultSGCustomResourceProvider",
+            "path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider",
+            "children": {
+              "Staging": {
+                "id": "Staging",
+                "path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Staging",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.AssetStaging",
+                  "version": "2.108.0"
+                }
+              },
+              "Role": {
+                "id": "Role",
+                "path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.108.0"
+                }
+              },
+              "Handler": {
+                "id": "Handler",
+                "path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CustomResourceProvider",
+              "version": "2.108.0"
+            }
+          },
+          "DatabaseSG": {
+            "id": "DatabaseSG",
+            "path": "MaturityBackend-dev/DatabaseSG",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/DatabaseSG/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "groupDescription": "Security group for RDS database",
+                    "securityGroupEgress": [
+                      {
+                        "cidrIp": "255.255.255.255/32",
+                        "description": "Disallow all traffic",
+                        "ipProtocol": "icmp",
+                        "fromPort": 252,
+                        "toPort": 86
+                      }
+                    ],
+                    "vpcId": {
+                      "Ref": "BackendVPC5F3A56B6"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                  "version": "2.108.0"
+                }
+              },
+              "from MaturityBackenddevApplicationSGCCE6A93E:3306": {
+                "id": "from MaturityBackenddevApplicationSGCCE6A93E:3306",
+                "path": "MaturityBackend-dev/DatabaseSG/from MaturityBackenddevApplicationSGCCE6A93E:3306",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "Allow MySQL traffic from application",
+                    "fromPort": 3306,
+                    "groupId": {
+                      "Fn::GetAtt": [
+                        "DatabaseSG2A23C222",
+                        "GroupId"
+                      ]
+                    },
+                    "ipProtocol": "tcp",
+                    "sourceSecurityGroupId": {
+                      "Fn::GetAtt": [
+                        "ApplicationSGE6EB7629",
+                        "GroupId"
+                      ]
+                    },
+                    "toPort": 3306
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupIngress",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+              "version": "2.108.0"
+            }
+          },
+          "ApplicationSG": {
+            "id": "ApplicationSG",
+            "path": "MaturityBackend-dev/ApplicationSG",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/ApplicationSG/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "groupDescription": "Security group for ECS application",
+                    "securityGroupEgress": [
+                      {
+                        "cidrIp": "0.0.0.0/0",
+                        "description": "Allow all outbound traffic by default",
+                        "ipProtocol": "-1"
+                      }
+                    ],
+                    "vpcId": {
+                      "Ref": "BackendVPC5F3A56B6"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                  "version": "2.108.0"
+                }
+              },
+              "from MaturityBackenddevALBSGA910B7D1:3000": {
+                "id": "from MaturityBackenddevALBSGA910B7D1:3000",
+                "path": "MaturityBackend-dev/ApplicationSG/from MaturityBackenddevALBSGA910B7D1:3000",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "Allow traffic from ALB",
+                    "fromPort": 3000,
+                    "groupId": {
+                      "Fn::GetAtt": [
+                        "ApplicationSGE6EB7629",
+                        "GroupId"
+                      ]
+                    },
+                    "ipProtocol": "tcp",
+                    "sourceSecurityGroupId": {
+                      "Fn::GetAtt": [
+                        "ALBSGB173E466",
+                        "GroupId"
+                      ]
+                    },
+                    "toPort": 3000
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupIngress",
+                  "version": "2.108.0"
+                }
+              },
+              "from MaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B:3000": {
+                "id": "from MaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B:3000",
+                "path": "MaturityBackend-dev/ApplicationSG/from MaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B:3000",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "Load balancer to target",
+                    "fromPort": 3000,
+                    "groupId": {
+                      "Fn::GetAtt": [
+                        "ApplicationSGE6EB7629",
+                        "GroupId"
+                      ]
+                    },
+                    "ipProtocol": "tcp",
+                    "sourceSecurityGroupId": {
+                      "Fn::GetAtt": [
+                        "BackendServiceLBSecurityGroup2B9BA648",
+                        "GroupId"
+                      ]
+                    },
+                    "toPort": 3000
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupIngress",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+              "version": "2.108.0"
+            }
+          },
+          "ALBSG": {
+            "id": "ALBSG",
+            "path": "MaturityBackend-dev/ALBSG",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/ALBSG/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "groupDescription": "Security group for Application Load Balancer",
+                    "securityGroupEgress": [
+                      {
+                        "cidrIp": "0.0.0.0/0",
+                        "description": "Allow all outbound traffic by default",
+                        "ipProtocol": "-1"
+                      }
+                    ],
+                    "securityGroupIngress": [
+                      {
+                        "cidrIp": "0.0.0.0/0",
+                        "ipProtocol": "tcp",
+                        "fromPort": 443,
+                        "toPort": 443,
+                        "description": "Allow HTTPS traffic"
+                      }
+                    ],
+                    "vpcId": {
+                      "Ref": "BackendVPC5F3A56B6"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+              "version": "2.108.0"
+            }
+          },
+          "DatabaseSecret": {
+            "id": "DatabaseSecret",
+            "path": "MaturityBackend-dev/DatabaseSecret",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/DatabaseSecret/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SecretsManager::Secret",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "Database credentials for Maturity Assessment",
+                    "generateSecretString": {
+                      "secretStringTemplate": "{\"username\":\"admin\"}",
+                      "generateStringKey": "password",
+                      "excludeCharacters": "\"@/\\'",
+                      "passwordLength": 32
+                    },
+                    "name": "maturity-db-dev"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_secretsmanager.CfnSecret",
+                  "version": "2.108.0"
+                }
+              },
+              "Attachment": {
+                "id": "Attachment",
+                "path": "MaturityBackend-dev/DatabaseSecret/Attachment",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "MaturityApp-Prod/FrontendBucket/Policy/Resource",
+                    "path": "MaturityBackend-dev/DatabaseSecret/Attachment/Resource",
                     "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
+                      "aws:cdk:cloudformation:type": "AWS::SecretsManager::SecretTargetAttachment",
                       "aws:cdk:cloudformation:props": {
-                        "bucket": {
-                          "Ref": "FrontendBucketEFE2E19C"
+                        "secretId": {
+                          "Ref": "DatabaseSecret86DBB7B3"
                         },
-                        "policyDocument": {
+                        "targetId": {
+                          "Ref": "DatabaseB269D8BB"
+                        },
+                        "targetType": "AWS::RDS::DBInstance"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_secretsmanager.CfnSecretTargetAttachment",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_secretsmanager.SecretTargetAttachment",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_secretsmanager.Secret",
+              "version": "2.108.0"
+            }
+          },
+          "JWTSecret": {
+            "id": "JWTSecret",
+            "path": "MaturityBackend-dev/JWTSecret",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/JWTSecret/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SecretsManager::Secret",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "JWT Secret for Maturity Assessment",
+                    "generateSecretString": {
+                      "passwordLength": 64,
+                      "excludeCharacters": "\"@/\\'"
+                    },
+                    "name": "maturity-jwt-dev"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_secretsmanager.CfnSecret",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_secretsmanager.Secret",
+              "version": "2.108.0"
+            }
+          },
+          "Database": {
+            "id": "Database",
+            "path": "MaturityBackend-dev/Database",
+            "children": {
+              "SubnetGroup": {
+                "id": "SubnetGroup",
+                "path": "MaturityBackend-dev/Database/SubnetGroup",
+                "children": {
+                  "Default": {
+                    "id": "Default",
+                    "path": "MaturityBackend-dev/Database/SubnetGroup/Default",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::RDS::DBSubnetGroup",
+                      "aws:cdk:cloudformation:props": {
+                        "dbSubnetGroupDescription": "Subnet group for Database database",
+                        "subnetIds": [
+                          {
+                            "Ref": "BackendVPCdatabaseSubnet1Subnet263DE46D"
+                          },
+                          {
+                            "Ref": "BackendVPCdatabaseSubnet2Subnet50DE5D5A"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_rds.CfnDBSubnetGroup",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_rds.SubnetGroup",
+                  "version": "2.108.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/Database/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::RDS::DBInstance",
+                  "aws:cdk:cloudformation:props": {
+                    "allocatedStorage": "100",
+                    "backupRetentionPeriod": 7,
+                    "copyTagsToSnapshot": true,
+                    "dbInstanceClass": "db.t3.micro",
+                    "dbName": "maturity_assessment",
+                    "dbSubnetGroupName": {
+                      "Ref": "DatabaseSubnetGroup7D60F180"
+                    },
+                    "deletionProtection": false,
+                    "engine": "mysql",
+                    "engineVersion": "8.0.35",
+                    "masterUsername": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "{{resolve:secretsmanager:",
+                          {
+                            "Ref": "DatabaseSecret86DBB7B3"
+                          },
+                          ":SecretString:username::}}"
+                        ]
+                      ]
+                    },
+                    "masterUserPassword": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "{{resolve:secretsmanager:",
+                          {
+                            "Ref": "DatabaseSecret86DBB7B3"
+                          },
+                          ":SecretString:password::}}"
+                        ]
+                      ]
+                    },
+                    "publiclyAccessible": false,
+                    "storageEncrypted": true,
+                    "storageType": "gp2",
+                    "vpcSecurityGroups": [
+                      {
+                        "Fn::GetAtt": [
+                          "DatabaseSG2A23C222",
+                          "GroupId"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_rds.CfnDBInstance",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_rds.DatabaseInstance",
+              "version": "2.108.0"
+            }
+          },
+          "BackendRepository": {
+            "id": "BackendRepository",
+            "path": "MaturityBackend-dev/BackendRepository",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ecr.RepositoryBase",
+              "version": "2.108.0"
+            }
+          },
+          "BackendCluster": {
+            "id": "BackendCluster",
+            "path": "MaturityBackend-dev/BackendCluster",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/BackendCluster/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ECS::Cluster",
+                  "aws:cdk:cloudformation:props": {
+                    "clusterName": "maturity-backend-dev",
+                    "clusterSettings": [
+                      {
+                        "name": "containerInsights",
+                        "value": "enabled"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ecs.CfnCluster",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ecs.Cluster",
+              "version": "2.108.0"
+            }
+          },
+          "BackendLogGroup": {
+            "id": "BackendLogGroup",
+            "path": "MaturityBackend-dev/BackendLogGroup",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/BackendLogGroup/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "logGroupName": "/ecs/maturity-backend-dev",
+                    "retentionInDays": 14
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_logs.CfnLogGroup",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_logs.LogGroup",
+              "version": "2.108.0"
+            }
+          },
+          "BackendTaskDefinition": {
+            "id": "BackendTaskDefinition",
+            "path": "MaturityBackend-dev/BackendTaskDefinition",
+            "children": {
+              "TaskRole": {
+                "id": "TaskRole",
+                "path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole",
+                "children": {
+                  "ImportTaskRole": {
+                    "id": "ImportTaskRole",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/ImportTaskRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
                           "Statement": [
                             {
-                              "Action": [
-                                "s3:DeleteObject*",
-                                "s3:GetBucket*",
-                                "s3:List*"
-                              ],
+                              "Action": "sts:AssumeRole",
                               "Effect": "Allow",
                               "Principal": {
-                                "AWS": {
-                                  "Fn::GetAtt": [
-                                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                                    "Arn"
-                                  ]
-                                }
-                              },
-                              "Resource": [
-                                {
-                                  "Fn::GetAtt": [
-                                    "FrontendBucketEFE2E19C",
-                                    "Arn"
-                                  ]
-                                },
-                                {
-                                  "Fn::Join": [
-                                    "",
-                                    [
-                                      {
-                                        "Fn::GetAtt": [
-                                          "FrontendBucketEFE2E19C",
-                                          "Arn"
-                                        ]
-                                      },
-                                      "/*"
-                                    ]
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "Action": [
-                                "s3:GetBucket*",
-                                "s3:GetObject*",
-                                "s3:List*"
-                              ],
-                              "Effect": "Allow",
-                              "Principal": {
-                                "CanonicalUser": {
-                                  "Fn::GetAtt": [
-                                    "OAIE1EFC67F",
-                                    "S3CanonicalUserId"
-                                  ]
-                                }
-                              },
-                              "Resource": [
-                                {
-                                  "Fn::GetAtt": [
-                                    "FrontendBucketEFE2E19C",
-                                    "Arn"
-                                  ]
-                                },
-                                {
-                                  "Fn::Join": [
-                                    "",
-                                    [
-                                      {
-                                        "Fn::GetAtt": [
-                                          "FrontendBucketEFE2E19C",
-                                          "Arn"
-                                        ]
-                                      },
-                                      "/*"
-                                    ]
-                                  ]
-                                }
-                              ]
+                                "Service": "ecs-tasks.amazonaws.com"
+                              }
                             }
                           ],
                           "Version": "2012-10-17"
@@ -1886,291 +1318,898 @@
                       }
                     },
                     "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.CfnBucketPolicy",
-                      "version": "2.87.0"
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.108.0"
                     }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3.BucketPolicy",
-                  "version": "2.87.0"
-                }
-              },
-              "AutoDeleteObjectsCustomResource": {
-                "id": "AutoDeleteObjectsCustomResource",
-                "path": "MaturityApp-Prod/FrontendBucket/AutoDeleteObjectsCustomResource",
-                "children": {
-                  "Default": {
-                    "id": "Default",
-                    "path": "MaturityApp-Prod/FrontendBucket/AutoDeleteObjectsCustomResource/Default",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.CfnResource",
-                      "version": "2.87.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CustomResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_s3.Bucket",
-              "version": "2.87.0"
-            }
-          },
-          "Custom::S3AutoDeleteObjectsCustomResourceProvider": {
-            "id": "Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "children": {
-              "Staging": {
-                "id": "Staging",
-                "path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.AssetStaging",
-                  "version": "2.87.0"
-                }
-              },
-              "Role": {
-                "id": "Role",
-                "path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              },
-              "Handler": {
-                "id": "Handler",
-                "path": "MaturityApp-Prod/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CustomResourceProvider",
-              "version": "2.87.0"
-            }
-          },
-          "OAI": {
-            "id": "OAI",
-            "path": "MaturityApp-Prod/OAI",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Prod/OAI/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
-                  "aws:cdk:cloudformation:props": {
-                    "cloudFrontOriginAccessIdentityConfig": {
-                      "comment": {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "OAI for ",
-                            {
-                              "Ref": "FrontendBucketEFE2E19C"
-                            }
-                          ]
-                        ]
-                      }
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnCloudFrontOriginAccessIdentity",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_cloudfront.OriginAccessIdentity",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendDistribution": {
-            "id": "FrontendDistribution",
-            "path": "MaturityApp-Prod/FrontendDistribution",
-            "children": {
-              "Origin1": {
-                "id": "Origin1",
-                "path": "MaturityApp-Prod/FrontendDistribution/Origin1",
-                "constructInfo": {
-                  "fqn": "constructs.Construct",
-                  "version": "10.4.2"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Prod/FrontendDistribution/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
-                  "aws:cdk:cloudformation:props": {
-                    "distributionConfig": {
-                      "enabled": true,
-                      "origins": [
-                        {
-                          "domainName": {
-                            "Fn::Select": [
-                              2,
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "secretsmanager:DescribeSecret",
+                                    "secretsmanager:GetSecretValue"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Ref": "DatabaseSecret86DBB7B3"
+                                    },
+                                    {
+                                      "Ref": "JWTSecretF6F1CBF0"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2",
+                            "roles": [
                               {
-                                "Fn::Split": [
-                                  "/",
+                                "Ref": "BackendTaskDefinitionTaskRoleE757CE00"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.108.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "MaturityBackend-dev/BackendTaskDefinition/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ECS::TaskDefinition",
+                  "aws:cdk:cloudformation:props": {
+                    "containerDefinitions": [
+                      {
+                        "essential": true,
+                        "image": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "637423285771.dkr.ecr.eu-west-1.",
+                              {
+                                "Ref": "AWS::URLSuffix"
+                              },
+                              "/maturity-backend-dev:latest"
+                            ]
+                          ]
+                        },
+                        "name": "backend",
+                        "portMappings": [
+                          {
+                            "containerPort": 3000,
+                            "protocol": "tcp"
+                          }
+                        ],
+                        "logConfiguration": {
+                          "logDriver": "awslogs",
+                          "options": {
+                            "awslogs-group": {
+                              "Ref": "BackendLogGroupDA10F1B2"
+                            },
+                            "awslogs-stream-prefix": "backend",
+                            "awslogs-region": "eu-west-1"
+                          }
+                        },
+                        "environment": [
+                          {
+                            "name": "NODE_ENV",
+                            "value": "production"
+                          },
+                          {
+                            "name": "PORT",
+                            "value": "3000"
+                          },
+                          {
+                            "name": "DB_HOST",
+                            "value": {
+                              "Fn::GetAtt": [
+                                "DatabaseB269D8BB",
+                                "Endpoint.Address"
+                              ]
+                            }
+                          },
+                          {
+                            "name": "DB_PORT",
+                            "value": "3306"
+                          },
+                          {
+                            "name": "DB_NAME",
+                            "value": "maturity_assessment"
+                          },
+                          {
+                            "name": "FRONTEND_URL",
+                            "value": "https://dev-maturity.e-dsin.fr"
+                          },
+                          {
+                            "name": "LOG_LEVEL",
+                            "value": "info"
+                          },
+                          {
+                            "name": "DB_PASSWORD_FALLBACK",
+                            "value": ""
+                          },
+                          {
+                            "name": "ECS_ENABLE_CONTAINER_METADATA",
+                            "value": "true"
+                          }
+                        ],
+                        "secrets": [
+                          {
+                            "name": "DB_USER",
+                            "valueFrom": {
+                              "Fn::Join": [
+                                "",
+                                [
                                   {
+                                    "Ref": "DatabaseSecret86DBB7B3"
+                                  },
+                                  ":username::"
+                                ]
+                              ]
+                            }
+                          },
+                          {
+                            "name": "DB_PASSWORD",
+                            "valueFrom": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  {
+                                    "Ref": "DatabaseSecret86DBB7B3"
+                                  },
+                                  ":password::"
+                                ]
+                              ]
+                            }
+                          },
+                          {
+                            "name": "JWT_SECRET",
+                            "valueFrom": {
+                              "Ref": "JWTSecretF6F1CBF0"
+                            }
+                          }
+                        ],
+                        "healthCheck": {
+                          "command": [
+                            "CMD-SHELL",
+                            "curl -f http://localhost:3000/health || exit 1"
+                          ],
+                          "interval": 60,
+                          "retries": 3,
+                          "startPeriod": 300,
+                          "timeout": 10
+                        }
+                      }
+                    ],
+                    "cpu": "256",
+                    "executionRoleArn": {
+                      "Fn::GetAtt": [
+                        "BackendTaskDefinitionExecutionRoleDA72B768",
+                        "Arn"
+                      ]
+                    },
+                    "family": "MaturityBackenddevBackendTaskDefinitionF6F25262",
+                    "memory": "512",
+                    "networkMode": "awsvpc",
+                    "requiresCompatibilities": [
+                      "FARGATE"
+                    ],
+                    "taskRoleArn": {
+                      "Fn::GetAtt": [
+                        "BackendTaskDefinitionTaskRoleE757CE00",
+                        "Arn"
+                      ]
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ecs.CfnTaskDefinition",
+                  "version": "2.108.0"
+                }
+              },
+              "backend": {
+                "id": "backend",
+                "path": "MaturityBackend-dev/BackendTaskDefinition/backend",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ecs.ContainerDefinition",
+                  "version": "2.108.0"
+                }
+              },
+              "ExecutionRole": {
+                "id": "ExecutionRole",
+                "path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole",
+                "children": {
+                  "ImportExecutionRole": {
+                    "id": "ImportExecutionRole",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/ImportExecutionRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "ecs-tasks.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "ecr:BatchCheckLayerAvailability",
+                                    "ecr:BatchGetImage",
+                                    "ecr:GetDownloadUrlForLayer"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "arn:aws:ecr:eu-west-1:637423285771:repository/maturity-backend-dev"
+                                },
+                                {
+                                  "Action": "ecr:GetAuthorizationToken",
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                },
+                                {
+                                  "Action": [
+                                    "logs:CreateLogStream",
+                                    "logs:PutLogEvents"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": {
                                     "Fn::GetAtt": [
-                                      "FrontendBucketEFE2E19C",
-                                      "WebsiteURL"
+                                      "BackendLogGroupDA10F1B2",
+                                      "Arn"
                                     ]
                                   }
+                                },
+                                {
+                                  "Action": [
+                                    "secretsmanager:DescribeSecret",
+                                    "secretsmanager:GetSecretValue"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Ref": "DatabaseSecret86DBB7B3"
+                                    },
+                                    {
+                                      "Ref": "JWTSecretF6F1CBF0"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "BackendTaskDefinitionExecutionRoleDefaultPolicy0750C44A",
+                            "roles": [
+                              {
+                                "Ref": "BackendTaskDefinitionExecutionRoleDA72B768"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.108.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_ecs.FargateTaskDefinition",
+              "version": "2.108.0"
+            }
+          },
+          "BackendService": {
+            "id": "BackendService",
+            "path": "MaturityBackend-dev/BackendService",
+            "children": {
+              "LB": {
+                "id": "LB",
+                "path": "MaturityBackend-dev/BackendService/LB",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MaturityBackend-dev/BackendService/LB/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+                      "aws:cdk:cloudformation:props": {
+                        "loadBalancerAttributes": [
+                          {
+                            "key": "deletion_protection.enabled",
+                            "value": "false"
+                          }
+                        ],
+                        "scheme": "internet-facing",
+                        "securityGroups": [
+                          {
+                            "Fn::GetAtt": [
+                              "BackendServiceLBSecurityGroup2B9BA648",
+                              "GroupId"
+                            ]
+                          }
+                        ],
+                        "subnets": [
+                          {
+                            "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+                          },
+                          {
+                            "Ref": "BackendVPCpublicSubnet2Subnet9A5C2AEA"
+                          }
+                        ],
+                        "type": "application"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnLoadBalancer",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "SecurityGroup": {
+                    "id": "SecurityGroup",
+                    "path": "MaturityBackend-dev/BackendService/LB/SecurityGroup",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MaturityBackend-dev/BackendService/LB/SecurityGroup/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                          "aws:cdk:cloudformation:props": {
+                            "groupDescription": "Automatically created Security Group for ELB MaturityBackenddevBackendServiceLB7B39D85E",
+                            "securityGroupIngress": [
+                              {
+                                "cidrIp": "0.0.0.0/0",
+                                "ipProtocol": "tcp",
+                                "fromPort": 443,
+                                "toPort": 443,
+                                "description": "Allow from anyone on port 443"
+                              },
+                              {
+                                "cidrIp": "0.0.0.0/0",
+                                "ipProtocol": "tcp",
+                                "fromPort": 80,
+                                "toPort": 80,
+                                "description": "Allow from anyone on port 80"
+                              }
+                            ],
+                            "vpcId": {
+                              "Ref": "BackendVPC5F3A56B6"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                          "version": "2.108.0"
+                        }
+                      },
+                      "to MaturityBackenddevApplicationSGCCE6A93E:3000": {
+                        "id": "to MaturityBackenddevApplicationSGCCE6A93E:3000",
+                        "path": "MaturityBackend-dev/BackendService/LB/SecurityGroup/to MaturityBackenddevApplicationSGCCE6A93E:3000",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupEgress",
+                          "aws:cdk:cloudformation:props": {
+                            "description": "Load balancer to target",
+                            "destinationSecurityGroupId": {
+                              "Fn::GetAtt": [
+                                "ApplicationSGE6EB7629",
+                                "GroupId"
+                              ]
+                            },
+                            "fromPort": 3000,
+                            "groupId": {
+                              "Fn::GetAtt": [
+                                "BackendServiceLBSecurityGroup2B9BA648",
+                                "GroupId"
+                              ]
+                            },
+                            "ipProtocol": "tcp",
+                            "toPort": 3000
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupEgress",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "PublicListener": {
+                    "id": "PublicListener",
+                    "path": "MaturityBackend-dev/BackendService/LB/PublicListener",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MaturityBackend-dev/BackendService/LB/PublicListener/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::Listener",
+                          "aws:cdk:cloudformation:props": {
+                            "certificates": [
+                              {
+                                "certificateArn": "arn:aws:acm:eu-west-1:637423285771:certificate/cf6a160d-877c-428c-bf0a-8a5f75faabfc"
+                              }
+                            ],
+                            "defaultActions": [
+                              {
+                                "type": "forward",
+                                "targetGroupArn": {
+                                  "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+                                }
+                              }
+                            ],
+                            "loadBalancerArn": {
+                              "Ref": "BackendServiceLB09608E98"
+                            },
+                            "port": 443,
+                            "protocol": "HTTPS"
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnListener",
+                          "version": "2.108.0"
+                        }
+                      },
+                      "ECSGroup": {
+                        "id": "ECSGroup",
+                        "path": "MaturityBackend-dev/BackendService/LB/PublicListener/ECSGroup",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "MaturityBackend-dev/BackendService/LB/PublicListener/ECSGroup/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+                              "aws:cdk:cloudformation:props": {
+                                "healthCheckIntervalSeconds": 30,
+                                "healthCheckPath": "/health",
+                                "healthCheckPort": "3000",
+                                "healthCheckProtocol": "HTTP",
+                                "healthCheckTimeoutSeconds": 10,
+                                "healthyThresholdCount": 2,
+                                "port": 80,
+                                "protocol": "HTTP",
+                                "targetGroupAttributes": [
+                                  {
+                                    "key": "stickiness.enabled",
+                                    "value": "false"
+                                  }
+                                ],
+                                "targetType": "ip",
+                                "unhealthyThresholdCount": 5,
+                                "vpcId": {
+                                  "Ref": "BackendVPC5F3A56B6"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnTargetGroup",
+                              "version": "2.108.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationTargetGroup",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationListener",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "PublicRedirectListener": {
+                    "id": "PublicRedirectListener",
+                    "path": "MaturityBackend-dev/BackendService/LB/PublicRedirectListener",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MaturityBackend-dev/BackendService/LB/PublicRedirectListener/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::Listener",
+                          "aws:cdk:cloudformation:props": {
+                            "defaultActions": [
+                              {
+                                "type": "redirect",
+                                "redirectConfig": {
+                                  "statusCode": "HTTP_301",
+                                  "port": "443",
+                                  "protocol": "HTTPS"
+                                }
+                              }
+                            ],
+                            "loadBalancerArn": {
+                              "Ref": "BackendServiceLB09608E98"
+                            },
+                            "port": 80,
+                            "protocol": "HTTP"
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnListener",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationListener",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationLoadBalancer",
+                  "version": "2.108.0"
+                }
+              },
+              "DNS": {
+                "id": "DNS",
+                "path": "MaturityBackend-dev/BackendService/DNS",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MaturityBackend-dev/BackendService/DNS/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
+                      "aws:cdk:cloudformation:props": {
+                        "aliasTarget": {
+                          "hostedZoneId": {
+                            "Fn::GetAtt": [
+                              "BackendServiceLB09608E98",
+                              "CanonicalHostedZoneID"
+                            ]
+                          },
+                          "dnsName": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "dualstack.",
+                                {
+                                  "Fn::GetAtt": [
+                                    "BackendServiceLB09608E98",
+                                    "DNSName"
+                                  ]
+                                }
+                              ]
+                            ]
+                          }
+                        },
+                        "hostedZoneId": "Z03909371P12UQ4UA00F0",
+                        "name": "api-dev.dev-maturity.e-dsin.fr.",
+                        "type": "A"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_route53.CfnRecordSet",
+                      "version": "2.108.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_route53.ARecord",
+                  "version": "2.108.0"
+                }
+              },
+              "LoadBalancerDNS": {
+                "id": "LoadBalancerDNS",
+                "path": "MaturityBackend-dev/BackendService/LoadBalancerDNS",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.108.0"
+                }
+              },
+              "ServiceURL": {
+                "id": "ServiceURL",
+                "path": "MaturityBackend-dev/BackendService/ServiceURL",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.108.0"
+                }
+              },
+              "Service": {
+                "id": "Service",
+                "path": "MaturityBackend-dev/BackendService/Service",
+                "children": {
+                  "Service": {
+                    "id": "Service",
+                    "path": "MaturityBackend-dev/BackendService/Service/Service",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ECS::Service",
+                      "aws:cdk:cloudformation:props": {
+                        "cluster": {
+                          "Ref": "BackendCluster5086059C"
+                        },
+                        "deploymentConfiguration": {
+                          "maximumPercent": 200,
+                          "minimumHealthyPercent": 50,
+                          "alarms": {
+                            "alarmNames": [],
+                            "enable": false,
+                            "rollback": false
+                          }
+                        },
+                        "desiredCount": 1,
+                        "enableEcsManagedTags": false,
+                        "healthCheckGracePeriodSeconds": 60,
+                        "launchType": "FARGATE",
+                        "loadBalancers": [
+                          {
+                            "targetGroupArn": {
+                              "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+                            },
+                            "containerName": "backend",
+                            "containerPort": 3000
+                          }
+                        ],
+                        "networkConfiguration": {
+                          "awsvpcConfiguration": {
+                            "assignPublicIp": "DISABLED",
+                            "subnets": [
+                              {
+                                "Ref": "BackendVPCprivateSubnet1Subnet67E2236E"
+                              },
+                              {
+                                "Ref": "BackendVPCprivateSubnet2SubnetA60CAE2F"
+                              }
+                            ],
+                            "securityGroups": [
+                              {
+                                "Fn::GetAtt": [
+                                  "ApplicationSGE6EB7629",
+                                  "GroupId"
                                 ]
                               }
                             ]
-                          },
-                          "id": "MaturityAppProdFrontendDistributionOrigin117D8D006",
-                          "customOriginConfig": {
-                            "originSslProtocols": [
-                              "TLSv1.2"
-                            ],
-                            "originProtocolPolicy": "http-only"
                           }
-                        }
-                      ],
-                      "defaultCacheBehavior": {
-                        "pathPattern": "*",
-                        "targetOriginId": "MaturityAppProdFrontendDistributionOrigin117D8D006",
-                        "cachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
-                        "compress": true,
-                        "viewerProtocolPolicy": "redirect-to-https"
-                      },
-                      "aliases": [
-                        "maturity.e-dsin.fr"
-                      ],
-                      "customErrorResponses": [
-                        {
-                          "errorCode": 404,
-                          "responseCode": 200,
-                          "responsePagePath": "/index.html"
-                        }
-                      ],
-                      "defaultRootObject": "index.html",
-                      "httpVersion": "http2",
-                      "ipv6Enabled": true,
-                      "viewerCertificate": {
-                        "acmCertificateArn": {
-                          "Ref": "Certificate4E7ABB08"
                         },
-                        "minimumProtocolVersion": "TLSv1.2_2021",
-                        "sslSupportMethod": "sni-only"
+                        "serviceName": "maturity-backend-dev",
+                        "taskDefinition": {
+                          "Ref": "BackendTaskDefinitionEC224DE6"
+                        }
                       }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ecs.CfnService",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "ScalingRole": {
+                    "id": "ScalingRole",
+                    "path": "MaturityBackend-dev/BackendService/Service/ScalingRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.108.0"
+                    }
+                  },
+                  "TaskCount": {
+                    "id": "TaskCount",
+                    "path": "MaturityBackend-dev/BackendService/Service/TaskCount",
+                    "children": {
+                      "Target": {
+                        "id": "Target",
+                        "path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApplicationAutoScaling::ScalableTarget",
+                              "aws:cdk:cloudformation:props": {
+                                "maxCapacity": 2,
+                                "minCapacity": 1,
+                                "resourceId": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "service/",
+                                      {
+                                        "Ref": "BackendCluster5086059C"
+                                      },
+                                      "/",
+                                      {
+                                        "Fn::GetAtt": [
+                                          "BackendService2147DAF9",
+                                          "Name"
+                                        ]
+                                      }
+                                    ]
+                                  ]
+                                },
+                                "roleArn": "arn:aws:iam::637423285771:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+                                "scalableDimension": "ecs:service:DesiredCount",
+                                "serviceNamespace": "ecs"
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_applicationautoscaling.CfnScalableTarget",
+                              "version": "2.108.0"
+                            }
+                          },
+                          "CpuScaling": {
+                            "id": "CpuScaling",
+                            "path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target/CpuScaling",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target/CpuScaling/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+                                  "aws:cdk:cloudformation:props": {
+                                    "policyName": "MaturityBackenddevBackendServiceTaskCountTargetCpuScalingE2FAF5AB",
+                                    "policyType": "TargetTrackingScaling",
+                                    "scalingTargetId": {
+                                      "Ref": "BackendServiceTaskCountTarget2134EDB2"
+                                    },
+                                    "targetTrackingScalingPolicyConfiguration": {
+                                      "predefinedMetricSpecification": {
+                                        "predefinedMetricType": "ECSServiceAverageCPUUtilization"
+                                      },
+                                      "scaleInCooldown": 300,
+                                      "scaleOutCooldown": 300,
+                                      "targetValue": 70
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_applicationautoscaling.CfnScalingPolicy",
+                                  "version": "2.108.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_applicationautoscaling.TargetTrackingScalingPolicy",
+                              "version": "2.108.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_applicationautoscaling.ScalableTarget",
+                          "version": "2.108.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ecs.ScalableTaskCount",
+                      "version": "2.108.0"
                     }
                   }
                 },
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnDistribution",
-                  "version": "2.87.0"
+                  "fqn": "aws-cdk-lib.aws_ecs.FargateService",
+                  "version": "2.108.0"
                 }
               }
             },
             "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_cloudfront.Distribution",
-              "version": "2.87.0"
+              "fqn": "aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService",
+              "version": "2.108.0"
             }
           },
-          "AliasRecord": {
-            "id": "AliasRecord",
-            "path": "MaturityApp-Prod/AliasRecord",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "MaturityApp-Prod/AliasRecord/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
-                  "aws:cdk:cloudformation:props": {
-                    "name": "dev-maturity.e-dsin.fr.",
-                    "type": "A",
-                    "aliasTarget": {
-                      "hostedZoneId": {
-                        "Fn::FindInMap": [
-                          "AWSCloudFrontPartitionHostedZoneIdMap",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          "zoneId"
-                        ]
-                      },
-                      "dnsName": {
-                        "Fn::GetAtt": [
-                          "FrontendDistributionE6EAF405",
-                          "DomainName"
-                        ]
-                      }
-                    },
-                    "hostedZoneId": "Z03909371P12UQ4UA00F0"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_route53.CfnRecordSet",
-                  "version": "2.87.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_route53.ARecord",
-              "version": "2.87.0"
-            }
-          },
-          "AWSCloudFrontPartitionHostedZoneIdMap": {
-            "id": "AWSCloudFrontPartitionHostedZoneIdMap",
-            "path": "MaturityApp-Prod/AWSCloudFrontPartitionHostedZoneIdMap",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.CfnMapping",
-              "version": "2.87.0"
-            }
-          },
-          "FrontendURL": {
-            "id": "FrontendURL",
-            "path": "MaturityApp-Prod/FrontendURL",
+          "ApiUrl": {
+            "id": "ApiUrl",
+            "path": "MaturityBackend-dev/ApiUrl",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           },
-          "FrontendBucketName": {
-            "id": "FrontendBucketName",
-            "path": "MaturityApp-Prod/FrontendBucketName",
+          "DatabaseEndpoint": {
+            "id": "DatabaseEndpoint",
+            "path": "MaturityBackend-dev/DatabaseEndpoint",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           },
-          "CloudFrontURL": {
-            "id": "CloudFrontURL",
-            "path": "MaturityApp-Prod/CloudFrontURL",
+          "ECRRepositoryURI": {
+            "id": "ECRRepositoryURI",
+            "path": "MaturityBackend-dev/ECRRepositoryURI",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           },
-          "CertificateArn": {
-            "id": "CertificateArn",
-            "path": "MaturityApp-Prod/CertificateArn",
+          "DatabaseSecretArn": {
+            "id": "DatabaseSecretArn",
+            "path": "MaturityBackend-dev/DatabaseSecretArn",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
-              "version": "2.87.0"
+              "version": "2.108.0"
+            }
+          },
+          "ClusterName": {
+            "id": "ClusterName",
+            "path": "MaturityBackend-dev/ClusterName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.108.0"
+            }
+          },
+          "ServiceName": {
+            "id": "ServiceName",
+            "path": "MaturityBackend-dev/ServiceName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.108.0"
             }
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "MaturityApp-Prod/CDKMetadata",
+            "path": "MaturityBackend-dev/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "MaturityApp-Prod/CDKMetadata/Default",
+                "path": "MaturityBackend-dev/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.87.0"
+                  "version": "2.108.0"
                 }
               }
             },
@@ -2181,24 +2220,24 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "MaturityApp-Prod/BootstrapVersion",
+            "path": "MaturityBackend-dev/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "MaturityApp-Prod/CheckBootstrapVersion",
+            "path": "MaturityBackend-dev/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
-              "version": "2.87.0"
+              "version": "2.108.0"
             }
           }
         },
         "constructInfo": {
           "fqn": "aws-cdk-lib.Stack",
-          "version": "2.87.0"
+          "version": "2.108.0"
         }
       },
       "Tree": {
@@ -2212,7 +2251,7 @@
     },
     "constructInfo": {
       "fqn": "aws-cdk-lib.App",
-      "version": "2.87.0"
+      "version": "2.108.0"
     }
   }
 }

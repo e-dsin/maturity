@@ -34,8 +34,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 // Types
 interface Questionnaire {
   id_questionnaire: string;
-  fonction: string;
-  thematique: string;
+  nom: string;
   description?: string;
   date_creation: string;
   date_modification: string;
@@ -267,7 +266,7 @@ const QuestionnaireDetail: React.FC = () => {
                   <ArrowBackIcon />
                 </IconButton>
                 <Typography component="h1" variant="h5" color="primary">
-                  {questionnaire.fonction || 'Questionnaire'} - {questionnaire.thematique || 'Sans description'}
+                  {questionnaire.nom}
                 </Typography>
               </Box>
               <Button

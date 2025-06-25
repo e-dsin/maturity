@@ -124,6 +124,17 @@ const MaturityModelAdmin: React.FC = () => {
     severity: 'success' as 'success' | 'error' | 'warning' | 'info'
   });
   
+  const [questions, setQuestions] = useState<{ [id_thematique: string]: any[] }>({});
+
+  const loadQuestionsForThematique = async (id_thematique: string) => {
+      try {
+        const data = await api.get(`/questions/thematique/${id_thematique}`);
+        setQuestions((prev) => ({ ...prev, [id_thematique]: data }));
+      } catch (e) {
+        showSnackbar('Erreur chargement des questions', 'error');
+      }
+    };
+
   // États pour les dialogues
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<DialogType>('');
@@ -138,6 +149,11 @@ const MaturityModelAdmin: React.FC = () => {
   useEffect(() => {
     loadFonctions();
   }, []);
+
+  // Charger les questions quand une fonction est chargée
+  useEffect(() => {
+      selectedFonction?.thematiques?.forEach((t) => loadQuestionsForThematique(t.id_thematique));
+    }, [selectedFonction]);
 
   // Fonctions de chargement
   const loadFonctions = async () => {
@@ -191,6 +207,18 @@ const MaturityModelAdmin: React.FC = () => {
   const confirmDelete = (type: string, id: string, name: string) => {
     setItemToDelete({ type, id, name });
     setDeleteConfirmOpen(true);
+  };
+
+  const handleAddQuestion = (thematique: Thematique) => {
+    setFormData({
+      id_thematique: thematique.id_thematique,
+      texte: '',
+      ponderation: 1,
+      aide_reponse: ''
+    });
+    setDialogType('question');
+    setEditingItem(null);
+    setDialogOpen(true);
   };
 
   // Fonction de sauvegarde
@@ -252,6 +280,25 @@ const MaturityModelAdmin: React.FC = () => {
             await loadFonctionDetails(selectedFonction.id_fonction);
           }
           break;
+
+        case 'question': {
+          if (!formData.texte || formData.texte.trim() === '') {
+            showSnackbar('Le texte est obligatoire', 'warning');
+            return;
+          }
+
+          if (editingItem) {
+            await api.put(`/questions/${editingItem.id_question}`, formData);
+            showSnackbar('Question modifiée');
+          } else {
+            await api.post(`/questions`, formData);
+            showSnackbar('Question ajoutée');
+          }
+
+          await loadQuestionsForThematique(formData.id_thematique);
+          closeDialog();
+          break;
+        }
       }
       
       closeDialog();
@@ -473,6 +520,35 @@ const MaturityModelAdmin: React.FC = () => {
                 </Select>
               </FormControl>
             )}
+
+            {dialogType === 'question' && (
+              <>
+                <TextField
+                  label="Texte de la question"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  required
+                  value={formData.texte || ''}
+                  onChange={(e) => setFormData({ ...formData, texte: e.target.value })}
+                />
+                <TextField
+                  label="Pondération"
+                  type="number"
+                  fullWidth
+                  value={formData.ponderation || 1}
+                  onChange={(e) => setFormData({ ...formData, ponderation: parseInt(e.target.value) || 1 })}
+                />
+                <TextField
+                  label="Aide à la réponse"
+                  fullWidth
+                  multiline
+                  rows={2}
+                  value={formData.aide_reponse || ''}
+                  onChange={(e) => setFormData({ ...formData, aide_reponse: e.target.value })}
+                />
+              </>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
@@ -691,7 +767,35 @@ const MaturityModelAdmin: React.FC = () => {
                         <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                           {them.description}
                         </Typography>
-                        
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<AddIcon />}
+                          onClick={() => handleAddQuestion(them)}
+                          disabled={(questions[them.id_thematique]?.length || 0) >= them.nombre_questions}
+                        >
+                          Ajouter une question
+                        </Button>
+                       <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle2">Questions :</Typography>
+
+                        {/* ✅ Correction : afficher temporairement en debug */}
+                        {(console.log('Questions affichées :', questions[them.id_thematique]), null)}
+
+                        {questions[them.id_thematique]?.map((q, i) => (
+                          <Paper key={q.id_question} sx={{ p: 1, mb: 1 }}>
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography>{i + 1}. {q.texte}</Typography>
+                              <Box>
+                                <IconButton size="small" onClick={() => openDialog('question', q)}>
+                                  <EditIcon />
+                                </IconButton>
+                              </Box>
+                            </Box>
+                          </Paper>
+                        ))}
+                      </Box>
+                                                
                         {them.niveauxThematiques && them.niveauxThematiques.length > 0 && (
                           <Box>
                             <Typography variant="subtitle2" gutterBottom>

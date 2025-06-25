@@ -1,26 +1,57 @@
 {
   "name": "maturity-infrastructure",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Infrastructure as Code for Maturity Assessment Platform",
-  "main": "lib/infrastructure.js",
+  "main": "lib/backend-stack.js",
+  "bin": {
+    "maturity-infrastructure": "bin/infrastructure.js"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy:dev": "ENVIRONMENT=dev cdk deploy MaturityBackend-dev --require-approval never",
+    "deploy:prod": "ENVIRONMENT=prod cdk deploy MaturityBackend-prod --require-approval never",
+    "destroy:dev": "ENVIRONMENT=dev cdk destroy MaturityBackend-dev --force",
+    "destroy:prod": "ENVIRONMENT=prod cdk destroy MaturityBackend-prod --force",
+    "diff:dev": "ENVIRONMENT=dev cdk diff MaturityBackend-dev",
+    "diff:prod": "ENVIRONMENT=prod cdk diff MaturityBackend-prod",
+    "synth:dev": "ENVIRONMENT=dev cdk synth MaturityBackend-dev",
+    "synth:prod": "ENVIRONMENT=prod cdk synth MaturityBackend-prod",
+    "bootstrap": "cdk bootstrap",
+    "hotswap:dev": "ENVIRONMENT=dev cdk deploy MaturityBackend-dev --hotswap"
   },
   "devDependencies": {
-    "@types/jest": "^29.4.0",
-    "@types/node": "18.14.6",
-    "jest": "^29.5.0",
-    "ts-jest": "^29.0.5",
-    "aws-cdk": "2.87.0",
+    "@types/jest": "^29.5.5",
+    "@types/node": "20.6.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "aws-cdk": "2.108.0",
     "ts-node": "^10.9.1",
-    "typescript": "~4.9.5"
+    "typescript": "~5.2.2"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.87.0",
+    "aws-cdk-lib": "2.108.0",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "bin": "bin"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "infrastructure",
+    "ecs",
+    "fargate",
+    "rds",
+    "maturity-assessment"
+  ],
+  "author": "MCE",
+  "license": "Mundo Archi"
 }

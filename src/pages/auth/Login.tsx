@@ -27,8 +27,8 @@ const Login: React.FC = () => {
   const { login, error, isLoading, isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
-    email: 'admin@qwanza.fr', // Pré-remplir avec l'admin
-    password: 'password', // Mot de passe par défaut
+    email: 'intervenant@qwanza.fr', // Pré-remplir avec l'admin
+    password: 'Intervenant@01', // Mot de passe par défaut
     rememberMe: false
   });
   
@@ -212,7 +212,7 @@ const Login: React.FC = () => {
             <Typography variant="caption" color="info.contrastText">
               <strong>🧪 Mode Développement</strong><br />
               <strong>Email:</strong> admin@qwanza.fr<br />
-              <strong>Mot de passe:</strong> password<br />
+              <strong>Mot de passe:</strong> ********<br />
               <strong>Rôle:</strong> Administrateur (accès total)<br />
               <em>Ces identifiants sont pré-remplis pour faciliter les tests</em>
             </Typography>

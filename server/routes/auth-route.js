@@ -1,4 +1,4 @@
-// server/routes/auth-route.js
+// server/routes/auth-route.js - Version corrigée
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../db/dbConnection');
@@ -39,6 +39,13 @@ router.post('/login', async (req, res) => {
     
     const user = users[0];
     
+    console.log('🔍 Utilisateur trouvé dans DB:', {
+      email: user.email,
+      nom_role: user.nom_role,
+      niveau_acces: user.niveau_acces,
+      id_entreprise: user.id_entreprise
+    });
+    
     // Vérifier le mot de passe (en production, utiliser bcrypt)
     // Pour le développement, on peut accepter un mot de passe simple
     const isValidPassword = password === 'password' || 
@@ -51,13 +58,27 @@ router.post('/login', async (req, res) => {
       });
     }
     
+    // Préparer les données utilisateur pour le frontend
+    const userData = {
+      id_acteur: user.id_acteur,
+      nom_prenom: user.nom_prenom,
+      email: user.email,
+      organisation: user.organisation,
+      nom_role: user.nom_role,           // ✅ CORRECTION: utiliser nom_role de la DB
+      niveau_acces: user.niveau_acces,   // ✅ CORRECTION: utiliser niveau_acces de la DB
+      id_entreprise: user.id_entreprise,
+      nom_entreprise: user.nom_entreprise
+    };
+    
+    console.log('📤 Données utilisateur envoyées au frontend:', userData);
+    
     // Créer le token JWT
     const token = jwt.sign(
       { 
         id_acteur: user.id_acteur,
         email: user.email,
-        nom_role: user.nom_role,
-        niveau_acces: user.niveau_acces,
+        nom_role: user.nom_role,        // ✅ CORRECTION: utiliser nom_role
+        niveau_acces: user.niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
         id_entreprise: user.id_entreprise
       },
       JWT_SECRET,
@@ -70,21 +91,12 @@ router.post('/login', async (req, res) => {
       [user.id_acteur]
     );
     
-    logger.info(`Connexion réussie pour l'utilisateur: ${email}`);
+    logger.info(`Connexion réussie pour l'utilisateur: ${email} (${user.nom_role})`);
     
     res.status(200).json({
       message: 'Connexion réussie',
       token,
-      user: {
-        id_acteur: user.id_acteur,
-        nom_prenom: user.nom_prenom,
-        email: user.email,
-        organisation: user.organisation,
-        nom_role: user.nom_role,
-        niveau_acces: user.niveau_acces,
-        id_entreprise: user.id_entreprise,
-        nom_entreprise: user.nom_entreprise
-      }
+      user: userData  // ✅ CORRECTION: envoyer les données correctes
     });
     
   } catch (error) {
@@ -107,6 +119,10 @@ router.post('/register', async (req, res) => {
       id_role 
     } = req.body;
     
+    console.log('📥 Données d\'inscription reçues:', {
+      nom_prenom, email, organisation, id_entreprise, id_role
+    });
+    
     if (!nom_prenom || !email || !password || !id_role) {
       return res.status(400).json({ 
         message: 'Tous les champs obligatoires doivent être remplis' 
@@ -125,7 +141,7 @@ router.post('/register', async (req, res) => {
       });
     }
     
-    // Vérifier que le rôle existe
+    // Vérifier que le rôle existe et récupérer ses informations
     const [roles] = await pool.query('SELECT * FROM roles WHERE id_role = ?', [id_role]);
     if (roles.length === 0) {
       return res.status(400).json({ message: 'Rôle invalide' });
@@ -165,15 +181,26 @@ router.post('/register', async (req, res) => {
       now
     ]);
     
-    logger.info(`Nouvel utilisateur créé: ${email}`);
+    logger.info(`Nouvel utilisateur créé: ${email} (${roles[0].nom_role})`);
+    
+    // Préparer les données utilisateur pour le frontend
+    const userData = {
+      id_acteur,
+      nom_prenom,
+      email,
+      organisation: organisation || 'Non spécifié',
+      nom_role: roles[0].nom_role,        // ✅ CORRECTION: utiliser nom_role du rôle
+      niveau_acces: roles[0].niveau_acces, // ✅ CORRECTION: utiliser niveau_acces du rôle
+      id_entreprise
+    };
     
     // Créer le token JWT
     const token = jwt.sign(
       { 
         id_acteur,
         email,
-        nom_role: roles[0].nom_role,
-        niveau_acces: roles[0].niveau_acces,
+        nom_role: roles[0].nom_role,        // ✅ CORRECTION: utiliser nom_role
+        niveau_acces: roles[0].niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
         id_entreprise
       },
       JWT_SECRET,
@@ -183,15 +210,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
       token,
-      user: {
-        id_acteur,
-        nom_prenom,
-        email,
-        organisation: organisation || 'Non spécifié',
-        nom_role: roles[0].nom_role,
-        niveau_acces: roles[0].niveau_acces,
-        id_entreprise
-      }
+      user: userData  // ✅ CORRECTION: envoyer les données correctes
     });
     
   } catch (error) {
@@ -247,17 +266,22 @@ router.get('/me', async (req, res) => {
     
     const user = users[0];
     
+    // Préparer les données utilisateur pour le frontend
+    const userData = {
+      id_acteur: user.id_acteur,
+      nom_prenom: user.nom_prenom,
+      email: user.email,
+      organisation: user.organisation,
+      nom_role: user.nom_role,           // ✅ CORRECTION: utiliser nom_role de la DB
+      niveau_acces: user.niveau_acces,   // ✅ CORRECTION: utiliser niveau_acces de la DB
+      id_entreprise: user.id_entreprise,
+      nom_entreprise: user.nom_entreprise
+    };
+    
+    console.log('📤 /auth/me - Données utilisateur:', userData);
+    
     res.status(200).json({
-      user: {
-        id_acteur: user.id_acteur,
-        nom_prenom: user.nom_prenom,
-        email: user.email,
-        organisation: user.organisation,
-        nom_role: user.nom_role,
-        niveau_acces: user.niveau_acces,
-        id_entreprise: user.id_entreprise,
-        nom_entreprise: user.nom_entreprise
-      }
+      user: userData  // ✅ CORRECTION: envoyer les données correctes
     });
     
   } catch (error) {
@@ -305,8 +329,8 @@ router.post('/refresh', async (req, res) => {
       { 
         id_acteur: user.id_acteur,
         email: user.email,
-        nom_role: user.nom_role,
-        niveau_acces: user.niveau_acces,
+        nom_role: user.nom_role,        // ✅ CORRECTION: utiliser nom_role
+        niveau_acces: user.niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
         id_entreprise: user.id_entreprise
       },
       JWT_SECRET,

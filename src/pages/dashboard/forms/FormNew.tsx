@@ -21,22 +21,22 @@ import {
   Step,
   StepLabel,
   Card,
-  CardContent
+  CardContent,
+  Checkbox,
+  ListItemText,
+  Chip,
+  FormGroup,
+  FormControlLabel
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
   Business as BusinessIcon,
   Person as PersonIcon,
-  Assignment as AssignmentIcon
+  Assignment as AssignmentIcon,
+  CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import api from '../../../services/api';
-import { CreateFormulaireRequest } from '../../../types/Formulaire';
-
-interface Application {
-  id_application: string;
-  nom_application: string;
-}
 
 interface Acteur {
   id_acteur: string;
@@ -45,10 +45,13 @@ interface Acteur {
   entreprise_nom?: string;
 }
 
+// Mis à jour pour la nouvelle structure
 interface Questionnaire {
   id_questionnaire: string;
-  fonction: string;
-  thematique: string;
+  nom: string;
+  description?: string;
+  thematiques?: string[];
+  fonctions?: string[];
 }
 
 interface Entreprise {
@@ -56,50 +59,44 @@ interface Entreprise {
   nom_entreprise: string;
 }
 
-interface Fonction {
-  id_fonction: string;
-  nom: string;
-}
-
 const FormNew: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [applications, setApplications] = useState<Application[]>([]);
   const [acteurs, setActeurs] = useState<Acteur[]>([]);
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
-  const [fonctions, setFonctions] = useState<Fonction[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   
   // Valeurs du formulaire
-  const [formValues, setFormValues] = useState<CreateFormulaireRequest & { id_entreprise?: string, id_fonction?: string }>({
-    id_acteur: '',
-    id_questionnaire: '',
+  const [formValues, setFormValues] = useState<{
+    id_entreprise: string;
+    id_acteur: string;
+    questionnaires: string[]; // Array de questionnaires sélectionnés
+  }>({
     id_entreprise: '',
-    id_fonction: '',
-    statut: 'Brouillon'
+    id_acteur: '',
+    questionnaires: []
   });
   
   // États de validation
   const [validation, setValidation] = useState({
-    id_acteur: true,
-    id_questionnaire: true,
     id_entreprise: true,
-    id_fonction: true
+    id_acteur: true,
+    questionnaires: true
   });
   
   // Étapes du stepper
   const steps = [
     { label: 'Entreprise', icon: <BusinessIcon /> },
-    { label: 'Fonction', icon: <AssignmentIcon /> },
-    { label: 'Acteur', icon: <PersonIcon /> }
+    { label: 'Acteur', icon: <PersonIcon /> },
+    { label: 'Questionnaires', icon: <AssignmentIcon /> }
   ];
   
   // Filtres pour limiter les options basés sur les sélections précédentes
   const [filteredActeurs, setFilteredActeurs] = useState<Acteur[]>([]);
-  const [filteredQuestionnaires, setFilteredQuestionnaires] = useState<Questionnaire[]>([]);
   
   // Charger les données nécessaires
   useEffect(() => {
@@ -115,22 +112,8 @@ const FormNew: React.FC = () => {
           entreprisesData = entreprisesResponse;
         } else if (entreprisesResponse && entreprisesResponse.data && Array.isArray(entreprisesResponse.data)) {
           entreprisesData = entreprisesResponse.data;
-        } else {
-          console.warn('Format de réponse inattendu pour entreprises:', entreprisesResponse);
         }
         setEntreprises(entreprisesData);
-        
-        // Récupérer les fonctions
-        const fonctionsResponse = await api.get('fonctions');
-        let fonctionsData: Fonction[] = [];
-        if (Array.isArray(fonctionsResponse)) {
-          fonctionsData = fonctionsResponse;
-        } else if (fonctionsResponse && fonctionsResponse.data && Array.isArray(fonctionsResponse.data)) {
-          fonctionsData = fonctionsResponse.data;
-        } else {
-          console.warn('Format de réponse inattendu pour fonctions:', fonctionsResponse);
-        }
-        setFonctions(fonctionsData);
         
         // Récupérer les acteurs
         const acteursResponse = await api.get('acteurs');
@@ -139,22 +122,29 @@ const FormNew: React.FC = () => {
           acteursData = acteursResponse;
         } else if (acteursResponse && acteursResponse.data && Array.isArray(acteursResponse.data)) {
           acteursData = acteursResponse.data;
-        } else {
-          console.warn('Format de réponse inattendu pour acteurs:', acteursResponse);
         }
         setActeurs(acteursData);
         
-        // Récupérer les questionnaires
+        // Récupérer les questionnaires avec la nouvelle structure
         const questionnairesResponse = await api.get('questionnaires');
-        let questionnairesData: Questionnaire[] = [];
+        let questionnairesData: any[] = [];
         if (Array.isArray(questionnairesResponse)) {
           questionnairesData = questionnairesResponse;
         } else if (questionnairesResponse && questionnairesResponse.data && Array.isArray(questionnairesResponse.data)) {
           questionnairesData = questionnairesResponse.data;
-        } else {
-          console.warn('Format de réponse inattendu pour questionnaires:', questionnairesResponse);
         }
-        setQuestionnaires(questionnairesData);
+        
+        // Normaliser les questionnaires pour la nouvelle structure
+        const normalizedQuestionnaires = questionnairesData.map(q => ({
+          id_questionnaire: q.id_questionnaire,
+          nom: q.nom || q.questionnaire_nom || 'Questionnaire sans nom',
+          description: q.description || '',
+          // Adapter selon la réponse de l'API - ces champs peuvent venir sous forme d'arrays ou de strings
+          thematiques: Array.isArray(q.thematiques) ? q.thematiques : (q.thematiques ? q.thematiques.split(',').map(t => t.trim()) : []),
+          fonctions: Array.isArray(q.fonctions) ? q.fonctions : (q.fonctions ? q.fonctions.split(',').map(f => f.trim()) : [])
+        }));
+        
+        setQuestionnaires(normalizedQuestionnaires);
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
         setError('Erreur lors du chargement des données. Veuillez réessayer plus tard.');
@@ -172,7 +162,7 @@ const FormNew: React.FC = () => {
       const filtered = acteurs.filter(acteur => acteur.id_entreprise === formValues.id_entreprise);
       setFilteredActeurs(filtered);
       
-      // Si l'acteur sélectionné ne fait pas partie de l'entreprise sélectionnée, réinitialiser la sélection
+      // Si l'acteur sélectionné ne fait pas partie de l'entreprise sélectionnée, réinitialiser
       if (formValues.id_acteur && !filtered.some(acteur => acteur.id_acteur === formValues.id_acteur)) {
         setFormValues(prev => ({ ...prev, id_acteur: '' }));
       }
@@ -181,27 +171,9 @@ const FormNew: React.FC = () => {
     }
   }, [formValues.id_entreprise, acteurs]);
   
-  // Mettre à jour les questionnaires filtrés lorsque la fonction change
-  useEffect(() => {
-    if (formValues.id_fonction) {
-      const fonction = fonctions.find(f => f.id_fonction === formValues.id_fonction);
-      if (fonction) {
-        const filtered = questionnaires.filter(q => q.fonction === fonction.nom);
-        setFilteredQuestionnaires(filtered);
-        
-        // Si le questionnaire sélectionné ne correspond pas à la fonction sélectionnée, réinitialiser la sélection
-        if (formValues.id_questionnaire && !filtered.some(q => q.id_questionnaire === formValues.id_questionnaire)) {
-          setFormValues(prev => ({ ...prev, id_questionnaire: '' }));
-        }
-      }
-    } else {
-      setFilteredQuestionnaires(questionnaires);
-    }
-  }, [formValues.id_fonction, fonctions, questionnaires]);
-  
   // Gérer les changements dans le formulaire
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const name = event.target.name as keyof (CreateFormulaireRequest & { id_entreprise?: string, id_fonction?: string });
+    const name = event.target.name as keyof typeof formValues;
     const value = event.target.value;
     
     if (name) {
@@ -220,6 +192,19 @@ const FormNew: React.FC = () => {
     }
   };
   
+  // Gérer la sélection multiple de questionnaires
+  const handleQuestionnaireChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const value = event.target.value as string[];
+    setFormValues({
+      ...formValues,
+      questionnaires: value
+    });
+    setValidation({
+      ...validation,
+      questionnaires: true
+    });
+  };
+  
   // Valider l'étape actuelle
   const validateCurrentStep = () => {
     let isValid = true;
@@ -230,13 +215,13 @@ const FormNew: React.FC = () => {
         newValidation.id_entreprise = Boolean(formValues.id_entreprise);
         isValid = newValidation.id_entreprise;
         break;
-      case 1: // Fonction
-        newValidation.id_fonction = Boolean(formValues.id_fonction);
-        isValid = newValidation.id_fonction;
-        break;
-      case 2: // Acteur
+      case 1: // Acteur
         newValidation.id_acteur = Boolean(formValues.id_acteur);
         isValid = newValidation.id_acteur;
+        break;
+      case 2: // Questionnaires
+        newValidation.questionnaires = formValues.questionnaires.length > 0;
+        isValid = newValidation.questionnaires;
         break;
     }
     
@@ -247,15 +232,13 @@ const FormNew: React.FC = () => {
   // Valider tout le formulaire
   const validateForm = () => {
     const newValidation = {
-      id_acteur: Boolean(formValues.id_acteur),
-      id_questionnaire: Boolean(formValues.id_questionnaire),
       id_entreprise: Boolean(formValues.id_entreprise),
-      id_fonction: Boolean(formValues.id_fonction)
+      id_acteur: Boolean(formValues.id_acteur),
+      questionnaires: formValues.questionnaires.length > 0
     };
     
     setValidation(newValidation);
     
-    // Retourner true si tous les champs sont valides
     return Object.values(newValidation).every(Boolean);
   };
   
@@ -277,17 +260,6 @@ const FormNew: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    // Trouver le questionnaire correspondant à la fonction sélectionnée
-    if (!formValues.id_questionnaire && formValues.id_fonction) {
-      const fonction = fonctions.find(f => f.id_fonction === formValues.id_fonction);
-      if (fonction) {
-        const matchingQuestionnaire = questionnaires.find(q => q.fonction === fonction.nom);
-        if (matchingQuestionnaire) {
-          formValues.id_questionnaire = matchingQuestionnaire.id_questionnaire;
-        }
-      }
-    }
-    
     if (!validateForm()) {
       setError('Veuillez remplir tous les champs obligatoires.');
       return;
@@ -295,39 +267,71 @@ const FormNew: React.FC = () => {
     
     setSubmitting(true);
     setError(null);
+    setSuccess(null);
     
     try {
-      // Préparer les données à envoyer
-      // Note: Le backend exige toujours id_application même si ce n'est plus utilisé dans l'interface
-      const { id_entreprise, id_fonction, ...submitData } = formValues;
-      
       const DEFAULT_APPLICATION_ID = "892daedf-3423-11f0-9f03-04bf1ba7bd1e";
-      // Ajouter un id_application "factice" ou par défaut pour satisfaire l'API
-      const dataToSubmit = {
-        ...submitData,
-        id_application: DEFAULT_APPLICATION_ID // Valeur factice pour satisfaire l'AP
-      };
       
-      // Supprimer le préfixe '/api/' car api.ts l'ajoute déjà
-      const response = await api.post('formulaires', dataToSubmit);
+      // Créer un formulaire pour chaque questionnaire sélectionné
+      const creationPromises = formValues.questionnaires.map(async (id_questionnaire) => {
+        const dataToSubmit = {
+          id_questionnaire,
+          id_acteur: formValues.id_acteur,
+          id_application: DEFAULT_APPLICATION_ID, // Valeur par défaut pour l'API
+          statut: 'Brouillon' as const
+        };
+        
+        try {
+          const response = await api.post('formulaires', dataToSubmit);
+          return { success: true, response, id_questionnaire };
+        } catch (error) {
+          return { success: false, error, id_questionnaire };
+        }
+      });
       
-      // Rediriger vers le détail du formulaire
-      let formId = '';
-      if (response && response.data && response.data.id_formulaire) {
-        formId = response.data.id_formulaire;
-      } else if (response && response.id_formulaire) {
-        formId = response.id_formulaire;
+      const results = await Promise.all(creationPromises);
+      
+      // Compter les succès et les échecs
+      const successes = results.filter(r => r.success);
+      const failures = results.filter(r => !r.success);
+      
+      if (successes.length === 0) {
+        setError('Erreur lors de la création des formulaires. Aucun formulaire n\'a pu être créé.');
+      } else if (failures.length > 0) {
+        setSuccess(`${successes.length} formulaire(s) créé(s) avec succès. ${failures.length} échec(s).`);
+        
+        // Attendre 2 secondes avant de rediriger
+        setTimeout(() => {
+          navigate('/formulaires');
+        }, 2000);
       } else {
-        console.warn('Format de réponse inattendu pour la création du formulaire:', response);
-        // Rediriger quand même vers la liste si on ne peut pas récupérer l'ID
-        navigate('/formulaires');
-        return;
+        setSuccess(`${successes.length} formulaire(s) créé(s) avec succès !`);
+        
+        // Si un seul formulaire créé, rediriger vers son détail
+        if (successes.length === 1) {
+          const response = successes[0].response;
+          let formId = '';
+          if (response && response.data && response.data.id_formulaire) {
+            formId = response.data.id_formulaire;
+          } else if (response && response.id_formulaire) {
+            formId = response.id_formulaire;
+          }
+          
+          if (formId) {
+            navigate(`/formulaires/${formId}`);
+            return;
+          }
+        }
+        
+        // Sinon, rediriger vers la liste après 2 secondes
+        setTimeout(() => {
+          navigate('/formulaires');
+        }, 2000);
       }
-      
-      navigate(`/formulaires/${formId}`);
     } catch (error) {
-      console.error('Erreur lors de la création du formulaire:', error);
-      setError('Erreur lors de la création du formulaire. Veuillez réessayer plus tard.');
+      console.error('Erreur lors de la création des formulaires:', error);
+      setError('Erreur lors de la création des formulaires. Veuillez réessayer plus tard.');
+    } finally {
       setSubmitting(false);
     }
   };
@@ -338,16 +342,16 @@ const FormNew: React.FC = () => {
       case 0: // Entreprise
         return (
           <Grid container spacing={3}>
-            <Grid xs={12}>
+            <Grid size={12}>
               <FormControl fullWidth error={!validation.id_entreprise}>
-                <InputLabel id="entreprise-label">Entreprise</InputLabel>
+                <InputLabel id="entreprise-label">Entreprise *</InputLabel>
                 <Select
                   labelId="entreprise-label"
                   id="id_entreprise"
                   name="id_entreprise"
                   value={formValues.id_entreprise}
                   onChange={handleChange}
-                  label="Entreprise"
+                  label="Entreprise *"
                   required
                 >
                   {entreprises.map((ent) => (
@@ -363,73 +367,20 @@ const FormNew: React.FC = () => {
             </Grid>
           </Grid>
         );
-      case 1: // Fonction
+        
+      case 1: // Acteur
         return (
           <Grid container spacing={3}>
-            <Grid xs={12}>
-              <FormControl fullWidth error={!validation.id_fonction}>
-                <InputLabel id="fonction-label">Fonction</InputLabel>
-                <Select
-                  labelId="fonction-label"
-                  id="id_fonction"
-                  name="id_fonction"
-                  value={formValues.id_fonction}
-                  onChange={handleChange}
-                  label="Fonction"
-                  required
-                >
-                  {fonctions.map((fonction) => (
-                    <MenuItem key={fonction.id_fonction} value={fonction.id_fonction}>
-                      {fonction.nom}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {!validation.id_fonction && (
-                  <FormHelperText>La fonction est requise</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
-            
-            {formValues.id_fonction && filteredQuestionnaires.length > 0 && (
-              <Grid xs={12}>
-                <FormControl fullWidth error={!validation.id_questionnaire}>
-                  <InputLabel id="questionnaire-label">Questionnaire</InputLabel>
-                  <Select
-                    labelId="questionnaire-label"
-                    id="id_questionnaire"
-                    name="id_questionnaire"
-                    value={formValues.id_questionnaire}
-                    onChange={handleChange}
-                    label="Questionnaire"
-                    required
-                  >
-                    {filteredQuestionnaires.map((q) => (
-                      <MenuItem key={q.id_questionnaire} value={q.id_questionnaire}>
-                        {q.fonction} ({q.thematique})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {!validation.id_questionnaire && (
-                    <FormHelperText>Le questionnaire est requis</FormHelperText>
-                  )}
-                </FormControl>
-              </Grid>
-            )}
-          </Grid>
-        );
-      case 2: // Acteur
-        return (
-          <Grid container spacing={3}>
-            <Grid xs={12}>
+            <Grid size={12}>
               <FormControl fullWidth error={!validation.id_acteur}>
-                <InputLabel id="acteur-label">Acteur</InputLabel>
+                <InputLabel id="acteur-label">Acteur *</InputLabel>
                 <Select
                   labelId="acteur-label"
                   id="id_acteur"
                   name="id_acteur"
                   value={formValues.id_acteur}
                   onChange={handleChange}
-                  label="Acteur"
+                  label="Acteur *"
                   required
                 >
                   {filteredActeurs.map((acteur) => (
@@ -450,6 +401,95 @@ const FormNew: React.FC = () => {
             </Grid>
           </Grid>
         );
+        
+      case 2: // Questionnaires
+        return (
+          <Grid container spacing={3}>
+            <Grid size={12}>
+              <FormControl fullWidth error={!validation.questionnaires}>
+                <InputLabel id="questionnaires-label">Questionnaires *</InputLabel>
+                <Select
+                  labelId="questionnaires-label"
+                  id="questionnaires"
+                  name="questionnaires"
+                  multiple
+                  value={formValues.questionnaires}
+                  onChange={handleQuestionnaireChange}
+                  label="Questionnaires *"
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {(selected as string[]).map((value) => {
+                        const q = questionnaires.find(quest => quest.id_questionnaire === value);
+                        return (
+                          <Chip 
+                            key={value} 
+                            label={q?.nom || 'Questionnaire inconnu'} 
+                            size="small" 
+                          />
+                        );
+                      })}
+                    </Box>
+                  )}
+                >
+                  {questionnaires.map((q) => (
+                    <MenuItem key={q.id_questionnaire} value={q.id_questionnaire}>
+                      <Checkbox checked={formValues.questionnaires.indexOf(q.id_questionnaire) > -1} />
+                      <ListItemText 
+                        primary={q.nom}
+                        secondary={
+                          <Box>
+                            {q.description && (
+                              <Typography variant="caption" display="block">
+                                {q.description}
+                              </Typography>
+                            )}
+                            {q.fonctions && q.fonctions.length > 0 && (
+                              <Box sx={{ mt: 0.5 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Fonctions: {q.fonctions.join(', ')}
+                                </Typography>
+                              </Box>
+                            )}
+                            {q.thematiques && q.thematiques.length > 0 && (
+                              <Box sx={{ mt: 0.5 }}>
+                                {q.thematiques.slice(0, 3).map((thematique, index) => (
+                                  <Chip
+                                    key={index}
+                                    label={thematique}
+                                    size="small"
+                                    variant="outlined"
+                                    color="secondary"
+                                    sx={{ mr: 0.5, mb: 0.5 }}
+                                  />
+                                ))}
+                                {q.thematiques.length > 3 && (
+                                  <Chip
+                                    label={`+${q.thematiques.length - 3}`}
+                                    size="small"
+                                    variant="outlined"
+                                    color="default"
+                                  />
+                                )}
+                              </Box>
+                            )}
+                          </Box>
+                        }
+                      />
+                    </MenuItem>
+                  ))}
+                </Select>
+                {!validation.questionnaires && (
+                  <FormHelperText>Sélectionnez au moins un questionnaire</FormHelperText>
+                )}
+              </FormControl>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {formValues.questionnaires.length} questionnaire(s) sélectionné(s). 
+                Un formulaire sera créé pour chaque questionnaire.
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+        
       default:
         return 'Étape inconnue';
     }
@@ -458,43 +498,69 @@ const FormNew: React.FC = () => {
   // Résumé avant soumission
   const renderSummary = () => {
     const entreprise = entreprises.find(e => e.id_entreprise === formValues.id_entreprise);
-    const fonction = fonctions.find(f => f.id_fonction === formValues.id_fonction);
     const acteur = acteurs.find(a => a.id_acteur === formValues.id_acteur);
-    const questionnaire = questionnaires.find(q => q.id_questionnaire === formValues.id_questionnaire) || 
-                          questionnaires.find(q => q.fonction === fonction?.nom);
+    const selectedQuestionnaires = questionnaires.filter(q => 
+      formValues.questionnaires.includes(q.id_questionnaire)
+    );
     
     return (
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Résumé du formulaire
+            Résumé de la création
           </Typography>
           <Grid container spacing={2}>
-            <Grid xs={12} sm={6}>
+            <Grid size={12}>
               <Typography variant="subtitle2">Entreprise:</Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {entreprise?.nom_entreprise || 'Non sélectionnée'}
               </Typography>
               
-              <Typography variant="subtitle2">Fonction:</Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {fonction?.nom || 'Non sélectionnée'}
-              </Typography>
-            </Grid>
-            <Grid xs={12} sm={6}>
               <Typography variant="subtitle2">Acteur:</Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {acteur?.nom_prenom || 'Non sélectionné'}
               </Typography>
               
-              {questionnaire && (
-                <>
-                  <Typography variant="subtitle2">Questionnaire:</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {questionnaire.fonction} ({questionnaire.thematique})
-                  </Typography>
-                </>
-              )}
+              <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                Questionnaires sélectionnés ({selectedQuestionnaires.length}):
+              </Typography>
+              <Box sx={{ ml: 2 }}>
+                {selectedQuestionnaires.map((q) => (
+                  <Box key={q.id_questionnaire} sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 1 }} />
+                      <Typography variant="body2" fontWeight="medium">
+                        {q.nom}
+                      </Typography>
+                    </Box>
+                    
+                    {q.fonctions && q.fonctions.length > 0 && (
+                      <Typography variant="caption" color="text.secondary" sx={{ ml: 3, display: 'block' }}>
+                        Fonctions: {q.fonctions.join(', ')}
+                      </Typography>
+                    )}
+                    
+                    {q.thematiques && q.thematiques.length > 0 && (
+                      <Box sx={{ ml: 3, mt: 0.5 }}>
+                        {q.thematiques.map((thematique, index) => (
+                          <Chip
+                            key={index}
+                            label={thematique}
+                            size="small"
+                            variant="outlined"
+                            color="secondary"
+                            sx={{ mr: 0.5, mb: 0.5 }}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+              
+              <Alert severity="info" sx={{ mt: 2 }}>
+                {selectedQuestionnaires.length} formulaire(s) seront créés à partir de cette sélection.
+              </Alert>
             </Grid>
           </Grid>
         </CardContent>
@@ -514,50 +580,30 @@ const FormNew: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
         {/* En-tête */}
-        <Grid xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Box display="flex" alignItems="center" mb={2}>
               <IconButton color="primary" onClick={() => navigate('/formulaires')} sx={{ mr: 1 }}>
                 <ArrowBackIcon />
               </IconButton>
               <Typography component="h1" variant="h5" color="primary">
-                Nouveau Formulaire d'Évaluation
+                Créer des Formulaires d'Évaluation
               </Typography>
             </Box>
             
             <Typography variant="body2" color="text.secondary">
-              Créez un nouveau formulaire d'évaluation en suivant les étapes ci-dessous.
+              Sélectionnez une entreprise, un acteur et un ou plusieurs questionnaires pour créer les formulaires correspondants.
             </Typography>
           </Paper>
         </Grid>
         
         {/* Stepper */}
-        <Grid xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2 }}>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((step, index) => (
                 <Step key={index}>
-                  <StepLabel
-                    StepIconProps={{
-                      icon: index === activeStep ? (
-                        <Box 
-                          sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            width: 24,
-                            height: 24
-                          }}
-                        >
-                          {step.icon}
-                        </Box>
-                      ) : (
-                        index + 1
-                      )
-                    }}
-                  >
-                    {step.label}
-                  </StepLabel>
+                  <StepLabel>{step.label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
@@ -565,11 +611,19 @@ const FormNew: React.FC = () => {
         </Grid>
         
         {/* Formulaire */}
-        <Grid xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2 }}>
             <Box component="form" noValidate onSubmit={handleSubmit}>
               {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+                  {error}
+                </Alert>
+              )}
+              
+              {success && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  {success}
+                </Alert>
               )}
               
               {activeStep === steps.length ? (
@@ -596,7 +650,7 @@ const FormNew: React.FC = () => {
                       disabled={submitting}
                       startIcon={<SaveIcon />}
                     >
-                      {submitting ? 'Création en cours...' : 'Créer le formulaire'}
+                      {submitting ? 'Création en cours...' : 'Créer les formulaires'}
                     </Button>
                   </Box>
                 </Box>

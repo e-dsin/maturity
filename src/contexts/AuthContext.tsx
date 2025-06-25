@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.tsx - Version adaptée pour votre système de rôles
+// src/contexts/AuthContext.tsx - Version corrigée pour le rôle
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
@@ -184,15 +184,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isUserAdmin = useCallback((user: Acteur | null): boolean => {
     if (!user) return false;
     
-    return user.nom_role === 'ADMINISTRATEUR' || 
-           user.nom_role === 'SUPER_ADMINISTRATEUR' ||
+    const role = user.nom_role?.toUpperCase();
+    return role === 'ADMINISTRATEUR' || 
+           role === 'SUPER_ADMINISTRATEUR' ||
            user.niveau_acces === 'GLOBAL';
   }, []);
 
   const isUserSuperAdmin = useCallback((user: Acteur | null): boolean => {
     if (!user) return false;
     
-    return user.nom_role === 'SUPER_ADMINISTRATEUR';
+    const role = user.nom_role?.toUpperCase();
+    return role === 'SUPER_ADMINISTRATEUR';
   }, []);
 
   // === GÉNÉRATION AUTOMATIQUE DES PERMISSIONS ADMIN ===
@@ -263,14 +265,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     ];
 
+    // Normaliser le nom du rôle pour la comparaison
+    const roleUpper = nomRole?.toUpperCase();
+    
+    console.log('🔑 Analyse du rôle:', {
+      nomRole: nomRole,
+      roleUpper: roleUpper,
+      niveauAcces: niveauAcces
+    });
+
     // === SUPER ADMINISTRATEUR ET ADMINISTRATEUR : TOUTES LES PERMISSIONS ===
-    if (nomRole === 'SUPER_ADMINISTRATEUR' || nomRole === 'ADMINISTRATEUR' || niveauAcces === 'GLOBAL') {
-      console.log('🔑 Génération permissions Administrateur (TOUTES)');
+    if (roleUpper === 'SUPER_ADMINISTRATEUR' || roleUpper === 'ADMINISTRATEUR' || niveauAcces === 'GLOBAL') {
+      console.log('🔑 Génération permissions Administrateur (TOUTES PERMISSIONS)');
       return generateFullAdminPermissions();
     }
     
     // === CONSULTANT : PERMISSIONS ÉTENDUES ===
-    if (nomRole === 'CONSULTANT') {
+    if (roleUpper === 'CONSULTANT') {
       console.log('🔑 Génération permissions Consultant (ÉTENDUES)');
       return basePermissions.map(p => ({
         ...p,
@@ -299,7 +310,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     // === MANAGER : PERMISSIONS MOYENNES ===
-    if (nomRole === 'MANAGER') {
+    if (roleUpper === 'MANAGER') {
       console.log('🔑 Génération permissions Manager (MOYENNES)');
       return basePermissions.map(p => ({
         ...p,
@@ -335,7 +346,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         try {
           // Essayer le nouveau endpoint avec permissions si disponible
-          const permissionsResponse = await api.get('/user/permissions');
+          const permissionsResponse = await api.get('user/permissions');
           
           setCurrentUser(permissionsResponse.user);
           setPermissions(permissionsResponse.permissions || []);
@@ -349,10 +360,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.log('⚠️ Endpoint permissions non disponible, utilisation /auth/me...');
           
           // Fallback sur /auth/me
-          const response = await api.get('/auth/me');
+          const response = await api.get('auth/me');
           const user = response.user || response.data?.user;
           
           if (user) {
+            console.log('🔍 Utilisateur depuis /auth/me:', user);
+            
             setCurrentUser(user);
             setPermissions(getDefaultPermissionsForRole(user.nom_role, user.niveau_acces));
             setHasGlobalAccess(isUserAdmin(user));
@@ -386,9 +399,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🔄 === DÉBUT LOGIN ===');
       console.log('📧 Email:', email);
       
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('auth/login', { email, password });
       
       if (response.token && response.user) {
+        console.log('🔍 Réponse login complète:', response);
+        console.log('🔍 Utilisateur reçu:', response.user);
+        
         localStorage.setItem('auth_token', response.token);
         
         setCurrentUser(response.user);
@@ -401,7 +417,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.user.email,
           nom_role: response.user.nom_role,
           niveau_acces: response.user.niveau_acces,
-          isAdmin: isUserAdmin(response.user)
+          isAdmin: isUserAdmin(response.user),
+          isSuperAdmin: isUserSuperAdmin(response.user)
         });
       } else {
         throw new Error('Réponse de connexion invalide');
@@ -423,7 +440,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // === AUTRES FONCTIONS (adaptées) ===
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('auth/logout');
     } catch (err) {
       console.warn('Erreur lors de la déconnexion:', err);
     } finally {
@@ -441,7 +458,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
       setIsLoading(true);
       
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('auth/register', userData);
       
       if (response.token && response.user) {
         localStorage.setItem('auth_token', response.token);
@@ -463,7 +480,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const forgotPassword = async (email: string) => {
     try {
       setError(null);
-      await api.post('/auth/forgot-password', { email });
+      await api.post('auth/forgot-password', { email });
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Erreur lors de la récupération';
       setError(errorMessage);
@@ -474,7 +491,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateProfile = async (userData: Partial<Acteur>) => {
     try {
       setError(null);
-      const response = await api.put('/auth/profile', userData);
+      const response = await api.put('auth/profile', userData);
       
       if (response.user) {
         setCurrentUser(response.user);

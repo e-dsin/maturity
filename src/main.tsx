@@ -1,14 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-//import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ToastProvider } from './contexts/ToastContext';
 import './index.css';
 
-// Configure React Router v6 with v7 transitions
-window.__reactRouterVersion = {
-  v7_startTransition: true,
-};
 
 // Fonction pour masquer le splash screen
 const hideSplashScreen = () => {
@@ -24,10 +20,24 @@ const hideSplashScreen = () => {
   }
 };
 
+// Composant wrapper avec Router et futures flags
+const AppWithRouter = () => (
+  <BrowserRouter
+    future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    }}
+  >
+    <ToastProvider>
+      <App />
+    </ToastProvider>
+  </BrowserRouter>
+);
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
       <ToastProvider>
-      <App />
+      <AppWithRouter />
       </ToastProvider>
     </React.StrictMode>
 );

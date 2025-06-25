@@ -1,0 +1,1636 @@
+{
+ "Description": "Maturity Assessment Backend Infrastructure - dev",
+ "Resources": {
+  "BackendVPC5F3A56B6": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/Resource"
+   }
+  },
+  "BackendVPCpublicSubnet1SubnetBABFA9C2": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/Subnet"
+   }
+  },
+  "BackendVPCpublicSubnet1RouteTable9EC3C63B": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTable"
+   }
+  },
+  "BackendVPCpublicSubnet1RouteTableAssociationCAC74DAD": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCpublicSubnet1RouteTable9EC3C63B"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/RouteTableAssociation"
+   }
+  },
+  "BackendVPCpublicSubnet1DefaultRoute9E41DACE": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "BackendVPCIGWBDB487F3"
+    },
+    "RouteTableId": {
+     "Ref": "BackendVPCpublicSubnet1RouteTable9EC3C63B"
+    }
+   },
+   "DependsOn": [
+    "BackendVPCVPCGW1A2F763B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/DefaultRoute"
+   }
+  },
+  "BackendVPCpublicSubnet1EIPC30B88B9": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/EIP"
+   }
+  },
+  "BackendVPCpublicSubnet1NATGateway61BCF2F3": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "BackendVPCpublicSubnet1EIPC30B88B9",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "BackendVPCpublicSubnet1DefaultRoute9E41DACE",
+    "BackendVPCpublicSubnet1RouteTableAssociationCAC74DAD"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet1/NATGateway"
+   }
+  },
+  "BackendVPCpublicSubnet2Subnet9A5C2AEA": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet2/Subnet"
+   }
+  },
+  "BackendVPCpublicSubnet2RouteTable86F66152": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/publicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTable"
+   }
+  },
+  "BackendVPCpublicSubnet2RouteTableAssociationF6FF4EF0": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCpublicSubnet2RouteTable86F66152"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCpublicSubnet2Subnet9A5C2AEA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet2/RouteTableAssociation"
+   }
+  },
+  "BackendVPCpublicSubnet2DefaultRoute4D05EB88": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "BackendVPCIGWBDB487F3"
+    },
+    "RouteTableId": {
+     "Ref": "BackendVPCpublicSubnet2RouteTable86F66152"
+    }
+   },
+   "DependsOn": [
+    "BackendVPCVPCGW1A2F763B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/publicSubnet2/DefaultRoute"
+   }
+  },
+  "BackendVPCprivateSubnet1Subnet67E2236E": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/privateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet1/Subnet"
+   }
+  },
+  "BackendVPCprivateSubnet1RouteTable27CC2AF4": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/privateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTable"
+   }
+  },
+  "BackendVPCprivateSubnet1RouteTableAssociation6EF4274A": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCprivateSubnet1RouteTable27CC2AF4"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCprivateSubnet1Subnet67E2236E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet1/RouteTableAssociation"
+   }
+  },
+  "BackendVPCprivateSubnet1DefaultRoute10EF6D01": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "BackendVPCpublicSubnet1NATGateway61BCF2F3"
+    },
+    "RouteTableId": {
+     "Ref": "BackendVPCprivateSubnet1RouteTable27CC2AF4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet1/DefaultRoute"
+   }
+  },
+  "BackendVPCprivateSubnet2SubnetA60CAE2F": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/privateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet2/Subnet"
+   }
+  },
+  "BackendVPCprivateSubnet2RouteTableB699B6EA": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/privateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTable"
+   }
+  },
+  "BackendVPCprivateSubnet2RouteTableAssociationC57397AB": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCprivateSubnet2RouteTableB699B6EA"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCprivateSubnet2SubnetA60CAE2F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet2/RouteTableAssociation"
+   }
+  },
+  "BackendVPCprivateSubnet2DefaultRoute8AD1F1AF": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "BackendVPCpublicSubnet1NATGateway61BCF2F3"
+    },
+    "RouteTableId": {
+     "Ref": "BackendVPCprivateSubnet2RouteTableB699B6EA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/privateSubnet2/DefaultRoute"
+   }
+  },
+  "BackendVPCdatabaseSubnet1Subnet263DE46D": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1a",
+    "CidrBlock": "10.0.4.0/28",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "database"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/databaseSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/Subnet"
+   }
+  },
+  "BackendVPCdatabaseSubnet1RouteTable89DBED06": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/databaseSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTable"
+   }
+  },
+  "BackendVPCdatabaseSubnet1RouteTableAssociation0CFB2C05": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCdatabaseSubnet1RouteTable89DBED06"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCdatabaseSubnet1Subnet263DE46D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet1/RouteTableAssociation"
+   }
+  },
+  "BackendVPCdatabaseSubnet2Subnet50DE5D5A": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-1b",
+    "CidrBlock": "10.0.4.16/28",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "database"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/databaseSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/Subnet"
+   }
+  },
+  "BackendVPCdatabaseSubnet2RouteTableEDB40AEF": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC/databaseSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTable"
+   }
+  },
+  "BackendVPCdatabaseSubnet2RouteTableAssociation3BF4E1EF": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "BackendVPCdatabaseSubnet2RouteTableEDB40AEF"
+    },
+    "SubnetId": {
+     "Ref": "BackendVPCdatabaseSubnet2Subnet50DE5D5A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/databaseSubnet2/RouteTableAssociation"
+   }
+  },
+  "BackendVPCIGWBDB487F3": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MaturityBackend-dev/BackendVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/IGW"
+   }
+  },
+  "BackendVPCVPCGW1A2F763B": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "BackendVPCIGWBDB487F3"
+    },
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/VPCGW"
+   }
+  },
+  "BackendVPCRestrictDefaultSecurityGroupCustomResourceCF54D8E6": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "BackendVPC5F3A56B6",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "637423285771"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendVPC/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:eu-west-1:637423285771:security-group/",
+             {
+              "Fn::GetAtt": [
+               "BackendVPC5F3A56B6",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-637423285771-eu-west-1",
+     "S3Key": "7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474",
+    "aws:asset:property": "Code"
+   }
+  },
+  "DatabaseSG2A23C222": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for RDS database",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "255.255.255.255/32",
+      "Description": "Disallow all traffic",
+      "FromPort": 252,
+      "IpProtocol": "icmp",
+      "ToPort": 86
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/DatabaseSG/Resource"
+   }
+  },
+  "DatabaseSGfromMaturityBackenddevApplicationSGCCE6A93E3306B9DEABE9": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow MySQL traffic from application",
+    "FromPort": 3306,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "DatabaseSG2A23C222",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ApplicationSGE6EB7629",
+      "GroupId"
+     ]
+    },
+    "ToPort": 3306
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/DatabaseSG/from MaturityBackenddevApplicationSGCCE6A93E:3306"
+   }
+  },
+  "ApplicationSGE6EB7629": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for ECS application",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/ApplicationSG/Resource"
+   }
+  },
+  "ApplicationSGfromMaturityBackenddevALBSGA910B7D13000F073D4E3": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow traffic from ALB",
+    "FromPort": 3000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ApplicationSGE6EB7629",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ALBSGB173E466",
+      "GroupId"
+     ]
+    },
+    "ToPort": 3000
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/ApplicationSG/from MaturityBackenddevALBSGA910B7D1:3000"
+   }
+  },
+  "ApplicationSGfromMaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B3000A942CE5E": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 3000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ApplicationSGE6EB7629",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceLBSecurityGroup2B9BA648",
+      "GroupId"
+     ]
+    },
+    "ToPort": 3000
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/ApplicationSG/from MaturityBackenddevBackendServiceLBSecurityGroupB2DA9A8B:3000"
+   }
+  },
+  "ALBSGB173E466": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for Application Load Balancer",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow HTTPS traffic",
+      "FromPort": 443,
+      "IpProtocol": "tcp",
+      "ToPort": 443
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/ALBSG/Resource"
+   }
+  },
+  "DatabaseSecret86DBB7B3": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "Database credentials for Maturity Assessment",
+    "GenerateSecretString": {
+     "ExcludeCharacters": "\"@/\\'",
+     "GenerateStringKey": "password",
+     "PasswordLength": 32,
+     "SecretStringTemplate": "{\"username\":\"admin\"}"
+    },
+    "Name": "maturity-db-dev"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/DatabaseSecret/Resource"
+   }
+  },
+  "DatabaseSecretAttachment9A63A3D4": {
+   "Type": "AWS::SecretsManager::SecretTargetAttachment",
+   "Properties": {
+    "SecretId": {
+     "Ref": "DatabaseSecret86DBB7B3"
+    },
+    "TargetId": {
+     "Ref": "DatabaseB269D8BB"
+    },
+    "TargetType": "AWS::RDS::DBInstance"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/DatabaseSecret/Attachment/Resource"
+   }
+  },
+  "JWTSecretF6F1CBF0": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "JWT Secret for Maturity Assessment",
+    "GenerateSecretString": {
+     "ExcludeCharacters": "\"@/\\'",
+     "PasswordLength": 64
+    },
+    "Name": "maturity-jwt-dev"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/JWTSecret/Resource"
+   }
+  },
+  "DatabaseSubnetGroup7D60F180": {
+   "Type": "AWS::RDS::DBSubnetGroup",
+   "Properties": {
+    "DBSubnetGroupDescription": "Subnet group for Database database",
+    "SubnetIds": [
+     {
+      "Ref": "BackendVPCdatabaseSubnet1Subnet263DE46D"
+     },
+     {
+      "Ref": "BackendVPCdatabaseSubnet2Subnet50DE5D5A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/Database/SubnetGroup/Default"
+   }
+  },
+  "DatabaseB269D8BB": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "AllocatedStorage": "100",
+    "BackupRetentionPeriod": 7,
+    "CopyTagsToSnapshot": true,
+    "DBInstanceClass": "db.t3.micro",
+    "DBName": "maturity_assessment",
+    "DBSubnetGroupName": {
+     "Ref": "DatabaseSubnetGroup7D60F180"
+    },
+    "DeletionProtection": false,
+    "Engine": "mysql",
+    "EngineVersion": "8.0.35",
+    "MasterUserPassword": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "DatabaseSecret86DBB7B3"
+       },
+       ":SecretString:password::}}"
+      ]
+     ]
+    },
+    "MasterUsername": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "DatabaseSecret86DBB7B3"
+       },
+       ":SecretString:username::}}"
+      ]
+     ]
+    },
+    "PubliclyAccessible": false,
+    "StorageEncrypted": true,
+    "StorageType": "gp2",
+    "VPCSecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "DatabaseSG2A23C222",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/Database/Resource"
+   }
+  },
+  "BackendCluster5086059C": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "maturity-backend-dev",
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "enabled"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendCluster/Resource"
+   }
+  },
+  "BackendLogGroupDA10F1B2": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/maturity-backend-dev",
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendLogGroup/Resource"
+   }
+  },
+  "BackendTaskDefinitionTaskRoleE757CE00": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/Resource"
+   }
+  },
+  "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Ref": "DatabaseSecret86DBB7B3"
+        },
+        {
+         "Ref": "JWTSecretF6F1CBF0"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2",
+    "Roles": [
+     {
+      "Ref": "BackendTaskDefinitionTaskRoleE757CE00"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendTaskDefinition/TaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendTaskDefinitionEC224DE6": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "production"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3000"
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "DatabaseB269D8BB",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "3306"
+       },
+       {
+        "Name": "DB_NAME",
+        "Value": "maturity_assessment"
+       },
+       {
+        "Name": "FRONTEND_URL",
+        "Value": "https://dev-maturity.e-dsin.fr"
+       },
+       {
+        "Name": "LOG_LEVEL",
+        "Value": "info"
+       },
+       {
+        "Name": "DB_PASSWORD_FALLBACK",
+        "Value": ""
+       },
+       {
+        "Name": "ECS_ENABLE_CONTAINER_METADATA",
+        "Value": "true"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:3000/health || exit 1"
+       ],
+       "Interval": 60,
+       "Retries": 3,
+       "StartPeriod": 300,
+       "Timeout": 10
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "637423285771.dkr.ecr.eu-west-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/maturity-backend-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "BackendLogGroupDA10F1B2"
+        },
+        "awslogs-stream-prefix": "backend",
+        "awslogs-region": "eu-west-1"
+       }
+      },
+      "Name": "backend",
+      "PortMappings": [
+       {
+        "ContainerPort": 3000,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "DB_USER",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "DatabaseSecret86DBB7B3"
+           },
+           ":username::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "DatabaseSecret86DBB7B3"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Ref": "JWTSecretF6F1CBF0"
+        }
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "BackendTaskDefinitionExecutionRoleDA72B768",
+      "Arn"
+     ]
+    },
+    "Family": "MaturityBackenddevBackendTaskDefinitionF6F25262",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "BackendTaskDefinitionTaskRoleE757CE00",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendTaskDefinition/Resource"
+   }
+  },
+  "BackendTaskDefinitionExecutionRoleDA72B768": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/Resource"
+   }
+  },
+  "BackendTaskDefinitionExecutionRoleDefaultPolicy0750C44A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:eu-west-1:637423285771:repository/maturity-backend-dev"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BackendLogGroupDA10F1B2",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Ref": "DatabaseSecret86DBB7B3"
+        },
+        {
+         "Ref": "JWTSecretF6F1CBF0"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendTaskDefinitionExecutionRoleDefaultPolicy0750C44A",
+    "Roles": [
+     {
+      "Ref": "BackendTaskDefinitionExecutionRoleDA72B768"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendTaskDefinition/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendServiceLB09608E98": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "BackendServiceLBSecurityGroup2B9BA648",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "BackendVPCpublicSubnet1SubnetBABFA9C2"
+     },
+     {
+      "Ref": "BackendVPCpublicSubnet2Subnet9A5C2AEA"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "BackendVPCpublicSubnet1DefaultRoute9E41DACE",
+    "BackendVPCpublicSubnet1RouteTableAssociationCAC74DAD",
+    "BackendVPCpublicSubnet2DefaultRoute4D05EB88",
+    "BackendVPCpublicSubnet2RouteTableAssociationF6FF4EF0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/Resource"
+   }
+  },
+  "BackendServiceLBSecurityGroup2B9BA648": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB MaturityBackenddevBackendServiceLB7B39D85E",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 443",
+      "FromPort": 443,
+      "IpProtocol": "tcp",
+      "ToPort": 443
+     },
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/SecurityGroup/Resource"
+   }
+  },
+  "BackendServiceLBSecurityGrouptoMaturityBackenddevApplicationSGCCE6A93E30002F69BD86": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ApplicationSGE6EB7629",
+      "GroupId"
+     ]
+    },
+    "FromPort": 3000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceLBSecurityGroup2B9BA648",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 3000
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/SecurityGroup/to MaturityBackenddevApplicationSGCCE6A93E:3000"
+   }
+  },
+  "BackendServiceLBPublicListener2FA7FC98": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "Certificates": [
+     {
+      "CertificateArn": "arn:aws:acm:eu-west-1:637423285771:certificate/cf6a160d-877c-428c-bf0a-8a5f75faabfc"
+     }
+    ],
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "BackendServiceLB09608E98"
+    },
+    "Port": 443,
+    "Protocol": "HTTPS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/PublicListener/Resource"
+   }
+  },
+  "BackendServiceLBPublicListenerECSGroupD43CD2AB": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 30,
+    "HealthCheckPath": "/health",
+    "HealthCheckPort": "3000",
+    "HealthCheckProtocol": "HTTP",
+    "HealthCheckTimeoutSeconds": 10,
+    "HealthyThresholdCount": 2,
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "UnhealthyThresholdCount": 5,
+    "VpcId": {
+     "Ref": "BackendVPC5F3A56B6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "BackendServiceLBPublicRedirectListenerA2A7EC53": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "RedirectConfig": {
+       "Port": "443",
+       "Protocol": "HTTPS",
+       "StatusCode": "HTTP_301"
+      },
+      "Type": "redirect"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "BackendServiceLB09608E98"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/LB/PublicRedirectListener/Resource"
+   }
+  },
+  "BackendServiceDNS07B9A993": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::Join": [
+       "",
+       [
+        "dualstack.",
+        {
+         "Fn::GetAtt": [
+          "BackendServiceLB09608E98",
+          "DNSName"
+         ]
+        }
+       ]
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::GetAtt": [
+       "BackendServiceLB09608E98",
+       "CanonicalHostedZoneID"
+      ]
+     }
+    },
+    "HostedZoneId": "Z03909371P12UQ4UA00F0",
+    "Name": "api-dev.dev-maturity.e-dsin.fr.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/DNS/Resource"
+   }
+  },
+  "BackendService2147DAF9": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "BackendCluster5086059C"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "backend",
+      "ContainerPort": 3000,
+      "TargetGroupArn": {
+       "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ApplicationSGE6EB7629",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "BackendVPCprivateSubnet1Subnet67E2236E"
+       },
+       {
+        "Ref": "BackendVPCprivateSubnet2SubnetA60CAE2F"
+       }
+      ]
+     }
+    },
+    "ServiceName": "maturity-backend-dev",
+    "TaskDefinition": {
+     "Ref": "BackendTaskDefinitionEC224DE6"
+    }
+   },
+   "DependsOn": [
+    "BackendServiceLBPublicListenerECSGroupD43CD2AB",
+    "BackendServiceLBPublicListener2FA7FC98",
+    "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2",
+    "BackendTaskDefinitionTaskRoleE757CE00"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/Service/Service"
+   }
+  },
+  "BackendServiceTaskCountTarget2134EDB2": {
+   "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+   "Properties": {
+    "MaxCapacity": 2,
+    "MinCapacity": 1,
+    "ResourceId": {
+     "Fn::Join": [
+      "",
+      [
+       "service/",
+       {
+        "Ref": "BackendCluster5086059C"
+       },
+       "/",
+       {
+        "Fn::GetAtt": [
+         "BackendService2147DAF9",
+         "Name"
+        ]
+       }
+      ]
+     ]
+    },
+    "RoleARN": "arn:aws:iam::637423285771:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+    "ScalableDimension": "ecs:service:DesiredCount",
+    "ServiceNamespace": "ecs"
+   },
+   "DependsOn": [
+    "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2",
+    "BackendTaskDefinitionTaskRoleE757CE00"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target/Resource"
+   }
+  },
+  "BackendServiceTaskCountTargetCpuScalingB44CAB95": {
+   "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+   "Properties": {
+    "PolicyName": "MaturityBackenddevBackendServiceTaskCountTargetCpuScalingE2FAF5AB",
+    "PolicyType": "TargetTrackingScaling",
+    "ScalingTargetId": {
+     "Ref": "BackendServiceTaskCountTarget2134EDB2"
+    },
+    "TargetTrackingScalingPolicyConfiguration": {
+     "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ECSServiceAverageCPUUtilization"
+     },
+     "ScaleInCooldown": 300,
+     "ScaleOutCooldown": 300,
+     "TargetValue": 70
+    }
+   },
+   "DependsOn": [
+    "BackendTaskDefinitionTaskRoleDefaultPolicy06F692E2",
+    "BackendTaskDefinitionTaskRoleE757CE00"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/BackendService/Service/TaskCount/Target/CpuScaling/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31T227bMAz9lr4rWpqhwF5z6YoAxWbYQV8LRmY9No5kiFSCwPC/D7LjS9JhTzw8OiIOSWmhH+c/9PwBzjwz+WFW0l7XmYA5qBTZBW9QwZnfazQLXb9VRq0/7FuyVknYl2SysLcokRtR6oLgDvYljvzILZmdIRBydhBH8LxNYvgF8gKCZ7ioxNMJBMfCWyvoLQ6Czsk1W4qA+XNEKypDEzzJ5cW7ULUe/ktsbeGR+Qv/3NKNYjQehY9goUCv66zNr/KIurADX6BMbAyC+5NG+Zx1vQGBPTBuLQtYg6rrdDC5WX0hemmj0HidYuWYxPnLChgVGtb1ugws6KO8hz/BFxCnz4cNfpClfvb3jLMCZNFPuOvdDP2JTLfPK8wMlHGfscjahdhV6QrW9asrBsc9bhTBUdep695EGxNXkmmX2KHYE79XIHHJrJdVVZJp38mrg3wFZWw8vzOEJbCQKR3k+1ZBtjgtdP3v277zNMmnOmJBe9X0eHLebXFobZI2ysdX/PRd18sUjfN522SLMpRGwVgFgjg2UJItdD3OMNZqp3vLdGHnwRzIFll3bxzcDdE0ah1Y3HH4t62JHt8cJd6dKI/9MaNkAgXZIup/B6mCNMq6HPUnfzstFvrxSc8fPplo5oMVOqJOu/gXcLbjzTwEAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "MaturityBackend-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "BackendServiceLoadBalancerDNSE742582D": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendServiceLB09608E98",
+     "DNSName"
+    ]
+   }
+  },
+  "BackendServiceServiceURLB1770053": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "BackendServiceDNS07B9A993"
+      }
+     ]
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Description": "API URL",
+   "Value": "https://api-dev.dev-maturity.e-dsin.fr"
+  },
+  "DatabaseEndpoint": {
+   "Description": "RDS Database Endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "DatabaseB269D8BB",
+     "Endpoint.Address"
+    ]
+   }
+  },
+  "ECRRepositoryURI": {
+   "Description": "ECR Repository URI",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "637423285771.dkr.ecr.eu-west-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/maturity-backend-dev"
+     ]
+    ]
+   }
+  },
+  "DatabaseSecretArn": {
+   "Description": "Database Secret ARN",
+   "Value": {
+    "Ref": "DatabaseSecret86DBB7B3"
+   }
+  },
+  "ClusterName": {
+   "Description": "ECS Cluster Name",
+   "Value": {
+    "Ref": "BackendCluster5086059C"
+   }
+  },
+  "ServiceName": {
+   "Description": "ECS Service Name",
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendService2147DAF9",
+     "Name"
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

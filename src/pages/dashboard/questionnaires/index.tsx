@@ -32,8 +32,7 @@ import { useNavigate } from 'react-router-dom';
 // Types
 interface Questionnaire {
   id_questionnaire: string;
-  fonction: string;
-  thematique: string;
+  nom: string;
   description?: string;
   date_creation: string;
   date_modification: string;
@@ -82,8 +81,7 @@ const QuestionnairesIndex: React.FC = () => {
       // Normaliser les données des questionnaires
       const normalizedQuestionnaires = questionnaireData.map((q: any) => ({
         id_questionnaire: q.id_questionnaire,
-        fonction: q.fonction || q.titre || 'Sans nom',
-        thematique: q.thematique || 'Non catégorisé',
+        nom: q.nom || q.titre || 'Sans nom',
         description: q.description || '',
         date_creation: q.date_creation || new Date().toISOString(),
         date_modification: q.date_modification || q.date_creation || new Date().toISOString()
@@ -210,8 +208,7 @@ const QuestionnairesIndex: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Fonction</TableCell>
-                  <TableCell>Thématique</TableCell>
+                  <TableCell>Nom</TableCell>
                   <TableCell>Description</TableCell>
                   <TableCell>Questions</TableCell>
                   <TableCell>Réponses</TableCell>
@@ -224,15 +221,7 @@ const QuestionnairesIndex: React.FC = () => {
                 {questionnaires.length > 0 ? (
                   questionnaires.map((questionnaire) => (
                     <TableRow key={questionnaire.id_questionnaire} hover>
-                      <TableCell>{questionnaire.fonction}</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={questionnaire.thematique} 
-                          color="primary" 
-                          variant="outlined" 
-                          size="small" 
-                        />
-                      </TableCell>
+                      <TableCell>{questionnaire.nom}</TableCell>
                       <TableCell>
                         {questionnaire.description && questionnaire.description.length > 50
                           ? `${questionnaire.description.substring(0, 50)}...`

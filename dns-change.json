@@ -1,0 +1,11 @@
+﻿{
+  "Changes": [{
+    "Action": "UPSERT",
+    "ResourceRecordSet": {
+      "Name": "_62cae6cb0ff9ba9bb6740bfc390df7d0.e-dsin.fr.",
+      "Type": "CNAME",
+      "TTL": 300,
+      "ResourceRecords": [{"Value": "_d9d1fa4715a7dd134e7e302d6eef5517.xlfgrmvvlj.acm-validations.aws."}]
+    }
+  }]
+}

@@ -1,4 +1,4 @@
-# Dockerfile
+# Dockerfile - Version corrigée
 FROM node:22-alpine AS builder
 
 # Installer les dépendances système nécessaires
@@ -18,9 +18,8 @@ FROM node:22-alpine AS production
 # Installer curl pour health checks
 RUN apk add --no-cache curl
 
-# L'utilisateur 'node' existe déjà dans l'image node:alpine, on l'utilise directement
-USER node
-
+# L'utilisateur 'node' existe déjà dans l'image Node.js Alpine
+# On va juste s'assurer qu'il a les bonnes permissions
 WORKDIR /app
 
 # Copier les dépendances installées
@@ -36,6 +35,9 @@ ENV PORT=3000
 
 # Exposer le port
 EXPOSE 3000
+
+# Utiliser l'utilisateur non-root existant
+USER node
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

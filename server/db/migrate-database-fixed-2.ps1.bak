@@ -1,0 +1,463 @@
+# migrate-database-fixed.ps1 - Script de migration de la base de donnees (VERSION OPTIMISÉE)
+
+param(
+    [Parameter(Mandatory=$false)]
+    [string]$Environment = "dev"
+)
+
+# Configuration depuis les outputs de la Phase 2
+$Config = @{
+    DATABASE_ENDPOINT = "maturitybackend-dev-databaseb269d8bb-rh7bxy6kcqbb.cd6w86yy2wyp.eu-west-1.rds.amazonaws.com"
+    DATABASE_SECRET_ARN = "arn:aws:secretsmanager:eu-west-1:637423285771:secret:maturity-db-dev-1QEB1e"
+    REGION = "eu-west-1"
+    DATABASE_NAME = "maturity_assessment"
+}
+
+Write-Host "DATABASE MIGRATION - ENVIRONMENT: $Environment" -ForegroundColor Green
+Write-Host "===============================================" -ForegroundColor Green
+
+# Fonction pour recuperer les credentials de la base
+function Get-DatabaseCredentials {
+    Write-Host "`nRecuperation des credentials de la base..." -ForegroundColor Cyan
+    
+    try {
+        $SecretValue = aws secretsmanager get-secret-value --secret-id $Config.DATABASE_SECRET_ARN --region $Config.REGION --query 'SecretString' --output text
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "Impossible de recuperer le secret"
+        }
+        
+        $Credentials = $SecretValue | ConvertFrom-Json
+        
+        Write-Host "Credentials recuperes avec succes" -ForegroundColor Green
+        Write-Host "Utilisateur: $($Credentials.username)" -ForegroundColor White
+        return $Credentials
+        
+    } catch {
+        Write-Host "Erreur lors de la recuperation des credentials: $($_.Exception.Message)" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Fonction pour tester la connectivité réseau avant les opérations MySQL
+function Test-NetworkConnectivity {
+    Write-Host "`nTest de connectivité réseau..." -ForegroundColor Cyan
+    
+    try {
+        # Test de résolution DNS
+        Write-Host "Résolution DNS de $($Config.DATABASE_ENDPOINT)..." -ForegroundColor Yellow
+        $DnsResult = Resolve-DnsName -Name $Config.DATABASE_ENDPOINT -ErrorAction Stop
+        $ResolvedIP = $DnsResult.IPAddress
+        Write-Host "✅ DNS résolu: $ResolvedIP" -ForegroundColor Green
+        
+        # Test de connectivité TCP
+        Write-Host "Test de connectivité TCP vers $ResolvedIP:3306..." -ForegroundColor Yellow
+        $TCPClient = New-Object System.Net.Sockets.TcpClient
+        $Connect = $TCPClient.BeginConnect($ResolvedIP, 3306, $null, $null)
+        $Wait = $Connect.AsyncWaitHandle.WaitOne(10000, $false)
+        
+        if ($Wait) {
+            $TCPClient.EndConnect($Connect)
+            $TCPClient.Close()
+            Write-Host "✅ Port 3306 accessible!" -ForegroundColor Green
+            return $true
+        } else {
+            $TCPClient.Close()
+            Write-Host "❌ Port 3306 non accessible (timeout de 10 secondes)" -ForegroundColor Red
+            return $false
+        }
+        
+    } catch {
+        Write-Host "❌ Erreur de connectivité réseau: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+}
+
+# Fonction pour tester la connexion a la base avec retry
+function Test-DatabaseConnection {
+    param($Credentials, $MaxRetries = 3)
+    
+    Write-Host "`nTest de connexion a la base (avec $MaxRetries tentatives)..." -ForegroundColor Cyan
+    
+    for ($i = 1; $i -le $MaxRetries; $i++) {
+        try {
+            Write-Host "Tentative $i/$MaxRetries..." -ForegroundColor Yellow
+            
+            # Créer un fichier de configuration temporaire sécurisé
+            $TempDir = [System.IO.Path]::GetTempPath()
+            $TempFile = [System.IO.Path]::GetRandomFileName()
+            $ConfigFile = Join-Path $TempDir "$TempFile.cnf"
+            
+            $MySQLConfig = @"
+[client]
+host=$($Config.DATABASE_ENDPOINT)
+port=3306
+user=$($Credentials.username)
+password=$($Credentials.password)
+ssl-ca=C:\Users\Marcel-Cédric\maturity-assessment-dasboard\server\eu-west-1-bundle.pem
+ssl-verify-server-cert
+"@
+            
+            $MySQLConfig | Out-File -FilePath $ConfigFile -Encoding UTF8
+            
+            # Tester la connexion avec mysql client
+            $TestQuery = "SELECT 1 as connection_test, NOW() as current_time"
+            $TestResult = & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --defaults-file="$ConfigFile" --connect-timeout=10 --protocol=tcp -e "$TestQuery" 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Connexion réussie!" -ForegroundColor Green
+                Write-Host "Résultat du test:" -ForegroundColor White
+                Write-Host $TestResult -ForegroundColor Gray
+                return $true
+            } else {
+                Write-Host "❌ Tentative $i échouée: $TestResult" -ForegroundColor Red
+                
+                if ($i -lt $MaxRetries) {
+                    Write-Host "Attente de 15 secondes avant la prochaine tentative..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 15
+                }
+            }
+            
+        } catch {
+            Write-Host "❌ Erreur lors de la tentative $i : $($_.Exception.Message)" -ForegroundColor Red
+            
+            if ($i -lt $MaxRetries) {
+                Write-Host "Attente de 15 secondes avant la prochaine tentative..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 15
+            }
+        } finally {
+            Remove-Item $ConfigFile -Force -ErrorAction SilentlyContinue
+        }
+    }
+    
+    return $false
+}
+
+# Fonction pour creer la base de donnees si elle n'existe pas
+function Initialize-Database {
+    param($Credentials)
+    
+    Write-Host "`nInitialisation de la base de donnees..." -ForegroundColor Cyan
+    
+    $TempDir = [System.IO.Path]::GetTempPath()
+    $TempFile = [System.IO.Path]::GetRandomFileName()
+    $ConfigFile = Join-Path $TempDir "$TempFile.cnf"
+    
+    $MySQLConfig = @"
+[client]
+host=$($Config.DATABASE_ENDPOINT)
+port=3306
+user=$($Credentials.username)
+password=$($Credentials.password)
+ssl-ca=C:\Users\Marcel-Cédric\maturity-assessment-dasboard\server\eu-west-1-bundle.pem
+ssl-verify-server-cert
+"@
+    
+    $MySQLConfig | Out-File -FilePath $ConfigFile -Encoding UTF8
+    
+    try {
+        # Créer la base si elle n'existe pas
+        $CreateDBQuery = "CREATE DATABASE IF NOT EXISTS $($Config.DATABASE_NAME) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        $Result = & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --defaults-file="$ConfigFile" --connect-timeout=10 -e "$CreateDBQuery" 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Base de donnees '$($Config.DATABASE_NAME)' creee/verifiee" -ForegroundColor Green
+            
+            # Vérifier que la base existe bien
+            $ShowDBQuery = "SHOW DATABASES LIKE '$($Config.DATABASE_NAME)'"
+            $ShowResult = & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --defaults-file="$ConfigFile" --connect-timeout=10 -e "$ShowDBQuery" 2>&1
+            
+            if ($ShowResult -like "*$($Config.DATABASE_NAME)*") {
+                Write-Host "✅ Base de données confirmée existante" -ForegroundColor Green
+                return $true
+            } else {
+                Write-Host "❌ Base de données non trouvée après création" -ForegroundColor Red
+                return $false
+            }
+        } else {
+            Write-Host "❌ Erreur lors de la creation de la base: $Result" -ForegroundColor Red
+            return $false
+        }
+        
+    } catch {
+        Write-Host "❌ Erreur: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    } finally {
+        Remove-Item $ConfigFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Fonction pour executer le schema SQL
+function Invoke-SchemaMigration {
+    param($Credentials)
+    
+    Write-Host "`nApplication du schema de base de donnees..." -ForegroundColor Cyan
+    
+    # Vérifier que le fichier de schema existe
+    $SchemaFile = "schema-fixed.sql"
+    if (-not (Test-Path $SchemaFile)) {
+        # Essayer d'autres emplacements possibles
+        $PossiblePaths = @(
+            ".\schema-fixed.sql",
+            ".\server\db\schema-fixed.sql",
+            ".\db\schema-fixed.sql",
+            "..\schema-fixed.sql"
+        )
+        
+        $SchemaFile = $null
+        foreach ($Path in $PossiblePaths) {
+            if (Test-Path $Path) {
+                $SchemaFile = $Path
+                break
+            }
+        }
+        
+        if (-not $SchemaFile) {
+            Write-Host "❌ Fichier schema-fixed.sql non trouve dans les emplacements suivants:" -ForegroundColor Red
+            $PossiblePaths | ForEach-Object { Write-Host "   - $_" -ForegroundColor Gray }
+            Write-Host "Assurez-vous d'etre dans le bon repertoire ou de fournir le chemin correct" -ForegroundColor Yellow
+            return $false
+        }
+    }
+    
+    Write-Host "✅ Fichier de schema trouve: $SchemaFile" -ForegroundColor Green
+    
+    $TempDir = [System.IO.Path]::GetTempPath()
+    $TempFile = [System.IO.Path]::GetRandomFileName()
+    $ConfigFile = Join-Path $TempDir "$TempFile.cnf"
+    
+    $MySQLConfig = @"
+[client]
+host=$($Config.DATABASE_ENDPOINT)
+port=3306
+user=$($Credentials.username)
+password=$($Credentials.password)
+database=$($Config.DATABASE_NAME)
+ssl-ca=C:\Users\Marcel-Cédric\maturity-assessment-dasboard\server\eu-west-1-bundle.pem
+ssl-verify-server-cert
+"@
+    
+    $MySQLConfig | Out-File -FilePath $ConfigFile -Encoding UTF8
+    
+    try {
+        Write-Host "Execution du schema depuis: $SchemaFile" -ForegroundColor Yellow
+        Write-Host "Cela peut prendre quelques minutes..." -ForegroundColor Yellow
+        
+        # Executer le fichier SQL avec options optimisées
+        $Result = Get-Content $SchemaFile -Raw | & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --defaults-file="$ConfigFile" --connect-timeout=30 --max_allowed_packet=1073741824 --verbose 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Schema applique avec succes!" -ForegroundColor Green
+            return $true
+        } else {
+            Write-Host "❌ Erreur lors de l'application du schema:" -ForegroundColor Red
+            Write-Host $Result -ForegroundColor Red
+            
+            # Essayer de donner plus d'informations sur l'erreur
+            if ($Result -like "*Access denied*") {
+                Write-Host "💡 L'erreur semble liée aux permissions. Vérifiez que l'utilisateur a les droits CREATE, ALTER, INSERT." -ForegroundColor Yellow
+            } elseif ($Result -like "*timeout*" -or $Result -like "*connection*") {
+                Write-Host "💡 L'erreur semble liée à la connectivité réseau." -ForegroundColor Yellow
+            }
+            
+            return $false
+        }
+        
+    } catch {
+        Write-Host "❌ Erreur: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    } finally {
+        Remove-Item $ConfigFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Fonction pour verifier les tables creees
+function Test-DatabaseSchema {
+    param($Credentials)
+    
+    Write-Host "`nVerification du schema..." -ForegroundColor Cyan
+    
+    $TempDir = [System.IO.Path]::GetTempPath()
+    $TempFile = [System.IO.Path]::GetRandomFileName()
+    $ConfigFile = Join-Path $TempDir "$TempFile.cnf"
+    
+    $MySQLConfig = @"
+[client]
+host=$($Config.DATABASE_ENDPOINT)
+port=3306
+user=$($Credentials.username)
+password=$($Credentials.password)
+database=$($Config.DATABASE_NAME)
+ssl-ca=C:\Users\Marcel-Cédric\maturity-assessment-dasboard\server\eu-west-1-bundle.pem
+ssl-verify-server-cert
+"@
+    
+    $MySQLConfig | Out-File -FilePath $ConfigFile -Encoding UTF8
+    
+    try {
+        # Lister les tables
+        $TablesQuery = "SHOW TABLES"
+        $Tables = & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --defaults-file="$ConfigFile" --connect-timeout=10 -e "$TablesQuery" 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Tables dans la base de données:" -ForegroundColor Green
+            $TableLines = $Tables -split "`n"
+            $TableCount = 0
+            
+            # Tables attendues dans le schema
+            $ExpectedTables = @(
+                "entreprises", "acteurs", "applications", "fonctions", "thematiques",
+                "questionnaires", "questions", "formulaires", "reponses", 
+                "maturity_analyses", "thematique_scores", "historique_scores",
+                "grille_interpretation", "permissions"
+            )
+            
+            $FoundTables = @()
+            
+            foreach ($Line in $TableLines) {
+                $Line = $Line.Trim()
+                if ($Line -and $Line -notmatch "Tables_in_" -and $Line -ne "") {
+                    Write-Host "  $Line" -ForegroundColor White
+                    $FoundTables += $Line
+                    $TableCount++
+                }
+            }
+            
+            Write-Host "`nRésumé:" -ForegroundColor Yellow
+            Write-Host "   Tables créées: $TableCount" -ForegroundColor White
+            Write-Host "   Tables attendues: $($ExpectedTables.Count)" -ForegroundColor White
+            
+            # Vérifier les tables manquantes
+            $MissingTables = $ExpectedTables | Where-Object { $_ -notin $FoundTables }
+            if ($MissingTables.Count -gt 0) {
+                Write-Host "⚠️ Tables manquantes:" -ForegroundColor Red
+                $MissingTables | ForEach-Object { Write-Host "   - $_" -ForegroundColor Red }
+            } else {
+                Write-Host "✅ Toutes les tables principales sont présentes!" -ForegroundColor Green
+            }
+            
+            return $true
+        } else {
+            Write-Host "❌ Erreur lors de la verification: $Tables" -ForegroundColor Red
+            return $false
+        }
+        
+    } catch {
+        Write-Host "❌ Erreur: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    } finally {
+        Remove-Item $ConfigFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# SCRIPT PRINCIPAL
+try {
+    Write-Host "Verification des prerequis..." -ForegroundColor Green
+    
+    # Verifier que mysql client est disponible
+    try {
+        $MySQLVersion = & "C:\Program Files\MariaDB 11.7\bin\mysql.exe" --version
+        Write-Host "✅ MySQL Client disponible" -ForegroundColor Green
+        Write-Host "   Version: $MySQLVersion" -ForegroundColor White
+    } catch {
+        Write-Host "❌ MySQL Client non trouve. Installez-le avec :" -ForegroundColor Red
+        Write-Host "   - Windows: winget install Oracle.MySQL ou MySQL CLI" -ForegroundColor Yellow
+        exit 1
+    }
+    
+    # Verifier AWS CLI et credentials
+    try {
+        $AWSVersion = aws --version
+        Write-Host "✅ AWS CLI disponible" -ForegroundColor Green
+        Write-Host "   Version: $AWSVersion" -ForegroundColor White
+        
+        # Vérifier les credentials
+        $Identity = aws sts get-caller-identity | ConvertFrom-Json
+        Write-Host "✅ Credentials AWS configurés" -ForegroundColor Green
+        Write-Host "   Compte: $($Identity.Account)" -ForegroundColor White
+        Write-Host "   Utilisateur: $($Identity.UserId)" -ForegroundColor White
+    } catch {
+        Write-Host "❌ AWS CLI non trouve ou credentials mal configurés" -ForegroundColor Red
+        Write-Host "Configurez vos credentials avec : aws configure" -ForegroundColor Yellow
+        exit 1
+    }
+    
+    # Étape 1: Récupérer les credentials
+    $Credentials = Get-DatabaseCredentials
+    
+    # Étape 2: Test de connectivité réseau
+    $NetworkOK = Test-NetworkConnectivity
+    if (-not $NetworkOK) {
+        Write-Host "`n❌ PROBLÈME DE CONNECTIVITÉ RÉSEAU DÉTECTÉ" -ForegroundColor Red
+        Write-Host "Votre base RDS n'est pas accessible depuis cette machine." -ForegroundColor Yellow
+        Write-Host "Veuillez d'abord exécuter le script de correction :" -ForegroundColor Yellow
+        Write-Host "   .\rds-quick-fix.ps1" -ForegroundColor White
+        Write-Host "Ou le diagnostic complet :" -ForegroundColor Yellow
+        Write-Host "   .\rds-connectivity-fix.ps1" -ForegroundColor White
+        Write-Host "Puis relancez ce script de migration." -ForegroundColor Yellow
+        exit 1
+    }
+    
+    # Étape 3: Tester la connexion à la base
+    $ConnectionOK = Test-DatabaseConnection -Credentials $Credentials
+    if (-not $ConnectionOK) {
+        Write-Host "`n❌ IMPOSSIBLE DE SE CONNECTER À LA BASE DE DONNÉES" -ForegroundColor Red
+        Write-Host "Vérifiez que :" -ForegroundColor Yellow
+        Write-Host "  - Les credentials sont corrects" -ForegroundColor Yellow
+        Write-Host "  - La base de données est démarrée et accessible" -ForegroundColor Yellow
+        Write-Host "  - Les groupes de sécurité permettent l'accès sur le port 3306" -ForegroundColor Yellow
+        Write-Host "Exécutez d'abord : .\rds-quick-fix.ps1" -ForegroundColor White
+        exit 1
+    }
+    
+    # Étape 4: Initialiser la base
+    $InitOK = Initialize-Database -Credentials $Credentials
+    if (-not $InitOK) {
+        Write-Host "`n❌ Échec de l'initialisation de la base" -ForegroundColor Red
+        exit 1
+    }
+    
+    # Étape 5: Appliquer le schema
+    $SchemaOK = Invoke-SchemaMigration -Credentials $Credentials
+    if (-not $SchemaOK) {
+        Write-Host "`n❌ Échec de l'application du schema" -ForegroundColor Red
+        Write-Host "Vous pouvez essayer d'appliquer le schema manuellement :" -ForegroundColor Yellow
+        Write-Host "mysql -h $($Config.DATABASE_ENDPOINT) -u $($Credentials.username) -P 3306 -p $($Config.DATABASE_NAME) < schema-fixed.sql" -ForegroundColor White
+        exit 1
+    }
+    
+    # Étape 6: Vérifier le schema
+    $VerificationOK = Test-DatabaseSchema -Credentials $Credentials
+    if (-not $VerificationOK) {
+        Write-Host "`n⚠️ Problème lors de la vérification du schema" -ForegroundColor Yellow
+        Write-Host "Le schema a été appliqué mais la vérification a échoué." -ForegroundColor Yellow
+    }
+    
+    Write-Host "`n🎉 MIGRATION DE BASE DE DONNÉES TERMINÉE AVEC SUCCÈS !" -ForegroundColor Green
+    Write-Host "=======================================" -ForegroundColor Green
+    
+    Write-Host "`nInformations de connexion :" -ForegroundColor Cyan
+    Write-Host "   Endpoint : $($Config.DATABASE_ENDPOINT)" -ForegroundColor White
+    Write-Host "   Base : $($Config.DATABASE_NAME)" -ForegroundColor White
+    Write-Host "   Port : 3306" -ForegroundColor White
+    Write-Host "   Utilisateur : $($Credentials.username)" -ForegroundColor White
+    Write-Host "   Mot de passe : [Stocké dans Secrets Manager]" -ForegroundColor White
+    
+    Write-Host "`nProchaines étapes :" -ForegroundColor Yellow
+    Write-Host "   - Infrastructure AWS déployée ✅" -ForegroundColor Green
+    Write-Host "   - Base de données migrée ✅" -ForegroundColor Green
+    Write-Host "   - Déployer l'application backend 🔄" -ForegroundColor Yellow
+    Write-Host "   - Mettre à jour la configuration frontend 🔄" -ForegroundColor Yellow
+    Write-Host "   - Tester la connectivité end-to-end 🔄" -ForegroundColor Yellow
+    
+    Write-Host "`nCommande pour tester la connexion :" -ForegroundColor Cyan
+    Write-Host "mysql -h $($Config.DATABASE_ENDPOINT) -P 3306 -u $($Credentials.username) -p" -ForegroundColor White
+    
+} catch {
+    Write-Host "`n❌ ERREUR LORS DE LA MIGRATION : $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "`nSi le problème persiste :" -ForegroundColor Yellow
+    Write-Host "   - Vérifiez la connectivité réseau avec : .\rds-quick-fix.ps1" -ForegroundColor White
+    Write-Host "   - Consultez les logs AWS RDS dans la console" -ForegroundColor White
+    Write-Host "   - Vérifiez les groupes de sécurité et NACLs" -ForegroundColor White
+    exit 1
+}

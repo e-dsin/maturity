@@ -1,10 +1,27 @@
-// src/services/api.ts
+// src/services/api.ts - Version mise à jour pour le backend déployé
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import logger from '../utils/logger';
 
-// Utiliser import.meta.env pour Vite
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Configuration des URLs selon l'environnement
+const getAPIBaseURL = (): string => {
+  // En production ou quand VITE_API_URL est définie, utiliser la valeur configurée
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Par défaut, utiliser le backend déployé
+  return 'https://api-dev.dev-maturity.e-dsin.fr';
+};
+
+const API_URL = getAPIBaseURL();
 const API_PREFIX = '/api';
+
+console.log('🌐 Configuration API:', {
+  baseURL: API_URL,
+  environment: import.meta.env.MODE,
+  isDev: import.meta.env.DEV,
+  customUrl: import.meta.env.VITE_API_URL
+});
 
 // Créer une instance d'axios avec la configuration de base
 const apiClient: AxiosInstance = axios.create({
@@ -12,6 +29,9 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Ajouter timeout et credentials
+  timeout: 30000,
+  withCredentials: true,
 });
 
 // Intercepteur pour les requêtes
@@ -28,10 +48,18 @@ apiClient.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     
+    // Ajouter les headers CORS explicites
+    if (config.headers) {
+      config.headers['Accept'] = 'application/json';
+      config.headers['Cache-Control'] = 'no-cache';
+    }
+    
     // Logger la requête en toute sécurité
     const logData = {
       method: config.method?.toUpperCase() || 'GET',
-      url: config.url || 'unknown'
+      url: config.url || 'unknown',
+      baseURL: config.baseURL,
+      hasToken: !!token
     };
     
     // Ajouter les données de manière sécurisée en mode dev uniquement
@@ -93,17 +121,35 @@ apiClient.interceptors.response.use(
       status: error.response?.status,
       statusText: error.response?.statusText || '',
       duration: error.config ? calculateRequestDuration(error.config) : null,
-      message: error?.message || 'Erreur inconnue'
+      message: error?.message || 'Erreur inconnue',
+      baseURL: error.config?.baseURL
     };
     
-    // Si token expiré ou non valide (statut 401), redirection vers la page de connexion
-    if (error.response && error.response.status === 401) {
+    // Gestion spécifique des erreurs
+    if (error.response?.status === 401) {
       logger.warn('Session expirée ou non authentifiée', errorData);
-      // Redirection vers la page de connexion
+      // Nettoyer le token et rediriger vers login
       localStorage.removeItem('auth_token');
-      window.location.href = '/auth/login';
+      
+      // Éviter les redirections infinies
+      if (!window.location.pathname.includes('/auth/login')) {
+        window.location.href = '/auth/login';
+      }
+    } else if (error.response?.status === 0 || error.code === 'NETWORK_ERROR') {
+      // Erreur de réseau
+      logger.error('Erreur de réseau - Backend inaccessible', {
+        ...errorData,
+        type: 'NETWORK_ERROR',
+        backendURL: API_URL
+      });
+    } else if (error.response?.status >= 500) {
+      // Erreur serveur
+      logger.error('Erreur serveur backend', {
+        ...errorData,
+        type: 'SERVER_ERROR'
+      });
     } else {
-      // Logger d'autres erreurs
+      // Autres erreurs (400, 403, 404, etc.)
       logger.error('Erreur de réponse API', {
         ...errorData,
         // Inclure les données de réponse en développement uniquement
@@ -124,8 +170,22 @@ const normalizePath = (url: string): string => {
   if (url.startsWith(API_PREFIX)) {
     return url;
   }
-  // Sinon, s'assurer que le chemin commence par /
-  return `${API_PREFIX}${url.startsWith('/') ? url : `/${url}`}`;
+  
+  // Endpoints spéciaux qui ne nécessitent pas /api/ (health checks, etc.)
+  const specialEndpoints = ['/health', '/health-simple'];
+  if (specialEndpoints.some(endpoint => url.startsWith(endpoint))) {
+    return url;
+  }
+  
+  // Pour tous les autres endpoints, ajouter /api/
+  const normalizedUrl = `${API_PREFIX}${url.startsWith('/') ? url : `/${url}`}`;
+  
+  // Debug en développement
+  if (import.meta.env.DEV) {
+    console.log(`🔄 URL Normalization: "${url}" → "${normalizedUrl}"`);
+  }
+  
+  return normalizedUrl;
 };
 
 // Fonction pour calculer la durée d'une requête de manière sécurisée
@@ -155,10 +215,11 @@ const withPerformanceLogging = async <T>(
     const duration = performance.now() - startTime;
     
     // Logger le succès uniquement si la durée est anormalement longue
-    if (duration > 1000) { // Plus d'une seconde
-      logger.info(`API Performance: ${method} ${normalizedUrl} - ${Math.round(duration)}ms`, {
+    if (duration > 2000) { // Plus de 2 secondes
+      logger.warn(`API Performance: ${method} ${normalizedUrl} - ${Math.round(duration)}ms (SLOW)`, {
         ...extraDetails,
-        duration
+        duration,
+        baseURL: API_URL
       });
     }
     
@@ -169,8 +230,33 @@ const withPerformanceLogging = async <T>(
   }
 };
 
-// Service API
+// Test de connectivité
+export const testConnection = async (): Promise<boolean> => {
+  try {
+    await apiClient.get('/health', { timeout: 5000 });
+    logger.info('✅ Test de connectivité réussi', { backendURL: API_URL });
+    return true;
+  } catch (error) {
+    logger.error('❌ Test de connectivité échoué', { 
+      backendURL: API_URL,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    return false;
+  }
+};
+
+// Service API avec gestion des erreurs améliorée
 const api = {
+  /**
+   * Test de connectivité au backend
+   */
+  testConnection,
+
+  /**
+   * Récupère l'URL de base configurée
+   */
+  getBaseURL: () => API_URL,
+
   /**
    * Effectue une requête GET
    * @param url - URL de la requête

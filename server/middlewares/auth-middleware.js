@@ -129,10 +129,10 @@ const requireRole = (...roles) => {
 };
 
 // Middleware pour les consultants uniquement
-const requireConsultant = requireRole('CONSULTANT');
+const requireConsultant = requireRole('CONSULTANT','ADMINISTRATEUR');
 
 // Middleware pour les managers et consultants
-const requireManagerOrConsultant = requireRole('MANAGER', 'CONSULTANT');
+const requireManagerOrConsultant = requireRole('MANAGER', 'CONSULTANT','ADMINISTRATEUR');
 
 // Helper pour obtenir les permissions d'un utilisateur
 const getUserPermissions = async (userId) => {

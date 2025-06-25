@@ -5,6 +5,31 @@ const { pool } = require('../db/dbConnection');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
+
+const calculateEntrepriseScore = async (pool, entrepriseId) => {
+  try {
+    // Récupérer le score moyen des dernières analyses des applications de cette entreprise
+    const [scoreResults] = await pool.query(`
+      SELECT AVG(ma.score_global) as score_global
+      FROM applications a
+      LEFT JOIN maturity_analyses ma ON a.id_application = ma.id_application
+      WHERE a.id_entreprise = ?
+      AND ma.id_analyse IN (
+        SELECT MAX(id_analyse) FROM maturity_analyses 
+        WHERE id_application = a.id_application
+        GROUP BY id_application
+      )
+      AND ma.score_global IS NOT NULL
+    `, [entrepriseId]);
+    
+    const score = scoreResults[0]?.score_global || 0;
+    return parseFloat(score) || 0;
+  } catch (error) {
+    console.warn(`Erreur calcul score entreprise ${entrepriseId}:`, error);
+    return 0;
+  }
+};
+
 // Fonction helper pour trouver une fonction par nom dans la BD
 async function findFonctionByNameFromDB(connection, fonctionName) {
   try {
@@ -117,57 +142,28 @@ async function findThematicLevelFromDB(connection, idFonction, thematiqueNom, sc
 // GET all enterprises with their scores
 router.get('/', async (req, res) => {
   try {
-    logger.debug('GET /api/entreprises - Retrieving all enterprises');
+    logger.debug('GET /api/entreprises - Retrieving all enterprises with calculated scores');
     
-    try {
-      // Get enterprises with their scores
-      const [entreprises] = await pool.query(`
-        SELECT e.*, 
-               es.score_global, 
-               es.date_calcul,
-               (SELECT COUNT(*) FROM applications a WHERE a.id_entreprise = e.id_entreprise) as nombre_applications
-        FROM entreprises e
-        LEFT JOIN (
-          SELECT id_entreprise, score_global, date_mesure as date_calcul
-          FROM historique_scores_entreprises
-          WHERE (id_entreprise, date_mesure) IN (
-            SELECT id_entreprise, MAX(date_mesure)
-            FROM historique_scores_entreprises
-            GROUP BY id_entreprise
-          )
-        ) es ON e.id_entreprise = es.id_entreprise
-        ORDER BY e.nom_entreprise
-      `);
+    const [entreprises] = await pool.query(`
+      SELECT e.*
+      FROM entreprises e
+      ORDER BY e.nom_entreprise
+    `);
+    
+    // Calculer les scores pour chaque entreprise
+    const entreprisesWithScores = await Promise.all(entreprises.map(async (entreprise) => {
+      const score_global = await calculateEntrepriseScore(pool, entreprise.id_entreprise);
       
-  // Juste avant le res.json() final
-  console.log(`=== RÉPONSE ENVOYÉE PAR L'API ===`);
-  const result = Object.values(functionsMap).sort((a, b) => a.nom.localeCompare(b.nom));
-  result.forEach((f, index) => {
-    console.log(`Fonction ${index}:`, {
-      id: f.id,
-      nom: f.nom,
-      score_global: f.score_global,
-      niveau: f.niveau,
-      cles_disponibles: Object.keys(f)
-    });
-  });
-
-      res.status(200).json(entreprises);
-    } catch (error) {
-      logger.warn('Error with complex query, trying simple query:', { error });
-      
-      // Fallback to simpler query
-      const [entreprises] = await pool.query(`
-        SELECT e.*, 
-               (SELECT COUNT(*) FROM applications a WHERE a.id_entreprise = e.id_entreprise) as nombre_applications
-        FROM entreprises e
-        ORDER BY e.nom_entreprise
-      `);      
-
-      res.status(200).json(entreprises);
-    }
+      return {
+        ...entreprise,
+        score_global: score_global
+      };
+    }));
+    
+    logger.info(`✅ ${entreprisesWithScores.length} entreprises avec scores calculés récupérées`);
+    res.status(200).json(entreprisesWithScores);
   } catch (error) {
-    logger.error('Error retrieving enterprises:', { error });
+    logger.error('Error retrieving enterprises with scores:', { error });
     res.status(500).json({ message: 'Server error while retrieving enterprises' });
   }
 });
@@ -186,22 +182,25 @@ router.get('/:id/maturity-analysis', async (req, res) => {
 
     // Get maturity analysis data
     const [maturityData] = await connection.query(`
-      SELECT 
-        e.nom_entreprise AS entreprise,
-        f.nom AS fonction,
-        t.nom AS thematique,
-        AVG(r.score) AS score_moyen
-      FROM entreprises e
-      JOIN applications a ON e.id_entreprise = a.id_entreprise
-      JOIN formulaires frm ON a.id_application = frm.id_application
-      JOIN reponses r ON frm.id_formulaire = r.id_formulaire
-      JOIN questions q ON r.id_question = q.id_question
-      JOIN thematiques t ON q.id_thematique = t.id_thematique
-      JOIN fonctions f ON t.id_fonction = f.id_fonction
-      WHERE e.id_entreprise = ?
-      GROUP BY e.nom_entreprise, f.nom, t.nom
-      ORDER BY e.nom_entreprise, f.nom, t.nom
-    `, [id]);
+  SELECT 
+    e.nom_entreprise AS entreprise,
+    f.nom AS fonction,
+    t.nom AS thematique,
+    AVG(ts.score) AS score_moyen,
+    COUNT(DISTINCT a.id_application) as nb_applications
+  FROM entreprises e
+  INNER JOIN applications a ON e.id_entreprise = a.id_entreprise
+  INNER JOIN maturity_analyses ma ON a.id_application = ma.id_application
+  INNER JOIN thematique_scores ts ON ma.id_analyse = ts.id_analyse
+  INNER JOIN thematiques t ON ts.thematique = t.nom
+  INNER JOIN fonctions f ON t.id_fonction = f.id_fonction
+  WHERE e.id_entreprise = ?
+  AND ts.score IS NOT NULL
+  AND ts.score > 0
+  GROUP BY e.nom_entreprise, f.nom, t.nom
+  HAVING score_moyen > 0
+  ORDER BY f.nom, t.nom
+`, [id]);
 
     if (maturityData.length === 0) {
       return res.status(404).json({ message: 'No maturity data found for this enterprise' });
@@ -546,129 +545,211 @@ router.get('/:id/fonctions', async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;
-    logger.debug(`GET /api/entreprises/${id}/fonctions - Retrieving fonction analysis for enterprise`);
+    logger.debug(`GET /api/entreprises/${id}/fonctions - Récupération des fonctions évaluées avec scores`);
+
+    // Vérifier que l'entreprise existe
+    const [entreprises] = await connection.query(
+      'SELECT id_entreprise, nom_entreprise FROM entreprises WHERE id_entreprise = ?', 
+      [id]
+    );
     
-    // Check if enterprise exists
-    const [entreprises] = await connection.query(`SELECT * FROM entreprises WHERE id_entreprise = ?`, [id]);
     if (entreprises.length === 0) {
-      return res.status(404).json({ message: 'Enterprise not found' });
+      logger.info(`Entreprise ${id} non trouvée`);
+      return res.status(404).json({ 
+        message: 'Cette entreprise n\'existe pas',
+        score_global: 0,
+        fonctions: []
+      });
     }
-    
-    // Get all fonctions with their average scores for this enterprise
+
+    // Récupérer les fonctions évaluées pour cette entreprise
     const [fonctions] = await connection.query(`
-      SELECT f.id_fonction, f.nom, f.description,
-             COALESCE(AVG(ts.score), 0) as score_moyen,
-             COUNT(DISTINCT a.id_application) as nombre_applications,
-             COUNT(DISTINCT ts.thematique) as nombre_thematiques
+      SELECT DISTINCT f.id_fonction, f.nom, f.description, f.ordre
       FROM fonctions f
-      LEFT JOIN thematiques t ON f.id_fonction = t.id_fonction
-      LEFT JOIN thematique_scores ts ON t.nom = ts.thematique
-      LEFT JOIN maturity_analyses ma ON ts.id_analyse = ma.id_analyse
-      LEFT JOIN applications a ON ma.id_application = a.id_application
-      WHERE a.id_entreprise = ? OR a.id_entreprise IS NULL
-      GROUP BY f.id_fonction, f.nom, f.description
-      ORDER BY f.nom
+      JOIN thematiques t ON t.id_fonction = f.id_fonction
+      JOIN questions q ON q.id_thematique = t.id_thematique
+      JOIN reponses r ON r.id_question = q.id_question
+      JOIN formulaires frm ON r.id_formulaire = frm.id_formulaire
+      JOIN acteurs act ON frm.id_acteur = act.id_acteur
+      WHERE act.id_entreprise = ?
+        AND r.score IS NOT NULL
+        AND f.actif = TRUE
+      ORDER BY f.ordre, f.nom
     `, [id]);
-    
-    // Get themes for each fonction and format the response to match frontend expectations
-    const formattedFonctions = await Promise.all(fonctions.map(async (func) => {
-      const [themes] = await connection.query(`
-        SELECT t.id_thematique, t.nom, t.description,
-               COALESCE(AVG(ts.score), 0) as score_moyen,
-               COUNT(DISTINCT ts.id_score) as nombre_evaluations
-        FROM thematiques t
-        LEFT JOIN thematique_scores ts ON t.nom = ts.thematique
-        LEFT JOIN maturity_analyses ma ON ts.id_analyse = ma.id_analyse
-        LEFT JOIN applications a ON ma.id_application = a.id_application
-        WHERE t.id_fonction = ? AND (a.id_entreprise = ? OR a.id_entreprise IS NULL)
-        GROUP BY t.id_thematique, t.nom, t.description
-        ORDER BY t.nom
-      `, [func.id_fonction, id]);
-      
-      // Récupérer le niveau depuis la BD
-      const scoreValue = parseFloat(func.score_moyen) || 0;
-      const globalLevel = await findGlobalLevelFromDB(connection, func.id_fonction, scoreValue);
-      
-      let niveau, recommandations;
-      if (globalLevel) {
-        niveau = globalLevel.niveau;
-        recommandations = globalLevel.recommandations;
-      } else {
-        // Fallback générique
-        if (scoreValue >= 4.5) niveau = "Niveau 5 - Optimisé";
-        else if (scoreValue >= 3.5) niveau = "Niveau 4 - Géré";
-        else if (scoreValue >= 2.5) niveau = "Niveau 3 - Mesuré";
-        else if (scoreValue >= 1.5) niveau = "Niveau 2 - Défini";
-        else niveau = "Niveau 1 - Initial";
-        
-        if (scoreValue >= 4.5) {
-          recommandations = "Maintenir l'excellence par l'innovation continue.";
-        } else if (scoreValue >= 3.5) {
-          recommandations = "Optimiser les processus existants.";
-        } else if (scoreValue >= 2.5) {
-          recommandations = "Améliorer les processus et renforcer les mesures.";
-        } else if (scoreValue >= 1.5) {
-          recommandations = "Standardiser les pratiques et formaliser les processus.";
-        } else {
-          recommandations = "Établir les fondations et les pratiques de base.";
-        }
-      }
-      
-      // Format themes in the expected structure
-      const formattedThemes = await Promise.all(themes.map(async (theme) => {
-        const themeScore = parseFloat(theme.score_moyen) || 0;
-        
-        // Récupérer le niveau thématique depuis la BD
-        const thematicLevel = await findThematicLevelFromDB(connection, func.id_fonction, theme.nom, themeScore);
-        
-        let themeNiveau, themeRecommandations;
-        
-        if (thematicLevel) {
-          themeNiveau = thematicLevel.niveau;
-          themeRecommandations = thematicLevel.recommandations;
-        } else {
-          // Fallback générique
-          if (themeScore >= 3.5) {
-            themeNiveau = `${theme.nom} - Avancé`;
-            themeRecommandations = "Capitaliser sur les acquis. Promouvoir l'innovation.";
-          } else if (themeScore >= 1.5) {
-            themeNiveau = `${theme.nom} - Intermédiaire`;
-            themeRecommandations = "Standardiser et renforcer les processus existants.";
-          } else {
-            themeNiveau = `${theme.nom} - Faible`;
-            themeRecommandations = "Structurer les fondations. Mettre en place des pratiques de base et sensibiliser les équipes.";
+
+    logger.debug(`Fonctions évaluées trouvées: ${fonctions.length}`);
+
+    const fonctionsAvecScores = [];
+
+    // Pour chaque fonction évaluée, récupérer les thématiques et calculer les scores
+    for (const fonction of fonctions) {
+      try {
+        // Récupérer les thématiques évaluées de cette fonction
+        const [thematiques] = await connection.query(`
+          SELECT DISTINCT t.id_thematique, t.nom, t.description
+          FROM thematiques t
+          JOIN questions q ON q.id_thematique = t.id_thematique
+          JOIN reponses r ON r.id_question = q.id_question
+          JOIN formulaires frm ON r.id_formulaire = frm.id_formulaire
+          JOIN acteurs act ON frm.id_acteur = act.id_acteur
+          WHERE act.id_entreprise = ?
+            AND t.id_fonction = ?
+            AND r.score IS NOT NULL
+            AND t.actif = TRUE
+          ORDER BY t.ordre, t.nom
+        `, [id, fonction.id_fonction]);
+
+        logger.debug(`Thématiques pour fonction ${fonction.id_fonction}: ${thematiques.length}`);
+
+        const thematiquesAvecScores = [];
+        let totalScoreFonction = 0;
+        let nbThematiquesAvecScores = 0;
+
+        for (const thematique of thematiques) {
+          try {
+            // Calculer le score moyen pour cette thématique
+            const [scoreData] = await connection.query(`
+              SELECT 
+                AVG(r.score) as score_moyen,
+                COUNT(DISTINCT r.id_formulaire) as nb_evaluations,
+                MAX(frm.date_modification) as derniere_evaluation
+              FROM reponses r
+              JOIN questions q ON r.id_question = q.id_question
+              JOIN formulaires frm ON r.id_formulaire = frm.id_formulaire
+              JOIN acteurs act ON frm.id_acteur = act.id_acteur
+              WHERE act.id_entreprise = ?
+                AND q.id_thematique = ?
+                AND r.score IS NOT NULL
+            `, [id, thematique.id_thematique]);
+
+            const score = scoreData[0]?.score_moyen ? parseFloat(scoreData[0].score_moyen) : 0;
+
+            // Récupérer le niveau et les recommandations pour la thématique
+            let niveauThematique = null;
+            if (score > 0) {
+              const [niveaux] = await connection.query(`
+                SELECT niveau, description, recommandations
+                FROM niveaux_thematiques 
+                WHERE id_thematique = ? 
+                  AND ? BETWEEN score_min AND score_max
+                ORDER BY score_min DESC
+                LIMIT 1
+              `, [thematique.id_thematique, score]);
+              
+              if (niveaux.length > 0) {
+                niveauThematique = niveaux[0];
+              }
+            }
+
+            if (score > 0) {
+              thematiquesAvecScores.push({
+                id: thematique.id_thematique,
+                nom: thematique.nom,
+                description: thematique.description || '',
+                score: parseFloat(score.toFixed(2)),
+                score_moyen: parseFloat(score.toFixed(2)),
+                nb_evaluations: scoreData[0]?.nb_evaluations || 0,
+                derniere_evaluation: scoreData[0]?.derniere_evaluation || null,
+                niveau: niveauThematique?.niveau || '',
+                description_niveau: niveauThematique?.description || '',
+                recommandations: niveauThematique?.recommandations || ''
+              });
+
+              totalScoreFonction += score;
+              nbThematiquesAvecScores++;
+            }
+          } catch (themeError) {
+            logger.error(`Erreur lors du traitement de la thématique ${thematique.id_thematique}`, { error: themeError.message });
+            continue; // Skip this thematique but continue with others
           }
         }
-        
-        return {
-          id: theme.id_thematique,
-          id_fonction: func.id_fonction,
-          nom: theme.nom,
-          description: theme.description || "Description de la thématique",
-          score: themeScore.toFixed(1),
-          score_moyen: themeScore.toFixed(1),
-          niveau: themeNiveau,
-          recommandations: themeRecommandations
-        };
-      }));
-      
-      // Return formatted function with renamed properties to match frontend expectations
-      return {
-        id: func.id_fonction,
-        nom: func.nom,
-        description: func.description || "",
-        ordre: 0,
-        score_global: scoreValue.toFixed(1),
-        niveau: niveau,
-        recommandations: recommandations,
-        thematiques: formattedThemes
-      };
-    }));
-    
-    res.status(200).json(formattedFonctions);
+
+        // Calculer le score global de la fonction
+        const scoreFonction = nbThematiquesAvecScores > 0 
+          ? totalScoreFonction / nbThematiquesAvecScores 
+          : 0;
+
+        if (scoreFonction > 0) {
+          // Récupérer le niveau global et les recommandations pour la fonction
+          let niveauGlobal = null;
+          try {
+            const [niveauxGlobaux] = await connection.query(`
+              SELECT niveau, description, recommandations
+              FROM niveaux_globaux 
+              WHERE id_fonction = ? 
+                AND ? BETWEEN score_min AND score_max
+              ORDER BY score_min DESC
+              LIMIT 1
+            `, [fonction.id_fonction, scoreFonction]);
+            
+            if (niveauxGlobaux.length > 0) {
+              niveauGlobal = niveauxGlobaux[0];
+            }
+          } catch (niveauError) {
+            logger.error(`Erreur lors de la récupération des niveaux globaux pour fonction ${fonction.id_fonction}`, { error: niveauError.message });
+          }
+
+          // Récupérer l'historique des scores pour cette fonction
+          let historique = [];
+          try {
+            const [hist] = await connection.query(`
+              SELECT 
+                DATE(frm.date_modification) as date_evaluation,
+                AVG(r.score) as score_moyen
+              FROM reponses r
+              JOIN questions q ON r.id_question = q.id_question
+              JOIN thematiques t ON q.id_thematique = t.id_thematique
+              JOIN formulaires frm ON r.id_formulaire = frm.id_formulaire
+              JOIN acteurs act ON frm.id_acteur = act.id_acteur
+              WHERE act.id_entreprise = ?
+                AND t.id_fonction = ?
+                AND r.score IS NOT NULL
+              GROUP BY DATE(frm.date_modification)
+              ORDER BY DATE(frm.date_modification) DESC
+              LIMIT 12
+            `, [id, fonction.id_fonction]);
+            historique = hist;
+          } catch (histError) {
+            logger.error(`Erreur lors de la récupération de l'historique pour fonction ${fonction.id_fonction}`, { error: histError.message });
+          }
+
+          fonctionsAvecScores.push({
+            id: fonction.id_fonction,
+            nom: fonction.nom,
+            description: fonction.description || '',
+            ordre: fonction.ordre || 0,
+            score_global: parseFloat(scoreFonction.toFixed(2)),
+            niveau: niveauGlobal?.niveau || '',
+            description_niveau: niveauGlobal?.description || '',
+            recommandations: niveauGlobal?.recommandations || '',
+            thematiques: thematiquesAvecScores,
+            historique
+          });
+        }
+      } catch (fonctionError) {
+        logger.error(`Erreur lors du traitement de la fonction ${fonction.id_fonction}`, { error: fonctionError.message });
+        continue; // Skip this function but continue with others
+      }
+    }
+
+    // Calculer le score global de l'entreprise
+    const scoreGlobal = fonctionsAvecScores.length > 0
+      ? parseFloat((fonctionsAvecScores.reduce((sum, f) => sum + f.score_global, 0) / fonctionsAvecScores.length).toFixed(2))
+      : 0;
+
+    logger.debug(`Fonctions avec scores retournées: ${fonctionsAvecScores.length}, Score global: ${scoreGlobal}`);
+
+    res.json({
+      score_global: scoreGlobal,
+      fonctions: fonctionsAvecScores
+    });
+
   } catch (error) {
-    logger.error(`Error retrieving fonction analysis for enterprise ${req.params.id}:`, { error });
-    res.status(500).json({ message: 'Server error while retrieving fonction analysis' });
+    logger.error(`Erreur lors de la récupération des fonctions avec scores pour entreprise ${req.params.id}`, { 
+      error: error.message, 
+      stack: error.stack 
+    });
+    res.status(500).json({ message: 'Erreur serveur interne', details: error.message });
   } finally {
     connection.release();
   }

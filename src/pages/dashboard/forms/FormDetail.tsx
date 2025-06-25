@@ -1,64 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Box,
-  CircularProgress,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  Card,
-  CardContent,
-  Divider,
-  TextField,
-  FormControl,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
-  IconButton,
-  Chip,
-  Alert,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Tooltip,
-  Badge,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Breadcrumbs,
-  Link
+  Container, Grid, Paper, Typography, Box, CircularProgress, Button,
+  Card, CardContent, Divider, TextField, FormControl, FormControlLabel, RadioGroup, Radio,
+  IconButton, Chip, Alert, Accordion, AccordionSummary, AccordionDetails, Tooltip, Badge,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Breadcrumbs, Link
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
-  Save as SaveIcon,
-  Send as SendIcon,
-  Check as CheckIcon,
-  Edit as EditIcon,
-  ExpandMore as ExpandMoreIcon,
-  HomeOutlined as HomeIcon,
-  Business as BusinessIcon,
-  AccountTree as FunctionIcon,
-  Person as PersonIcon,
-  Warning as WarningIcon,
-  Comment as CommentIcon,
-  InfoOutlined as InfoIcon
+  ArrowBack as ArrowBackIcon, Save as SaveIcon, Send as SendIcon, Check as CheckIcon,
+  ExpandMore as ExpandMoreIcon, Home as HomeIcon, Business as BusinessIcon,
+  AccountTree as FunctionIcon, Person as PersonIcon, Warning as WarningIcon,
+  Comment as CommentIcon, InfoOutlined as InfoIcon
 } from '@mui/icons-material';
 import api from '../../../services/api';
 
-import { Formulaire, Reponse } from '../../../types/Formulaire';
+// Interfaces mises à jour
+interface Thematique {
+  id: string;
+  nom: string;
+}
+
+interface Formulaire {
+  id_formulaire: string;
+  id_acteur: string;
+  acteur_nom: string;
+  id_application: string;
+  nom_application: string;
+  id_entreprise: string;
+  nom_entreprise: string;
+  id_questionnaire: string;
+  questionnaire_nom: string;
+  thematiques: Thematique[];
+  fonctions: string[];
+  date_creation: string;
+  date_modification: string;
+  statut: 'Brouillon' | 'Soumis' | 'Validé';
+  progression: number;
+}
+
+interface Reponse {
+  id_reponse: string;
+  id_formulaire: string;
+  id_question: string;
+  question_texte: string;
+  valeur_reponse: string;
+  score: number;
+  commentaire?: string;
+}
 
 interface Question {
   id_question: string;
+  id_thematique: string;
   texte: string;
   ponderation: number;
   ordre: number;
+  aide_reponse?: string;
+  date_creation: string;
+  date_modification: string;
 }
 
 const FormDetail: React.FC = () => {
@@ -69,905 +67,823 @@ const FormDetail: React.FC = () => {
   const [formulaire, setFormulaire] = useState<Formulaire | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [reponses, setReponses] = useState<Reponse[]>([]);
-  const [currentStep, setCurrentStep] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [openConfirmDialog, setOpenConfirmDialog] = useState<{ open: boolean, action: 'Soumis' | 'Validé' | null }>({ open: false, action: null });
-
-  // Nombre de questions par étape
-  const questionsPerStep = 5;
+  const [openConfirmDialog, setOpenConfirmDialog] = useState<{ open: boolean; action: 'Soumis' | 'Validé' | null }>({ open: false, action: null });
 
   // Charger les données du formulaire
   useEffect(() => {
     const fetchFormulaire = async () => {
       if (!id) {
-        setError("Identifiant du formulaire manquant");
+        setError('Identifiant du formulaire manquant');
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         // Récupérer les informations du formulaire
         const formulaireResponse = await api.get(`formulaires/${id}`);
-        
-        let formulaireData = null;
-        if (formulaireResponse && typeof formulaireResponse === 'object') {
-          if (Array.isArray(formulaireResponse)) {
-            formulaireData = formulaireResponse[0]; // Prendre le premier si c'est un tableau
-          } else if (formulaireResponse.data) {
-            formulaireData = formulaireResponse.data;
-          } else {
-            formulaireData = formulaireResponse;
-          }
+        const formulaireData = formulaireResponse.data || formulaireResponse;
+
+        if (!formulaireData || typeof formulaireData !== 'object') {
+          throw new Error('Format de données du formulaire inattendu');
         }
-        
-        if (!formulaireData) {
-          setError("Format de données du formulaire inattendu");
-          setLoading(false);
-          return;
-        }
-        
-        // Normaliser les données du formulaire
+
+        // Normaliser les données
         const normalizedFormulaire: Formulaire = {
-            id_formulaire: formulaireData.id_formulaire,
-            id_acteur: formulaireData.id_acteur || '',
-            acteur_nom: formulaireData.acteur_nom || 'Utilisateur inconnu',
-            id_application: formulaireData.id_application || '',
-            nom_application: formulaireData.nom_application || 'Application inconnue',
-            id_entreprise: formulaireData.id_entreprise || '',
-            nom_entreprise: formulaireData.nom_entreprise || 'Entreprise inconnue',
-            id_questionnaire: formulaireData.id_questionnaire || '',
-            questionnaire_titre: formulaireData.questionnaire_titre || 'Questionnaire inconnu',
-            fonction: formulaireData.fonction || 'Fonction inconnue',
-            thematique: formulaireData.thematique || 'Non catégorisé',
-            date_creation: formulaireData.date_creation || new Date().toISOString(),
-            date_modification: formulaireData.date_modification || formulaireData.date_creation || new Date().toISOString(),
-            statut: formulaireData.statut || 'Brouillon',
-            progression: formulaireData.progression || 0
-          };
-          
-          setFormulaire(normalizedFormulaire);
-          
-          // Récupérer les questions du questionnaire
-          const questionsResponse = await api.get(`questionnaires/${normalizedFormulaire.id_questionnaire}/questions`);
-          
-          let questionsData: Question[] = [];
-          if (Array.isArray(questionsResponse)) {
-            questionsData = questionsResponse;
-          } else if (questionsResponse && questionsResponse.data && Array.isArray(questionsResponse.data)) {
-            questionsData = questionsResponse.data;
-          } else {
-            console.warn('Format de réponse inattendu pour les questions:', questionsResponse);
-          }
-          
-          // Normaliser et trier les questions par ordre
-          const normalizedQuestions = questionsData
-            .map(q => ({
-              id_question: q.id_question,
-              texte: q.texte || `Question ${q.ordre || '?'}`,
-              ponderation: q.ponderation || 1,
-              ordre: q.ordre || 0
-            }))
-            .sort((a, b) => a.ordre - b.ordre);
-          
-          setQuestions(normalizedQuestions);
-          
-          // Récupérer les réponses existantes
-          const reponsesResponse = await api.get(`formulaires/${id}/reponses`);
-          
-          let reponsesData: Reponse[] = [];
-          if (Array.isArray(reponsesResponse)) {
-            reponsesData = reponsesResponse;
-          } else if (reponsesResponse && reponsesResponse.data && Array.isArray(reponsesResponse.data)) {
-            reponsesData = reponsesResponse.data;
-          } else {
-            console.warn('Format de réponse inattendu pour les réponses:', reponsesResponse);
-          }
-          
-          // Normaliser les réponses
-          const normalizedReponses = reponsesData.map(r => ({
-            id_reponse: r.id_reponse,
-            id_formulaire: r.id_formulaire || id,
-            id_question: r.id_question,
-            question_texte: r.question_texte || '',
-            valeur_reponse: r.valeur_reponse || '',
-            score: r.score || 0,
-            commentaire: r.commentaire
-          }));
-          
-          setReponses(normalizedReponses);
-        } catch (error) {
-          console.error('Erreur lors du chargement du formulaire:', error);
-          setError('Erreur lors du chargement du formulaire. Veuillez réessayer plus tard.');
-        } finally {
-          setLoading(false);
+          id_formulaire: formulaireData.id_formulaire || '',
+          id_acteur: formulaireData.acteur?.id_acteur || '',
+          acteur_nom: formulaireData.acteur?.nom_prenom || 'Utilisateur inconnu',
+          id_application: formulaireData.application?.id_application || '',
+          nom_application: formulaireData.application?.nom_application || 'Application inconnue',
+          id_entreprise: formulaireData.entreprise?.id_entreprise || '',
+          nom_entreprise: formulaireData.entreprise?.nom_entreprise || 'Entreprise inconnue',
+          id_questionnaire: formulaireData.questionnaire?.id_questionnaire || '',
+          questionnaire_nom: formulaireData.questionnaire?.nom || 'Questionnaire inconnu',
+          thematiques: Array.isArray(formulaireData.questionnaire?.thematiques)
+            ? formulaireData.questionnaire.thematiques.map((t: { id: string; nom: string }) => ({
+                id: t.id || '',
+                nom: t.nom || 'Thématique inconnue',
+              }))
+            : [],
+          fonctions: Array.isArray(formulaireData.questionnaire?.fonctions)
+            ? formulaireData.questionnaire.fonctions.map((f: { nom: string }) => f.nom).filter(Boolean)
+            : [],
+          date_creation: formulaireData.date_creation || new Date().toISOString(),
+          date_modification: formulaireData.date_modification || formulaireData.date_creation || new Date().toISOString(),
+          statut: formulaireData.statut || 'Brouillon',
+          progression: Number(formulaireData.progression) || 0,
+        };
+
+        setFormulaire(normalizedFormulaire);
+
+        if (!normalizedFormulaire.id_questionnaire) {
+          throw new Error('Questionnaire non valide associé au formulaire');
         }
-      };
-      
-      fetchFormulaire();
-    }, [id]);
-   
-    // Calculer le nombre total d'étapes
-    const totalSteps = Math.ceil((questions.length || 0) / questionsPerStep);
-    
-    // Questions pour l'étape actuelle
-    const currentStepQuestions = questions.slice(
-      currentStep * questionsPerStep,
-      (currentStep + 1) * questionsPerStep
-    );
-    
-    // Vérifier si toutes les questions de l'étape actuelle ont des réponses
-    const isCurrentStepComplete = currentStepQuestions.every(question => 
-      reponses.some(reponse => reponse.id_question === question.id_question)
-    );
-    
-    // Vérifier si le formulaire est complet
-    const isFormComplete = questions.length > 0 && questions.every(question => 
-      reponses.some(reponse => reponse.id_question === question.id_question)
-    );
-    
-    // Calculer la progression
-    const progression = questions.length > 0
-      ? (reponses.length / questions.length) * 100
-      : 0;
-    
-    // Gérer la navigation entre les étapes
-    const handleNextStep = () => {
-      if (currentStep < totalSteps - 1) {
-        setCurrentStep(currentStep + 1);
-        // Faire défiler la page vers le haut
-        window.scrollTo(0, 0);
-      }
-    };
-    
-    const handlePrevStep = () => {
-      if (currentStep > 0) {
-        setCurrentStep(currentStep - 1);
-        // Faire défiler la page vers le haut
-        window.scrollTo(0, 0);
-      }
-    };
-    
-    // Trouver la réponse pour une question
-    const findReponse = (questionId: string) => {
-      return reponses.find(reponse => reponse.id_question === questionId);
-    };
-    
-    // Mettre à jour une réponse
-    const updateReponse = (questionId: string, value: string) => {
-      const existingReponseIndex = reponses.findIndex(r => r.id_question === questionId);
-      
-      if (existingReponseIndex >= 0) {
-        // Mise à jour d'une réponse existante
-        const updatedReponses = [...reponses];
-        updatedReponses[existingReponseIndex] = {
-          ...updatedReponses[existingReponseIndex],
-          valeur_reponse: value,
-          // Dans un cas réel, le score pourrait être calculé autrement
-          score: parseInt(value) || 0
-        };
-        setReponses(updatedReponses);
-      } else {
-        // Création d'une nouvelle réponse
-        const question = questions.find(q => q.id_question === questionId);
-        if (!question) return;
-        
-        const newReponse: Reponse = {
-          id_reponse: `temp_${Date.now()}`, // Sera remplacé par l'ID généré côté serveur
-          id_formulaire: id || '',
-          id_question: questionId,
-          question_texte: question.texte,
-          valeur_reponse: value,
-          // Dans un cas réel, le score pourrait être calculé autrement
-          score: parseInt(value) || 0
-        };
-        setReponses([...reponses, newReponse]);
-      }
-    };
-    
-    // Mettre à jour un commentaire
-    const updateCommentaire = (questionId: string, commentaire: string) => {
-      const existingReponseIndex = reponses.findIndex(r => r.id_question === questionId);
-      
-      if (existingReponseIndex >= 0) {
-        const updatedReponses = [...reponses];
-        updatedReponses[existingReponseIndex] = {
-          ...updatedReponses[existingReponseIndex],
-          commentaire: commentaire || undefined
-        };
-        setReponses(updatedReponses);
-      }
-    };
-    
-    // Ouvrir la boîte de dialogue de confirmation
-    const handleConfirmAction = (action: 'Soumis' | 'Validé') => {
-      setOpenConfirmDialog({ open: true, action });
-    };
-    
-    // Fermer la boîte de dialogue de confirmation
-    const handleCloseConfirmDialog = () => {
-      setOpenConfirmDialog({ open: false, action: null });
-    };
-    
-    // Sauvegarder le formulaire
-    const saveFormulaire = async (newStatus?: 'Brouillon' | 'Soumis' | 'Validé') => {
-      if (!formulaire) return;
-      
-      setSaving(true);
-      setError(null);
-      
-      try {
-        // Update form status if needed
-        if (newStatus && newStatus !== formulaire.statut) {
+
+        // Récupérer les questions pour chaque thématique
+        const questionsPromises = normalizedFormulaire.thematiques.map(async (thematique) => {
           try {
-            await api.put(`formulaires/${id}`, { 
-              statut: newStatus,
-              progression: Math.round(progression)
-            });
-            
-            setFormulaire({
-              ...formulaire,
-              statut: newStatus,
-              progression: Math.round(progression)
-            });
-          } catch (error) {
-            console.error('Erreur lors de la mise à jour du statut:', error);
-            setError('Erreur lors de la mise à jour du statut. Veuillez réessayer.');
-            setSaving(false);
-            return;
-          }
-        }
-        
-        // OPTIMIZATION: Fetch all existing responses once at the beginning
-        let existingResponses = [];
-        try {
-          const existingResponsesResult = await api.get(`formulaires/${id}/reponses`);
-          console.log("Récupération des réponses existantes...");
-          
-          // Normalize the response data
-          if (Array.isArray(existingResponsesResult)) {
-            existingResponses = existingResponsesResult;
-          } else if (existingResponsesResult && existingResponsesResult.data && Array.isArray(existingResponsesResult.data)) {
-            existingResponses = existingResponsesResult.data;
-          } else {
-            console.warn("Format de réponse inattendu:", existingResponsesResult);
-            existingResponses = [];
-          }
-        } catch (error) {
-          console.error('Erreur lors de la récupération des réponses existantes:', error);
-          existingResponses = [];
-        }
-        
-        // Process all responses
-        const savePromises = reponses.map(async (reponse) => {
-          try {
-            // First check if this response already exists in our fetched data
-            const existingReponse = existingResponses.find(r => r.id_question === reponse.id_question);
-            
-            if (existingReponse && existingReponse.id_reponse) {
-              // Response exists - update it
-              console.log(`Mise à jour de la réponse existante: ${existingReponse.id_reponse}`);
-              try {
-                const updateResponse = await api.put(`reponses/${existingReponse.id_reponse}`, {
-                  valeur_reponse: reponse.valeur_reponse,
-                  score: reponse.score,
-                  commentaire: reponse.commentaire || ''
-                });
-                
-                console.log("Mise à jour réussie:", updateResponse);
-                return true;
-              } catch (putError) {
-                console.error("Erreur lors de la mise à jour:", putError);
-                return false;
-              }
-            } else {
-              // Response doesn't exist - create it
-              try {
-                console.log(`Création d'une nouvelle réponse pour la question: ${reponse.id_question}`);
-                const createResponse = await api.post('reponses', {
-                  id_formulaire: reponse.id_formulaire,
-                  id_question: reponse.id_question,
-                  valeur_reponse: reponse.valeur_reponse,
-                  score: reponse.score,
-                  commentaire: reponse.commentaire || ''
-                });
-                
-                console.log("Création réussie:", createResponse);
-                return true;
-              } catch (postError) {
-                // If error 400 (response already exists), try update as fallback
-                if (postError.response && postError.response.status === 400) {
-                  console.log("Bascule vers le PUT - La réponse existe déjà");
-                  
-                  // Fetch the latest responses to find the ID
-                  try {
-                    const refreshedResponsesResult = await api.get(`formulaires/${reponse.id_formulaire}/reponses`);
-                    
-                    // Normalize the refreshed response data
-                    let refreshedResponses = [];
-                    if (Array.isArray(refreshedResponsesResult)) {
-                      refreshedResponses = refreshedResponsesResult;
-                    } else if (refreshedResponsesResult && refreshedResponsesResult.data && Array.isArray(refreshedResponsesResult.data)) {
-                      refreshedResponses = refreshedResponsesResult.data;
-                    } else {
-                      console.warn("Format de réponse rafraîchie inattendu:", refreshedResponsesResult);
-                      refreshedResponses = [];
-                    }
-                    
-                    // Find the response by question ID
-                    const refreshedReponse = refreshedResponses.find(r => r.id_question === reponse.id_question);
-                    
-                    if (refreshedReponse && refreshedReponse.id_reponse) {
-                      console.log("Réponse existante trouvée:", refreshedReponse.id_reponse);
-                      
-                      // Update with the found ID
-                      const fallbackUpdateResponse = await api.put(`reponses/${refreshedReponse.id_reponse}`, {
-                        valeur_reponse: reponse.valeur_reponse,
-                        score: reponse.score,
-                        commentaire: reponse.commentaire || ''
-                      });
-                      
-                      console.log("Mise à jour réussie:", fallbackUpdateResponse);
-                      return true;
-                    } else {
-                      console.error("Pas de réponse existante trouvée pour cette question");
-                      return false;
-                    }
-                  } catch (refreshError) {
-                    console.error("Erreur lors de la récupération des réponses rafraîchies:", refreshError);
-                    return false;
-                  }
-                } else {
-                  // Other type of error
-                  console.error('Erreur lors de la création de la réponse:', postError);
-                  return false;
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Erreur générale lors de la sauvegarde d\'une réponse:', error);
-            return false;
+            const response = await api.get(`questions/thematique/${thematique.id}`);
+            const questions = Array.isArray(response) ? response : [];
+            return questions.map((q: any) => ({
+              id_question: q.id_question || '',
+              id_thematique: q.id_thematique || thematique.id,
+              texte: q.texte || 'Question inconnue',
+              ponderation: Number(q.ponderation) || 1,
+              ordre: Number(q.ordre) || 0,
+              aide_reponse: q.aide_reponse || undefined,
+              date_creation: q.date_creation || new Date().toISOString(),
+              date_modification: q.date_modification || q.date_creation || new Date().toISOString(),
+            }));
+          } catch (err) {
+            console.warn(`Erreur lors du chargement des questions pour la thématique ${thematique.nom}:`, err);
+            return [];
           }
         });
-        
-        // Wait for all responses to be saved
-        const results = await Promise.allSettled(savePromises);
-        const failedSaves = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value));
-        
-        if (failedSaves.length > 0) {
-          setError(`${failedSaves.length} réponses n'ont pas pu être sauvegardées. Veuillez réessayer.`);
-        } else {
-          setSuccess(newStatus === 'Soumis' 
-            ? 'Formulaire soumis avec succès !' 
-            : newStatus === 'Validé' 
-              ? 'Formulaire validé avec succès !'
-              : 'Formulaire enregistré avec succès !');
-        }
-      } catch (error) {
-        console.error('Erreur lors de la sauvegarde du formulaire:', error);
-        setError('Erreur lors de la sauvegarde. Veuillez réessayer plus tard.');
+
+        const questionsArrays = await Promise.all(questionsPromises);
+        const normalizedQuestions = questionsArrays.flat().sort((a: Question, b: Question) => a.ordre - b.ordre);
+        setQuestions(normalizedQuestions);
+
+        // Récupérer les réponses
+        const reponsesResponse = await api.get(`reponses/formulaire/${id}`);
+        const reponsesData = Array.isArray(reponsesResponse) ? reponsesResponse : [];
+        const normalizedReponses = reponsesData.map((r: any) => ({
+          id_reponse: r.id_reponse || '',
+          id_formulaire: r.id_formulaire || id,
+          id_question: r.id_question || '',
+          question_texte: r.question_texte || '',
+          valeur_reponse: r.valeur_reponse || '',
+          score: Number(r.score) || 0,
+          commentaire: r.commentaire || undefined,
+        }));
+        setReponses(normalizedReponses);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors du chargement du formulaire.');
       } finally {
-        setSaving(false);
+        setLoading(false);
       }
     };
-    
-    // Obtenir le label et la couleur pour l'état du formulaire
-    const getStatusInfo = (status: string) => {
-      switch (status) {
-        case 'Validé':
-          return { label: 'Validé', color: 'success' as const };
-        case 'Soumis':
-          return { label: 'Soumis', color: 'primary' as const };
-        case 'Brouillon':
-        default:
-          return { label: 'Brouillon', color: 'warning' as const };
-      }
-    };
-    
-    // Formater la date de manière sécurisée
-    const formatDate = (dateString: string) => {
-      try {
-        return new Date(dateString).toLocaleDateString('fr-FR');
-      } catch (e) {
-        console.warn('Erreur lors du formatage de la date:', e);
-        return 'Date invalide';
-      }
-    };
-    
-    // Compter le nombre de commentaires
-    const commentCount = reponses.filter(r => r.commentaire && r.commentaire.trim() !== '').length;
-    
-    // Nombre de questions avec un score critique (1 ou 2) avec une pondération élevée (≥ 3)
-    const criticalQuestions = reponses.filter(r => {
-      const score = parseInt(r.valeur_reponse) || 0;
-      const question = questions.find(q => q.id_question === r.id_question);
+
+    fetchFormulaire();
+  }, [id]);
+
+  // Calculs mémorisés
+  const isFormComplete = useMemo(
+    () => questions.length > 0 && questions.every((q) => reponses.some((r) => r.id_question === q.id_question)),
+    [questions, reponses]
+  );
+  const progression = useMemo(
+    () => (questions.length > 0 ? (reponses.length / questions.length) * 100 : 0),
+    [questions.length, reponses.length]
+  );
+  const commentCount = useMemo(
+    () => reponses.filter((r) => r.commentaire && r.commentaire.trim().length > 0).length,
+    [reponses]
+  );
+  const criticalQuestions = useMemo(
+    () => reponses.filter((r) => {
+      const score = parseFloat(r.valeur_reponse) || 0;
+      const question = questions.find((q) => q.id_question === r.id_question);
       return score <= 2 && question && question.ponderation >= 3;
-    }).length;
-    
-    if (loading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-          <CircularProgress />
-        </Box>
-      );
+    }).length,
+    [reponses, questions]
+  );
+
+  // Regrouper les questions par thématique
+  const questionsByThematique = useMemo(() => {
+    if (!formulaire) return {};
+
+    const grouped: { [key: string]: Question[] } = {};
+    formulaire.thematiques.forEach((thematique) => {
+      grouped[thematique.id] = questions
+        .filter((q) => q.id_thematique === thematique.id)
+        .sort((a, b) => a.ordre - b.ordre);
+    });
+    return grouped;
+  }, [formulaire, questions]);
+
+  // Trouver une réponse
+  const findReponse = (questionId: string) => reponses.find((r) => r.id_question === questionId);
+
+  // Mettre à jour une réponse
+  const updateReponse = (questionId: string, value: string) => {
+    const existingReponseIndex = reponses.findIndex((r) => r.id_question === questionId);
+    const question = questions.find((q) => q.id_question === questionId);
+
+    if (!question) return;
+
+    if (existingReponseIndex >= 0) {
+      const updatedReponses = [...reponses];
+      updatedReponses[existingReponseIndex] = {
+        ...updatedReponses[existingReponseIndex],
+        valeur_reponse: value,
+        score: parseInt(value) || 0,
+      };
+      setReponses(updatedReponses);
+    } else {
+      const newReponse: Reponse = {
+        id_reponse: `temp_${Date.now()}`,
+        id_formulaire: id || '',
+        id_question: questionId,
+        question_texte: question.texte,
+        valeur_reponse: value,
+        score: parseInt(value) || 0,
+      };
+      setReponses([...reponses, newReponse]);
     }
-    
-    if (!formulaire) {
-      return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Alert severity="error">
-            {error || 'Formulaire non trouvé. Le formulaire demandé n\'existe pas ou a été supprimé.'}
-          </Alert>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/formulaires')}
-            sx={{ mt: 2 }}
-          >
-            Retour à la liste des formulaires
-          </Button>
-        </Container>
-      );
+  };
+
+  // Mettre à jour un commentaire
+  const updateCommentaire = (questionId: string, commentaire: string) => {
+    const existingReponseIndex = reponses.findIndex((r) => r.id_question === questionId);
+    if (existingReponseIndex >= 0) {
+      const updatedReponses = [...reponses];
+      updatedReponses[existingReponseIndex] = {
+        ...updatedReponses[existingReponseIndex],
+        commentaire: commentaire || undefined,
+      };
+      setReponses(updatedReponses);
     }
-    
-    // Informations sur le statut
-    const statusInfo = getStatusInfo(formulaire.statut);
-    
+  };
+
+  // Gestion des actions de confirmation
+  const handleConfirmAction = (action: 'Soumis' | 'Validé') => {
+    setOpenConfirmDialog({ open: true, action });
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog({ open: false, action: null });
+  };
+
+  // Sauvegarder le formulaire
+  const saveFormulaire = async (newStatus?: 'Brouillon' | 'Soumis' | 'Validé') => {
+  if (!formulaire || !id) return;
+
+  setSaving(true);
+  setError(null);
+
+  try {
+    // ✅ ÉTAPE 1 : Mettre à jour le statut (IDENTIQUE à l'existant)
+    if (newStatus && newStatus !== formulaire.statut) {
+      await api.put(`formulaires/${id}`, { statut: newStatus, progression: Math.round(progression) });
+      setFormulaire({ ...formulaire, statut: newStatus, progression: Math.round(progression) });
+    }
+
+    // ✅ ÉTAPE 2 : Sauvegarder les réponses (IDENTIQUE à l'existant)
+    const savePromises = reponses.map(async (reponse, index) => {
+      try {
+        // Validation préalable
+        if (!reponse.id_question || !reponse.id_formulaire) {
+          console.warn(`Réponse ${index + 1} incomplète, ignorée:`, reponse);
+          return { skipped: true, index };
+        }
+
+        let response;
+        let result;
+
+        if (reponse.id_reponse.startsWith('temp_')) {
+          // POST pour nouvelles réponses
+          response = await api.post('reponses', {
+            id_formulaire: reponse.id_formulaire,
+            id_question: reponse.id_question,
+            valeur_reponse: reponse.valeur_reponse,
+            score: reponse.score,
+            commentaire: reponse.commentaire || '',
+          });
+
+          // ✅ Gestion robuste de la structure de réponse pour POST
+          if (response && response.data && response.data.id_reponse) {
+            result = response.data;
+          } else if (response && response.id_reponse) {
+            result = response;
+          } else if (response) {
+            console.warn(`Format de réponse inattendu pour POST réponse ${index + 1}:`, response);
+            result = { id_reponse: 'created', success: true, originalResponse: response };
+          } else {
+            throw new Error('Aucune réponse reçue de l\'API');
+          }
+        } else {
+          // PUT pour réponses existantes
+          response = await api.put(`reponses/${reponse.id_reponse}`, {
+            valeur_reponse: reponse.valeur_reponse,
+            score: reponse.score,
+            commentaire: reponse.commentaire || '',
+          });
+
+          // ✅ Gestion robuste de la structure de réponse pour PUT
+          if (response && response.data) {
+            result = response.data;
+          } else if (response) {
+            result = response;
+          } else {
+            result = { id_reponse: reponse.id_reponse, success: true };
+          }
+        }
+
+        return { success: true, index, result };
+
+      } catch (err: any) {
+        console.error(`❌ Erreur sauvegarde réponse ${index + 1}:`, {
+          error: err,
+          reponse: reponse,
+          message: err?.message,
+          status: err?.response?.status
+        });
+        
+        return { 
+          success: false, 
+          index, 
+          error: err?.message || 'Erreur inconnue',
+          reponse 
+        };
+      }
+    });
+
+    const results = await Promise.all(savePromises);
+
+    // ✅ ÉTAPE 3 : Analyser les résultats (IDENTIQUE à l'existant)
+    const successfulSaves = results.filter(r => r.success === true);
+    const failedSaves = results.filter(r => r.success === false);
+    const skippedSaves = results.filter(r => r.skipped === true);
+
+    console.log(`📊 Résultats sauvegarde: ${successfulSaves.length} réussies, ${failedSaves.length} échouées, ${skippedSaves.length} ignorées`);
+
+    // ✅ ÉTAPE 4 : Gestion des messages d'erreur/succès (IDENTIQUE à l'existant)
+    if (failedSaves.length > 0) {
+      console.error('❌ Détails des échecs:', failedSaves);
+      
+      const errorDetails = failedSaves.map(f => `Réponse ${f.index + 1}: ${f.error}`).join('; ');
+      setError(`${failedSaves.length} réponses n'ont pas pu être sauvegardées. Détails: ${errorDetails}`);
+      
+    } else if (skippedSaves.length > 0) {
+      setError(`${skippedSaves.length} réponses incomplètes ont été ignorées.`);
+      
+    } else {
+      // 🆕 ÉTAPE 5 : NOUVEAU - Calcul du score après sauvegarde réussie
+      try {
+        console.log('🔢 Déclenchement du calcul de score...');
+        
+        // Déclencher le calcul de score via une mise à jour du formulaire
+        const updatedFormulaire = await api.put(`formulaires/${id}`, { 
+          statut: formulaire.statut,
+          progression: Math.round(progression),
+          trigger_score_calculation: true // Flag pour indiquer qu'on veut recalculer
+        });
+
+        // Mettre à jour le formulaire avec les nouveaux scores
+        if (updatedFormulaire.score_actuel !== undefined && updatedFormulaire.score_maximum !== undefined) {
+          setFormulaire(prev => ({
+            ...prev,
+            ...updatedFormulaire,
+            // Conserver les données locales importantes
+            thematiques: prev.thematiques,
+            fonctions: prev.fonctions
+          }));
+          
+          console.log(`✅ Score calculé: ${updatedFormulaire.score_actuel}/${updatedFormulaire.score_maximum}`);
+        }
+        
+      } catch (scoreError: any) {
+        console.warn('⚠️ Erreur lors du calcul de score (réponses sauvegardées avec succès):', scoreError);
+        // On n'interrompt pas le processus si le calcul de score échoue
+      }
+
+      // 🆕 Messages de succès améliorés
+      const successMessage = newStatus === 'Soumis'
+        ? 'Formulaire soumis avec succès ! Score calculé.'
+        : newStatus === 'Validé'
+        ? 'Formulaire validé avec succès ! Score calculé.'
+        : 'Formulaire enregistré avec succès ! Score calculé.';
+        
+      setSuccess(successMessage);
+    }
+
+  } catch (err: any) {
+    console.error('❌ Erreur générale lors de la sauvegarde:', err);
+    setError(err.message || 'Erreur lors de la sauvegarde du formulaire.');
+  } finally {
+    setSaving(false);
+  }
+};
+
+  // Statut du formulaire
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'Validé':
+        return { label: 'Validé', color: 'success' as const };
+      case 'Soumis':
+        return { label: 'Soumis', color: 'primary' as const };
+      default:
+        return { label: 'Brouillon', color: 'warning' as const };
+    }
+  };
+
+  // Formatage des dates
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return 'Date invalide';
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!formulaire) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        {/* Breadcrumbs de navigation */}
-        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-          <Link
-            underline="hover"
-            color="inherit"
-            sx={{ display: 'flex', alignItems: 'center' }}
-            href="/"
-          >
-            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-            Accueil
-          </Link>
-          <Link
-            underline="hover"
-            color="inherit"
-            sx={{ display: 'flex', alignItems: 'center' }}
-            href="/formulaires"
-          >
-            Formulaires
-          </Link>
-          <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-            {formulaire.fonction} - {formulaire.nom_entreprise}
-          </Typography>
-        </Breadcrumbs>
-        
-        <Grid container spacing={3}>
-          {/* En-tête */}
-          <Grid xs={12}>
-            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Box display="flex" alignItems="center">
-                  <IconButton color="primary" onClick={() => navigate('/formulaires')} sx={{ mr: 1 }}>
-                    <ArrowBackIcon />
-                  </IconButton>
-                  <Typography component="h1" variant="h5" color="primary">
-                    {formulaire.fonction || 'Formulaire'} - {formulaire.questionnaire_titre}
-                  </Typography>
-                </Box>
-                <Box display="flex" alignItems="center">
-                  {criticalQuestions > 0 && (
-                    <Tooltip title={`${criticalQuestions} question(s) critique(s) à traiter`}>
-                      <Badge badgeContent={criticalQuestions} color="error" sx={{ mr: 2 }}>
-                        <WarningIcon color="error" />
-                      </Badge>
-                    </Tooltip>
-                  )}
-                  
-                  {commentCount > 0 && (
-                    <Tooltip title={`${commentCount} commentaire(s)`}>
-                      <Badge badgeContent={commentCount} color="info" sx={{ mr: 2 }}>
-                        <CommentIcon color="info" />
-                      </Badge>
-                    </Tooltip>
-                  )}
-                  
-                  <Chip 
-                    label={statusInfo.label}
-                    color={statusInfo.color}
-                    variant="outlined"
-                  />
-                </Box>
+        <Alert severity="error">{error || 'Formulaire non trouvé.'}</Alert>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/formulaires')} sx={{ mt: 2 }}>
+          Retour à la liste
+        </Button>
+      </Container>
+    );
+  }
+
+  const statusInfo = getStatusInfo(formulaire.statut);
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+        <Link underline="hover" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} href="/">
+          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Accueil
+        </Link>
+        <Link underline="hover" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} href="/formulaires">
+          Formulaires
+        </Link>
+        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+          {formulaire.questionnaire_nom}
+        </Typography>
+      </Breadcrumbs>
+
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Box display="flex" alignItems="center">
+                <IconButton color="primary" onClick={() => navigate('/formulaires')} sx={{ mr: 1 }}>
+                  <ArrowBackIcon />
+                </IconButton>
+                <Typography component="h1" variant="h5" color="primary">
+                  {formulaire.questionnaire_nom}
+                </Typography>
               </Box>
-              
-              <Grid container spacing={2}>
-                <Grid xs={12} md={4}>
-                  <Box display="flex" alignItems="center" mb={1}>
-                    <BusinessIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="subtitle1">
-                      <strong>Entreprise:</strong> {formulaire.nom_entreprise}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    <FunctionIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="subtitle1">
-                      <strong>Fonction:</strong> {formulaire.fonction}
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid xs={12} md={4}>
-                  <Box display="flex" alignItems="center" mb={1}>
-                    <InfoIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="subtitle1">
-                      <strong>Thématique:</strong> {formulaire.thematique}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    <Typography variant="subtitle1">
-                      <strong>Statut:</strong> {formulaire.statut}
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid xs={12} md={4}>
-                  <Box display="flex" alignItems="center" mb={1}>
-                    <PersonIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="subtitle1">
-                      <strong>Acteur:</strong> {formulaire.acteur_nom}
-                    </Typography>
-                  </Box>
+              <Box display="flex" alignItems="center">
+                {criticalQuestions > 0 && (
+                  <Tooltip title={`${criticalQuestions} question(s) critique(s)`}>
+                    <Badge badgeContent={criticalQuestions} color="error" sx={{ mr: 2 }}>
+                      <WarningIcon color="error" />
+                    </Badge>
+                  </Tooltip>
+                )}
+                {commentCount > 0 && (
+                  <Tooltip title={`${commentCount} commentaire(s)`}>
+                    <Badge badgeContent={commentCount} color="info" sx={{ mr: 2 }}>
+                      <CommentIcon color="info" />
+                    </Badge>
+                  </Tooltip>
+                )}
+                <Chip label={statusInfo.label} color={statusInfo.color} variant="outlined" />
+              </Box>
+            </Box>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <BusinessIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
                   <Typography variant="subtitle1">
-                    <strong>Date de création:</strong> {formatDate(formulaire.date_creation)}
+                    <strong>Entreprise:</strong> {formulaire.nom_entreprise}
                   </Typography>
-                </Grid>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <FunctionIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="subtitle1">
+                    <strong>Fonctions:</strong> {formulaire.fonctions.join(', ') || 'Aucune'}
+                  </Typography>
+                </Box>
               </Grid>
-            </Paper>
-          </Grid>
-          
-          {/* Barre de progression */}
-          <Grid xs={12}>
-            <Paper sx={{ p: 2 }}>
-              <Box sx={{ width: '100%' }}>
-                <Box display="flex" justifyContent="space-between">
-                  <Typography variant="body2" sx={{ mb: 1 }}>Progression: {Math.round(progression)}%</Typography>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    {reponses.length} / {questions.length} questions répondues
+              <Grid item xs={12} md={4}>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <InfoIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="subtitle1">
+                    <strong>Thématiques:</strong>
                   </Typography>
                 </Box>
-                <Box sx={{ width: '100%', backgroundColor: '#e0e0e0', borderRadius: 1, height: 8, position: 'relative' }}>
-                  <Box
-                    sx={{
-                      width: `${progression}%`,
-                      backgroundColor: progression < 30 ? '#f44336' : progression < 70 ? '#ff9800' : '#4caf50',
-                      borderRadius: 1,
-                      height: '100%',
-                      transition: 'width 0.5s ease-in-out',
-                    }}
-                  />
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {formulaire.thematiques.map((thematique, index) => (
+                    <Chip key={index} label={thematique.nom} size="small" color="secondary" variant="outlined" />
+                  ))}
                 </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <PersonIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="subtitle1">
+                    <strong>Acteur:</strong> {formulaire.acteur_nom}
+                  </Typography>
+                </Box>
+                <Typography variant="subtitle1">
+                  <strong>Date de création:</strong> {formatDate(formulaire.date_creation)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Box sx={{ width: '100%' }}>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Progression: {Math.round(progression)}% 
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                    {reponses.length} / {questions.length} questions répondues
+                </Typography>
               </Box>
-            </Paper>
+              <Box sx={{ width: '100%', backgroundColor: '#e0e0e0', borderRadius: 1, height: 8 }}>
+                <Box
+                  sx={{
+                    width: `${progression}%`,
+                    backgroundColor: progression < 30 ? '#f44336' : progression < 70 ? '#ff9800' : '#4caf50',
+                    borderRadius: 1,
+                    height: '100%',
+                    transition: 'width 0.5s ease-in-out',
+                  }}
+                />
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {error && (
+          <Grid item xs={12}>
+            <Alert severity="error" onClose={() => setError(null)}>
+              {error}
+            </Alert>
           </Grid>
-          
-          {/* Messages d'erreur ou de succès */}
-          {error && (
-            <Grid xs={12}>
-              <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
-            </Grid>
-          )}
-          
-          {success && (
-            <Grid xs={12}>
-              <Alert severity="success" onClose={() => setSuccess(null)}>{success}</Alert>
-            </Grid>
-          )}
-          
-          {/* Stepper */}
-          <Grid xs={12}>
-            <Paper sx={{ p: 2 }}>
-              <Stepper activeStep={currentStep} alternativeLabel>
-                {Array.from({ length: totalSteps }, (_, i) => (
-                  <Step key={i} completed={i < currentStep || (i === currentStep && isCurrentStepComplete)}>
-                    <StepLabel>Étape {i + 1}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Paper>
+        )}
+
+        {success && (
+          <Grid item xs={12}>
+            <Alert severity="success" onClose={() => setSuccess(null)}>
+              {success}
+            </Alert>
           </Grid>
-          
-          {/* Questions de l'étape actuelle */}
-          <Grid xs={12}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Questions - Étape {currentStep + 1} / {totalSteps}
+        )}
+
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Questions par thématique
+            </Typography>
+            <Divider sx={{ mb: 3 }} />
+
+            {formulaire.thematiques.length > 0 ? (
+              formulaire.thematiques.map((thematique) => (
+                <Accordion key={thematique.id} defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="subtitle1">{thematique.nom}</Typography>
+                    <Box sx={{ ml: 2 }}>
+                      <Chip
+                        label={`${questionsByThematique[thematique.id]?.length || 0} questions`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {questionsByThematique[thematique.id]?.length > 0 ? (
+                      questionsByThematique[thematique.id].map((question) => {
+                        const reponse = findReponse(question.id_question);
+                        const isHighPriority = question.ponderation >= 3;
+                        const isCritical = reponse && (parseInt(reponse.valeur_reponse) || 0) <= 2 && isHighPriority;
+
+                        return (
+                          <Card
+                            key={question.id_question}
+                            sx={{
+                              mb: 3,
+                              position: 'relative',
+                              border: isCritical ? '1px solid #f44336' : isHighPriority ? '1px solid #ff9800' : 'none',
+                            }}
+                          >
+                            <CardContent>
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  top: -10,
+                                  left: -10,
+                                  width: 30,
+                                  height: 30,
+                                  borderRadius: '50%',
+                                  backgroundColor: isHighPriority ? 'warning.main' : 'primary.main',
+                                  color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 'bold',
+                                }}
+                              >
+                                {question.ordre}
+                              </Box>
+                              <Box sx={{ ml: 3 }}>
+                                <Typography variant="subtitle1" gutterBottom fontWeight={isHighPriority ? 'bold' : 'normal'}>
+                                  {question.texte}
+                                  {isHighPriority && (
+                                    <Tooltip title="Question à forte pondération">
+                                      <InfoIcon color="warning" fontSize="small" sx={{ ml: 1 }} />
+                                    </Tooltip>
+                                  )}
+                                </Typography>
+                                {question.aide_reponse && (
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2}}>
+                                    <strong>Aide:</strong> {question.aide_reponse}
+                                  </Typography>
+                                )}
+                                <Typography
+                                  variant="caption"
+                                  color={isHighPriority ? 'warning.main' : 'text.secondary'}
+                                  sx={{ display: 'block', mb: 2 }}
+                                >
+                                  Pondération: {question.ponderation} {isHighPriority ? '(Question importante)' : ''}
+                                </Typography>
+                                <FormControl component="fieldset" sx={{ width: "100%" }}>
+                                  <Typography variant="body2" sx={{ mb: 1 }}>
+                                    Évaluation (1 = Niveau initial, 5 = Niveau optimisé)
+                                  </Typography>
+                                  <RadioGroup
+                                    row
+                                    name={`question-${question.id_question}`}
+                                    value={reponse?.valeur_reponse || ''}
+                                    onChange={(e) => updateReponse(question.id_question, e.target.value)}
+                                  >
+                                    {[1, 2, 3, 4, 5].map((value) => (
+                                      <FormControlLabel
+                                        key={value}
+                                        value={value.toString()}
+                                        control={
+                                          <Radio
+                                            sx={{
+                                              color: value <= 2 && isHighPriority ? 'error.main' : undefined,
+                                              '&.Mui-checked': {
+                                                color: value <= 2 && isHighPriority ? 'error.main' : undefined,
+                                              },
+                                            }}
+                                          />
+                                        }
+                                        label={value.toString()}
+                                        disabled={formulaire.statut === 'Validé'}
+                                      />
+                                    ))}
+                                  </RadioGroup>
+                                </FormControl>
+                                <TextField
+                                  fullWidth
+                                  label="Commentaire (optionnel)"
+                                  multiline
+                                  rows={2}
+                                  margin="normal"
+                                  value={reponse?.commentaire || ''}
+                                  onChange={(e) => updateCommentaire(question.id_question, e.target.value)}
+                                  disabled={formulaire.statut === 'Validé'}
+                                  helperText={isCritical ? 'Un commentaire est recommandé pour cette question critique' : ''}
+                                  error={isCritical && (!reponse?.commentaire || reponse.commentaire.trim() === '')}
+                                />
+                                {isCritical && (!reponse?.commentaire || reponse.commentaire.trim() === '') && (
+                                  <Alert severity="warning" sx={{ mt: 1 }}>
+                                    Veuillez ajouter un commentaire pour justifier cette évaluation critique.
+                                  </Alert>
+                                )}
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Aucune question pour cette thématique.
+                      </Typography>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            ) : (
+              <Typography variant="body1" align="center" sx={{ py: 2 }}>
+                Aucune thématique associée à ce formulaire.
               </Typography>
-              <Divider sx={{ mb: 3 }} />
-              
-              {currentStepQuestions.length > 0 ? (
-                <Box sx={{ mb: 3 }}>
-                  {currentStepQuestions.map((question, index) => {
-                    const reponse = findReponse(question.id_question);
-                    const isHighPriority = question.ponderation >= 3;
-                    const isCritical = reponse && (parseInt(reponse.valeur_reponse) || 0) <= 2 && isHighPriority;
-                    
-                    return (
-                      <Card 
-                        key={question.id_question} 
-                        sx={{ 
-                          mb: 3, 
-                          position: 'relative', 
-                          overflow: 'visible',
-                          border: isCritical ? '1px solid #f44336' : isHighPriority ? '1px solid #ff9800' : 'none',
-                        }}
-                      >
-                        <CardContent>
-                          <Box sx={{ 
-                            position: 'absolute', 
-                            top: -10, 
-                            left: -10, 
-                            width: 30, 
-                            height: 30, 
-                            borderRadius: '50%', 
-                            backgroundColor: isHighPriority ? 'warning.main' : 'primary.main', 
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 'bold'
-                          }}>
-                            {question.ordre}
-                          </Box>
-                          
-                          <Box sx={{ ml: 3 }}>
-                            <Typography variant="subtitle1" gutterBottom fontWeight={isHighPriority ? 'bold' : 'normal'}>
-                              {question.texte}
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => saveFormulaire('Brouillon')}
+                disabled={saving || formulaire.statut === 'Validé'}
+                startIcon={<SaveIcon />}
+                sx={{ mr: 1 }}
+              >
+                Enregistrer
+              </Button>
+              {formulaire.statut === 'Brouillon' && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleConfirmAction('Soumis')}
+                  disabled={saving || !isFormComplete}
+                  startIcon={<SendIcon />}
+                  sx={{ mr: 1 }}
+                >
+                  Soumettre
+                </Button>
+              )}
+              {formulaire.statut === 'Soumis' && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => handleConfirmAction('Validé')}
+                  disabled={saving || !isFormComplete}
+                  startIcon={<CheckIcon />}
+                >
+                  Valider
+                </Button>
+              )}
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="reponses-content" id="reponses-header">
+              <Typography>Aperçu des réponses</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box sx={{ width: '100%' }}>
+                {formulaire.thematiques.map((thematique) => (
+                  <Box key={thematique.id} sx={{ mb: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      {thematique.nom}
+                    </Typography>
+                    {questionsByThematique[thematique.id]?.length > 0 ? (
+                      questionsByThematique[thematique.id].map((question) => {
+                        const reponse = findReponse(question.id_question);
+                        const isHighPriority = question.ponderation >= 3;
+                        const isCritical = reponse && (parseInt(reponse.valeur_reponse) || 0) <= 2 && isHighPriority;
+
+                        return (
+                          <Box
+                            key={question.id_question}
+                            sx={{
+                              mb: 2,
+                              p: 2,
+                              border: isCritical ? '1px solid #f44336' : isHighPriority ? '1px solid #ff9800' : '1px solid #eee',
+                              borderRadius: 1,
+                              bgcolor: isCritical ? 'rgba(244, 67, 54, 0.05)' : isHighPriority ? 'rgba(255, 152, 0, 0.05)' : 'transparent',
+                            }}
+                          >
+                            <Typography variant="subtitle2" fontWeight={isHighPriority ? 'bold' : 'normal'}>
+                              {question.ordre}. {question.texte}
                               {isHighPriority && (
                                 <Tooltip title="Question à forte pondération">
                                   <InfoIcon color="warning" fontSize="small" sx={{ ml: 1 }} />
                                 </Tooltip>
                               )}
                             </Typography>
-                            
-                            <Typography variant="caption" color={isHighPriority ? 'warning.main' : 'text.secondary'} sx={{ display: 'block', mb: 2 }}>
-                              Pondération: {question.ponderation} {isHighPriority ? '(Question importante)' : ''}
-                            </Typography>
-                            
-                            <FormControl component="fieldset" sx={{ width: '100%' }}>
-                              <Typography variant="body2" sx={{ mb: 1 }}>
-                                Évaluation (1 = Niveau initial, 5 = Niveau optimisé)
+                            {reponse ? (
+                              <>
+                                <Typography variant="body2" sx={{ mt: 1, color: isCritical ? 'error.main' : 'inherit' }}>
+                                  <strong>Réponse:</strong> {reponse.valeur_reponse} / 5
+                                </Typography>
+                                {reponse.commentaire ? (
+                                  <Typography variant="body2" sx={{ mt: 1 }}>
+                                    <strong>Commentaire:</strong> {reponse.commentaire}
+                                  </Typography>
+                                ) : (
+                                  isCritical && (
+                                    <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                                      <strong>Commentaire manquant</strong> pour une question critique
+                                    </Typography>
+                                  )
+                                )}
+                              </>
+                            ) : (
+                              <Typography variant="body2" sx={{ mt: 1, color: 'error.main' }}>
+                                Pas de réponse
                               </Typography>
-                              <RadioGroup
-                                row
-                                name={`question-${question.id_question}`}
-                                value={reponse?.valeur_reponse || ''}
-                                onChange={(e) => updateReponse(question.id_question, e.target.value)}
-                              >
-                                {[1, 2, 3, 4, 5].map((value) => (
-                                  <FormControlLabel
-                                    key={value}
-                                    value={String(value)}
-                                    control={
-                                      <Radio 
-                                        sx={{
-                                          color: value <= 2 && isHighPriority ? 'error.main' : undefined,
-                                          '&.Mui-checked': {
-                                            color: value <= 2 && isHighPriority ? 'error.main' : undefined
-                                          }
-                                        }}
-                                      />
-                                    }
-                                    label={String(value)}
-                                    disabled={formulaire.statut === 'Validé'}
-                                  />
-                                ))}
-                              </RadioGroup>
-                            </FormControl>
-                            
-                            <TextField
-                              fullWidth
-                              label="Commentaire (optionnel)"
-                              multiline
-                              rows={2}
-                              margin="normal"
-                              value={reponse?.commentaire || ''}
-                              onChange={(e) => updateCommentaire(question.id_question, e.target.value)}
-                              disabled={formulaire.statut === 'Validé'}
-                              helperText={isCritical ? "Un commentaire est fortement recommandé pour cette question critique" : ""}
-                              error={isCritical && (!reponse?.commentaire || reponse.commentaire.trim() === '')}
-                            />
-                            
-                            {isCritical && (!reponse?.commentaire || reponse.commentaire.trim() === '') && (
-                              <Alert severity="warning" sx={{ mt: 1 }}>
-                                Cette question a une note faible et une forte pondération. Veuillez ajouter un commentaire pour justifier cette évaluation.
-                              </Alert>
                             )}
                           </Box>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </Box>
-              ) : (
-                <Typography variant="body1" align="center" sx={{ py: 3 }}>
-                  Aucune question pour cette étape.
-                </Typography>
-              )}
-              
-              {/* Navigation entre les étapes */}
-              <Box display="flex" justifyContent="space-between" mt={3}>
-                <Button
-                  variant="outlined"
-                  onClick={handlePrevStep}
-                  disabled={currentStep === 0}
-                  startIcon={<ArrowBackIcon />}
-                >
-                  Précédent
-                </Button>
-                
-                <Box>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => saveFormulaire('Brouillon')}
-                    disabled={saving || formulaire.statut === 'Validé'}
-                    startIcon={<SaveIcon />}
-                    sx={{ mr: 1 }}
-                  >
-                    Enregistrer
-                  </Button>
-                  
-                  {formulaire.statut === 'Brouillon' && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleConfirmAction('Soumis')}
-                      disabled={saving || !isFormComplete}
-                      startIcon={<SendIcon />}
-                      sx={{ mr: 1 }}
-                    >
-                      Soumettre
-                    </Button>
-                  )}
-                  
-                  {formulaire.statut === 'Soumis' && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleConfirmAction('Validé')}
-                      disabled={saving || !isFormComplete}
-                      startIcon={<CheckIcon />}
-                      sx={{ mr: 1 }}
-                    >
-                      Valider
-                    </Button>
-                  )}
-                </Box>
-                
-                <Button
-                  variant="contained"
-                  onClick={handleNextStep}
-                  disabled={currentStep === totalSteps - 1}
-                  endIcon={<EditIcon />}
-                >
-                  Suivant
-                </Button>
+                        );
+                      })
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Aucune question pour cette thématique.
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
               </Box>
-            </Paper>
-          </Grid>
-          
-          {/* Aperçu de toutes les réponses */}
-          <Grid xs={12}>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="reponses-content"
-                id="reponses-header"
-              >
-                <Typography>Aperçu de toutes les réponses</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box sx={{ width: '100%' }}>
-                  {questions.map((question) => {
-                    const reponse = findReponse(question.id_question);
-                    const isHighPriority = question.ponderation >= 3;
-                    const isCritical = reponse && (parseInt(reponse.valeur_reponse) || 0) <= 2 && isHighPriority;
-                    
-                    return (
-                      <Box 
-                        key={question.id_question} 
-                        sx={{ 
-                          mb: 2, 
-                          p: 2, 
-                          border: isCritical ? '1px solid #f44336' : isHighPriority ? '1px solid #ff9800' : '1px solid #eee', 
-                          borderRadius: 1,
-                          bgcolor: isCritical ? 'rgba(244, 67, 54, 0.05)' : isHighPriority ? 'rgba(255, 152, 0, 0.05)' : 'transparent'
-                        }}
-                      >
-                        <Typography variant="subtitle2" fontWeight={isHighPriority ? 'bold' : 'normal'}>
-                          {question.ordre}. {question.texte}
-                          {isHighPriority && (
-                            <Tooltip title="Question à forte pondération">
-                              <InfoIcon color="warning" fontSize="small" sx={{ ml: 1 }} />
-                            </Tooltip>
-                          )}
-                        </Typography>
-                        
-                        {reponse ? (
-                          <>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ mt: 1 }}
-                              color={isCritical ? 'error' : 'inherit'}
-                            >
-                              <strong>Réponse:</strong> {reponse.valeur_reponse} / 5
-                            </Typography>
-                            
-                            {reponse.commentaire ? (
-                              <Typography variant="body2">
-                                <strong>Commentaire:</strong> {reponse.commentaire}
-                              </Typography>
-                            ) : (
-                              isCritical && (
-                                <Typography variant="body2" color="error">
-                                  <strong>Commentaire manquant</strong> pour une question critique
-                                </Typography>
-                              )
-                            )}
-                          </>
-                        ) : (
-                          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                            Pas encore de réponse
-                          </Typography>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          </Grid>
+            </AccordionDetails>
+          </Accordion>
         </Grid>
-        
-        {/* Boîte de dialogue de confirmation */}
-        <Dialog
-          open={openConfirmDialog.open}
-          onClose={handleCloseConfirmDialog}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {openConfirmDialog.action === 'Soumis' ? 'Soumettre le formulaire ?' : 'Valider le formulaire ?'}
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              {openConfirmDialog.action === 'Soumis' 
-                ? 'Êtes-vous sûr de vouloir soumettre ce formulaire ? Après soumission, il sera en attente de validation.'
-                : 'Êtes-vous sûr de vouloir valider ce formulaire ? Cette action est définitive et le formulaire ne pourra plus être modifié.'}
-            </DialogContentText>
-            
-            {criticalQuestions > 0 && (
-              <Alert severity="warning" sx={{ mt: 2 }}>
-                Attention : {criticalQuestions} question(s) critique(s) ont une note faible (1 ou 2). Assurez-vous que tous les commentaires explicatifs sont bien renseignés.
-              </Alert>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseConfirmDialog} color="inherit">Annuler</Button>
-            <Button 
-              onClick={() => {
-                if (openConfirmDialog.action) {
-                  saveFormulaire(openConfirmDialog.action);
-                  handleCloseConfirmDialog();
-                }
-              }} 
-              color={openConfirmDialog.action === 'Validé' ? 'success' : 'primary'}
-              variant="contained"
-              autoFocus
-            >
-              Confirmer
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
-    );
-   };
-   
-   export default FormDetail;
+      </Grid>
+
+      <Dialog
+        open={openConfirmDialog.open}
+        onClose={handleCloseConfirmDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {openConfirmDialog.action === 'Soumis' ? 'Soumettre le formulaire ?' : 'Valider le formulaire ?'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {openConfirmDialog.action === 'Soumis'
+              ? 'Êtes-vous sûr de vouloir soumettre ce formulaire ? Après soumission, il sera en attente de validation.'
+              : 'Êtes-vous sûr de vouloir valider ce formulaire ? Cette action est définitive.'}
+          </DialogContentText>
+          {criticalQuestions > 0 && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Attention : {criticalQuestions} question(s) critique(s) ont une note faible. Assurez-vous que tous les commentaires sont bien renseignés.
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog} color="inherit">
+            Annuler
+          </Button>
+          <Button
+            onClick={() => {
+              if (openConfirmDialog.action) {
+                saveFormulaire(openConfirmDialog.action);
+                handleCloseConfirmDialog();
+              }
+            }}
+            color={openConfirmDialog.action === 'Validé' ? 'success' : 'primary'}
+            variant="contained"
+            autoFocus
+          >
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
+};
+
+export default FormDetail;

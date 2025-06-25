@@ -36,7 +36,8 @@ import {
   AccountCircle as RoleIcon,
   Settings as SettingsIcon,
   ModelTraining as MaturityIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  Business as OrganizationIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -90,13 +91,6 @@ const MainLayout: React.FC = () => {
       action: 'voir'
     },
     {
-      text: 'Applications Portfolio',
-      icon: <ComputerIcon />,
-      path: '/applications',
-      module: 'APPLICATIONS',
-      action: 'voir'
-    },
-    {
       text: 'Formulaires',
       icon: <AssignmentIcon />,
       path: '/formulaires',
@@ -110,7 +104,7 @@ const MainLayout: React.FC = () => {
       module: 'QUESTIONNAIRES',
       action: 'voir'
     },
-   
+      
     // Divider avant administration
     {
       text: '',
@@ -128,15 +122,22 @@ const MainLayout: React.FC = () => {
         {
           text: 'Gestion des Utilisateurs',
           icon: <PeopleIcon />,
-          path: '/admin/users',
+          path: '/admin',
           module: 'ADMIN_USERS',
           action: 'voir'
         },
         {
           text: 'Permissions & Rôles',
           icon: <SecurityIcon />,
-          path: '/admin/permissions',
+          path: '/admin',
           module: 'ADMIN_PERMISSIONS',
+          action: 'voir'
+        },
+        {
+          text: 'Entreprises',
+          icon: <BusinessIcon />,
+          path: '/admin',
+          module: 'ADMINISTRATION',
           action: 'voir'
         },
         {
@@ -204,6 +205,10 @@ const MainLayout: React.FC = () => {
   // Fonction pour vérifier si un élément de menu est actif
   const isMenuItemActive = (item: MenuItem): boolean => {
     if (item.path) {
+      // Pour les items d'administration, considérer comme actif si on est sur /admin
+      if (item.path === '/admin' && location.pathname.startsWith('/admin')) {
+        return true;
+      }
       return location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     }
     return false;

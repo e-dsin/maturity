@@ -1,7 +1,21 @@
-// src/pages/auth/forgot-password.tsx
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Button from '../../components/ui/Button';
+// src/pages/auth/ForgotPassword.tsx - Version Material-UI
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  Paper,
+  Container
+} from '@mui/material';
+import {
+  CheckCircle as CheckCircleIcon,
+  Email as EmailIcon,
+  ArrowBack as ArrowBackIcon
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ForgotPassword: React.FC = () => {
@@ -10,14 +24,22 @@ const ForgotPassword: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { forgotPassword } = useAuth();
+  const { forgotPassword, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Rediriger si déjà authentifié
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
   
   const validateEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email);
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     
     // Validation de l'email
     if (!email.trim()) {
@@ -37,98 +59,167 @@ const ForgotPassword: React.FC = () => {
       await forgotPassword(email);
       setIsSubmitted(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Une erreur est survenue lors de l\'envoi du mail');
+      setError(err.message || 'Une erreur est survenue lors de l\'envoi du mail');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
   
   return (
-    <div className="w-full">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Mot de passe oublié</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Nous vous enverrons un lien pour réinitialiser votre mot de passe
-        </p>
-      </div>
-      
-      {isSubmitted ? (
-        <div className="rounded-md bg-success-50 p-4 mb-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-success-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-success-800">Instructions envoyées</h3>
-              <div className="mt-2 text-sm text-success-700">
-                <p>
-                  Si l'adresse {email} est associée à un compte, vous recevrez un email contenant les instructions pour réinitialiser votre mot de passe.
-                </p>
-              </div>
-              <div className="mt-4">
-                <div className="-mx-2 -my-1.5 flex">
-                  <Link
-                    to="/auth/login"
-                    className="px-2 py-1.5 rounded-md text-sm font-medium text-success-800 hover:bg-success-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-500"
-                  >
-                    Retour à la connexion
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {error && (
-            <div className="bg-danger-50 border border-danger-200 text-danger-800 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                />
-              </div>
-            </div>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* En-tête */}
+            <Typography 
+              component="h1" 
+              variant="h4" 
+              gutterBottom
+              sx={{ 
+                color: 'primary.main',
+                fontWeight: 'bold'
+              }}
+            >
+              eQwanza
+            </Typography>
             
-            <div>
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-full"
-                isLoading={isLoading}
-              >
-                Envoyer les instructions
-              </Button>
-            </div>
-          </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              <Link to="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
-                Retour à la connexion
-              </Link>
-            </p>
-          </div>
-        </>
-      )}
-    </div>
+            {!isSubmitted ? (
+              <>
+                {/* Formulaire de récupération */}
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <EmailIcon color="primary" sx={{ fontSize: 48, mb: 1 }} />
+                  <Typography variant="h5" component="h2" gutterBottom>
+                    Mot de passe oublié
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe
+                  </Typography>
+                </Box>
+                
+                {error && (
+                  <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                    {error}
+                  </Alert>
+                )}
+                
+                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Adresse email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={email}
+                    onChange={handleChange}
+                    error={!!error}
+                    disabled={isLoading}
+                    placeholder="votre.email@exemple.com"
+                  />
+                  
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2, py: 1.5 }}
+                    disabled={isLoading || !email.trim()}
+                    startIcon={isLoading ? <CircularProgress size={20} /> : <EmailIcon />}
+                  >
+                    {isLoading ? 'Envoi en cours...' : 'Envoyer les instructions'}
+                  </Button>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <Link to="/auth/login" style={{ textDecoration: 'none' }}>
+                      <Button
+                        variant="text"
+                        startIcon={<ArrowBackIcon />}
+                        color="primary"
+                      >
+                        Retour à la connexion
+                      </Button>
+                    </Link>
+                  </Box>
+                </Box>
+              </>
+            ) : (
+              <>
+                {/* Message de confirmation */}
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <CheckCircleIcon color="success" sx={{ fontSize: 64, mb: 2 }} />
+                  <Typography variant="h5" component="h2" color="success.main" gutterBottom>
+                    Instructions envoyées !
+                  </Typography>
+                </Box>
+                
+                <Alert severity="success" sx={{ width: '100%', mb: 3 }}>
+                  <Typography variant="body1">
+                    Si l'adresse <strong>{email}</strong> est associée à un compte, vous recevrez un email contenant les instructions pour réinitialiser votre mot de passe.
+                  </Typography>
+                </Alert>
+                
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Vous n'avez pas reçu l'email ? Vérifiez votre dossier spam ou tentez de renvoyer les instructions.
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setEmail('');
+                        setError('');
+                      }}
+                      startIcon={<EmailIcon />}
+                    >
+                      Renvoyer les instructions
+                    </Button>
+                    
+                    <Link to="/auth/login" style={{ textDecoration: 'none' }}>
+                      <Button
+                        variant="text"
+                        startIcon={<ArrowBackIcon />}
+                        color="primary"
+                        fullWidth
+                      >
+                        Retour à la connexion
+                      </Button>
+                    </Link>
+                  </Box>
+                </Box>
+              </>
+            )}
+          </Box>
+        </Paper>
+
+        {/* Aide pour les développeurs */}
+        {process.env.NODE_ENV === 'development' && !isSubmitted && (
+          <Paper elevation={1} sx={{ mt: 2, p: 2, bgcolor: 'warning.light', width: '100%' }}>
+            <Typography variant="caption" color="warning.contrastText">
+              <strong>🧪 Mode Développement</strong><br />
+              <strong>Note:</strong> La fonctionnalité de récupération de mot de passe doit être implémentée côté serveur.<br />
+              <em>Actuellement, cette page simule l'envoi d'un email de récupération.</em>
+            </Typography>
+          </Paper>
+        )}
+      </Box>
+    </Container>
   );
 };
 

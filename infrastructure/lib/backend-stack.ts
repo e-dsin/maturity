@@ -9,14 +9,15 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 
 export interface BackendStackProps extends cdk.StackProps {
   environment: string;
   domainName: string;
-  hostedZone: route53.IHostedZone;
-  certificate: acm.ICertificate;
+  hostedZoneId: string;
+  hostedZoneName: string;
+  certificateArn: string;
+  fallbackDbPassword?: string; // New optional parameter for fallback password
 }
 
 export class BackendStack extends cdk.Stack {
@@ -26,7 +27,15 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
-    const { environment, domainName, hostedZone, certificate } = props;
+    const { environment, domainName, hostedZoneId, hostedZoneName, certificateArn, fallbackDbPassword } = props;
+
+    // Import de la hosted zone et du certificat
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      hostedZoneId: hostedZoneId,
+      zoneName: hostedZoneName,
+    });
+
+    const certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
 
     // VPC pour l'infrastructure backend
     const vpc = new ec2.Vpc(this, 'BackendVPC', {
@@ -110,10 +119,10 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // RDS MariaDB
+    // RDS MySQL (compatible MariaDB)
     const database = new rds.DatabaseInstance(this, 'Database', {
-      engine: rds.DatabaseInstanceEngine.mariaDb({
-        version: rds.MariaDbEngineVersion.VER_11_4,
+      engine: rds.DatabaseInstanceEngine.mysql({
+        version: rds.MysqlEngineVersion.VER_8_0_35,
       }),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       credentials: rds.Credentials.fromSecret(dbSecret),
@@ -125,19 +134,16 @@ export class BackendStack extends cdk.Stack {
       databaseName: 'maturity_assessment',
       storageEncrypted: true,
       backupRetention: cdk.Duration.days(7),
-      deletionProtection: false, // Mettre à true en production
+      deletionProtection: false,
       removalPolicy: environment === 'dev' ? cdk.RemovalPolicy.DESTROY : cdk.RemovalPolicy.SNAPSHOT,
-      monitoringInterval: cdk.Duration.seconds(60),
-      enablePerformanceInsights: true,
-      performanceInsightRetention: rds.PerformanceInsightRetention.DEFAULT,
     });
 
     // ECR Repository
-    const ecrRepo = new ecr.Repository(this, 'BackendRepository', {
-      repositoryName: `maturity-backend-${environment}`,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      imageScanOnPush: true,
-    });
+    const ecrRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'BackendRepository',
+      `maturity-backend-${environment}`
+    );
 
     // ECS Cluster
     const cluster = new ecs.Cluster(this, 'BackendCluster', {
@@ -176,6 +182,8 @@ export class BackendStack extends cdk.Stack {
           ? 'https://dev-maturity.e-dsin.fr' 
           : 'https://maturity.e-dsin.fr',
         LOG_LEVEL: 'info',
+        DB_PASSWORD_FALLBACK: fallbackDbPassword || '',
+        ECS_ENABLE_CONTAINER_METADATA: 'true',
       },
       secrets: {
         DB_USER: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
@@ -188,10 +196,10 @@ export class BackendStack extends cdk.Stack {
       }),
       healthCheck: {
         command: ['CMD-SHELL', 'curl -f http://localhost:3000/health || exit 1'],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
+        interval: cdk.Duration.seconds(60),
+        timeout: cdk.Duration.seconds(10),
         retries: 3,
-        startPeriod: cdk.Duration.seconds(60),
+        startPeriod: cdk.Duration.seconds(300),
       },
     });
 
@@ -211,7 +219,7 @@ export class BackendStack extends cdk.Stack {
         desiredCount: environment === 'dev' ? 1 : 2,
         assignPublicIp: false,
         securityGroups: [appSecurityGroup],
-        domainName: `api-${environment}.e-dsin.fr`,
+        domainName: `api-${environment}.dev-maturity.e-dsin.fr`,
         domainZone: hostedZone,
         certificate: certificate,
         protocol: elbv2.ApplicationProtocol.HTTPS,
@@ -220,7 +228,7 @@ export class BackendStack extends cdk.Stack {
       }
     );
 
-    // Configuration du health check pour le load balancer
+    // // Configuration du health check pour le load balancer
     fargateService.targetGroup.configureHealthCheck({
       path: '/health',
       protocol: elbv2.Protocol.HTTP,
@@ -231,7 +239,7 @@ export class BackendStack extends cdk.Stack {
       interval: cdk.Duration.seconds(30),
     });
 
-    // Auto-scaling basé sur le CPU
+    // // Auto-scaling basé sur le CPU
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: environment === 'dev' ? 1 : 2,
       maxCapacity: environment === 'dev' ? 2 : 10,
@@ -244,7 +252,7 @@ export class BackendStack extends cdk.Stack {
     });
 
     // Enregistrement DNS
-    this.apiUrl = `https://api-${environment}.e-dsin.fr`;
+    this.apiUrl = `https://api-${environment}.dev-maturity.e-dsin.fr`;
     this.databaseEndpoint = database.instanceEndpoint.hostname;
 
     // Outputs
@@ -266,6 +274,16 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DatabaseSecretArn', {
       value: dbSecret.secretArn,
       description: 'Database Secret ARN',
+    });
+
+    new cdk.CfnOutput(this, 'ClusterName', {
+      value: cluster.clusterName,
+      description: 'ECS Cluster Name',
+    });
+
+    new cdk.CfnOutput(this, 'ServiceName', {
+      value: fargateService.service.serviceName,
+      description: 'ECS Service Name',
     });
   }
 }

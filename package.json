@@ -27,6 +27,7 @@
     "create-admin-user": "node scripts/create-admin-user.js"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.825.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@faker-js/faker": "^8.3.1",
@@ -37,6 +38,7 @@
     "@mui/x-date-pickers": "^6.19.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.6.7",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",

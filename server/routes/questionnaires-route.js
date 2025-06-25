@@ -13,7 +13,14 @@ router.get('/', async (req, res) => {
     const [questionnaires] = await pool.query(`
       SELECT * FROM questionnaires ORDER BY date_creation DESC
     `);
-    res.status(200).json(questionnaires);
+    
+    // Adapter les données pour le frontend (utiliser 'fonction' au lieu de 'titre')
+    const adaptedQuestionnaires = questionnaires.map(q => ({
+      ...q,
+      fonction: q.fonction || q.titre || ''
+    }));
+    
+    res.status(200).json(adaptedQuestionnaires);
   } catch (error) {
     console.error('Erreur lors de la récupération des questionnaires:', error);
     res.status(500).json({ message: 'Erreur serveur lors de la récupération des questionnaires' });
@@ -82,6 +89,7 @@ router.get('/:id', async (req, res) => {
       const q = questionnaires[0];
       const adaptedQuestionnaire = {
         id_questionnaire: q.id_questionnaire,
+        nom: q.nom || '',
         fonction: q.fonction || q.titre || '',
         thematique: q.thematique || '',
         description: q.description || '',
@@ -102,28 +110,20 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/questions', async (req, res) => {
   try {
     const { id } = req.params;
-    logger.debug(`GET /api/questionnaire/${id}/questions - Récupération des questions d'un questionnaire`);
-
-    // Vérifier si le questionnaire existe
-    const [questionnaires] = await pool.query(`
-      SELECT * FROM questionnaires WHERE id_questionnaire = ?
-    `, [id]);
     
-    if (questionnaires.length === 0) {
-      return res.status(404).json({ message: 'Questionnaire non trouvé' });
-    }
-    
-    // Récupérer les questions associées
     const [questions] = await pool.query(`
-      SELECT * FROM questions 
-      WHERE id_questionnaire = ?
-      ORDER BY ordre ASC
+      SELECT DISTINCT q.*, t.nom as thematique_nom
+      FROM questions q
+      JOIN thematiques t ON q.id_thematique = t.id_thematique
+      JOIN questionnaire_thematiques qt ON t.id_thematique = qt.id_thematique
+      WHERE qt.id_questionnaire = ?
+      ORDER BY qt.ordre, q.ordre
     `, [id]);
     
     res.status(200).json(questions);
   } catch (error) {
-    console.error('Erreur lors de la récupération des questions:', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la récupération des questions' });
+    logger.error('Error retrieving questions:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -172,55 +172,39 @@ router.get('/:id/stats', async (req, res) => {
 // POST nouveau questionnaire
 router.post('/', async (req, res) => {
   try {
-    const { 
-      titre,
-      description,
-      version,
-      thematique,
-      etat,
-      instructions
-    } = req.body;
+    const { nom, description, thematiques } = req.body;
     
-    if (!titre || !thematique) {
-      return res.status(400).json({ 
-        message: 'Données invalides: titre et thematique sont requis' 
-      });
+    if (!nom) {
+      return res.status(400).json({ message: 'Le nom est requis' });
     }
     
     const id_questionnaire = uuidv4();
-    const now = new Date();
     
+    // Créer le questionnaire
     await pool.query(`
-      INSERT INTO questionnaires (
-        id_questionnaire, titre, description, version, thematique,
-        etat, instructions, date_creation, date_modification
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      id_questionnaire,
-      titre,
-      description || '',
-      version || '1.0',
-      thematique,
-      etat || 'Actif',
-      instructions || '',
-      now,
-      now
-    ]);
+      INSERT INTO questionnaires (id_questionnaire, nom, description)
+      VALUES (?, ?, ?)
+    `, [id_questionnaire, nom, description || null]);
     
-    res.status(201).json({
-      id_questionnaire,
-      titre,
-      description: description || '',
-      version: version || '1.0',
-      thematique,
-      etat: etat || 'Actif',
-      instructions: instructions || '',
-      date_creation: now,
-      date_modification: now
-    });
+    // Ajouter les thématiques si fournies
+    if (thematiques && thematiques.length > 0) {
+      for (let i = 0; i < thematiques.length; i++) {
+        await pool.query(`
+          INSERT INTO questionnaire_thematiques (id_questionnaire, id_thematique, ordre)
+          VALUES (?, ?, ?)
+        `, [id_questionnaire, thematiques[i], i + 1]);
+      }
+    }
+    
+    const [newQuestionnaire] = await pool.query(
+      'SELECT * FROM questionnaires WHERE id_questionnaire = ?', 
+      [id_questionnaire]
+    );
+    
+    res.status(201).json(newQuestionnaire[0]);
   } catch (error) {
-    console.error('Erreur lors de la création du questionnaire:', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la création du questionnaire' });
+    logger.error('Error creating questionnaire:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -228,14 +212,9 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      titre,
-      description,
-      version,
-      thematique,
-      etat,
-      instructions
-    } = req.body;
+    const { nom, description, thematiques } = req.body;
+    
+    console.log('📥 Mise à jour questionnaire:', id, { nom, description, thematiques });
     
     // Vérifier si le questionnaire existe
     const [questionnaires] = await pool.query('SELECT * FROM questionnaires WHERE id_questionnaire = ?', [id]);
@@ -245,50 +224,70 @@ router.put('/:id', async (req, res) => {
     }
     
     // Construire la requête de mise à jour
-    let updateQuery = 'UPDATE questionnaires SET date_modification = NOW()';
+    let updateQuery = 'UPDATE questionnaires SET';
     const updateParams = [];
+    const updates = [];
     
-    if (titre !== undefined) {
-      updateQuery += ', titre = ?';
-      updateParams.push(titre);
+    if (nom !== undefined) {
+      updates.push(' nom = ?');
+      updateParams.push(nom);
     }
     
     if (description !== undefined) {
-      updateQuery += ', description = ?';
+      updates.push(' description = ?');
       updateParams.push(description);
     }
     
-    if (version !== undefined) {
-      updateQuery += ', version = ?';
-      updateParams.push(version);
+    // Si aucune mise à jour, retourner le questionnaire existant
+    if (updates.length === 0 && !thematiques) {
+      return res.status(200).json(questionnaires[0]);
     }
     
-    if (thematique !== undefined) {
-      updateQuery += ', thematique = ?';
-      updateParams.push(thematique);
+    // Mettre à jour les champs du questionnaire si nécessaire
+    if (updates.length > 0) {
+      updateQuery += updates.join(',') + ' WHERE id_questionnaire = ?';
+      updateParams.push(id);
+      
+      console.log('📤 Requête UPDATE:', updateQuery);
+      console.log('📤 Paramètres:', updateParams);
+      
+      await pool.query(updateQuery, updateParams);
     }
     
-    if (etat !== undefined) {
-      updateQuery += ', etat = ?';
-      updateParams.push(etat);
+    // Mettre à jour les thématiques si fournies
+    if (thematiques && Array.isArray(thematiques)) {
+      // Supprimer les anciennes liaisons
+      await pool.query('DELETE FROM questionnaire_thematiques WHERE id_questionnaire = ?', [id]);
+      
+      // Ajouter les nouvelles liaisons
+      for (let i = 0; i < thematiques.length; i++) {
+        await pool.query(`
+          INSERT INTO questionnaire_thematiques (id_questionnaire, id_thematique, ordre)
+          VALUES (?, ?, ?)
+        `, [id, thematiques[i], i + 1]);
+      }
     }
-    
-    if (instructions !== undefined) {
-      updateQuery += ', instructions = ?';
-      updateParams.push(instructions);
-    }
-    
-    updateQuery += ' WHERE id_questionnaire = ?';
-    updateParams.push(id);
-    
-    await pool.query(updateQuery, updateParams);
     
     // Récupérer le questionnaire mis à jour
     const [updatedQuestionnaires] = await pool.query('SELECT * FROM questionnaires WHERE id_questionnaire = ?', [id]);
     
-    res.status(200).json(updatedQuestionnaires[0]);
+    // Récupérer aussi les thématiques associées
+    const [linkedThematiques] = await pool.query(`
+      SELECT t.id_thematique, t.nom
+      FROM questionnaire_thematiques qt
+      JOIN thematiques t ON qt.id_thematique = t.id_thematique
+      WHERE qt.id_questionnaire = ?
+      ORDER BY qt.ordre
+    `, [id]);
+    
+    const result = {
+      ...updatedQuestionnaires[0],
+      thematiques: linkedThematiques
+    };
+    
+    res.status(200).json(result);
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du questionnaire:', error);
+    console.error('❌ Erreur lors de la mise à jour du questionnaire:', error);
     res.status(500).json({ message: 'Erreur serveur lors de la mise à jour du questionnaire' });
   }
 });
