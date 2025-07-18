@@ -476,44 +476,6 @@ const AnalysesFonctions: React.FC = () => {
     }
   };
 
-  // Convert thematiques to radar chart data with benchmark
-  // const convertToRadarData = (
-  //   thematiques: Thematique[] = [], 
-  //   secteur: string = "Finance", 
-  //   fonctionName: string = "RH"
-  // ) => {
-  //   console.log('Converting radar data:', { thematiques, secteur, fonctionName }); // Debug log
-    
-  //   if (!Array.isArray(thematiques) || thematiques.length === 0) {
-  //     console.warn('No thematiques data available for radar chart');
-  //     return [];
-  //   }
-
-  //   // Obtenir les données benchmark
-  //   const benchmarkData = getBenchmarkData(secteur, fonctionName);
-  //   console.log('Benchmark data:', benchmarkData); // Debug log
-    
-  //   const radarData = thematiques.map((theme) => {
-  //     const score = ensureValidScore(theme.score || theme.score_moyen);
-      
-  //     // Trouver le score benchmark correspondant
-  //     const benchmarkScore = benchmarkData.find(b => 
-  //       b.nom.toLowerCase().includes(theme.nom.toLowerCase()) || 
-  //       theme.nom.toLowerCase().includes(b.nom.toLowerCase())
-  //     )?.score || 3.5; // Score par défaut si pas de correspondance
-      
-  //     return {
-  //       thematique: theme.nom || 'Thématique inconnue',
-  //       score: score,
-  //       benchmark: benchmarkScore,
-  //       fullMark: 5,
-  //     };
-  //   }).filter(item => item.score > 0);
-    
-  //   console.log('Final radar data:', radarData); // Debug log
-  //   return radarData;
-  // };
-
   // Handle enterprise selection
   const handleEntrepriseChange = (event: any) => {
     const entrepriseId = event.target.value as string;
@@ -777,12 +739,12 @@ const AnalysesFonctions: React.FC = () => {
                         </Box>
                         
                         {/* Métadonnées benchmark si disponibles */}
-                        {benchmarkDataLLM && (
+                        {benchmarkDataLLM && benchmarkDataLLM.metadata && (
                           <Alert severity="info" sx={{ mt: 2 }}>
                             <Typography variant="body2">
-                              <strong>Benchmark basé sur :</strong> {benchmarkDataLLM.metadata.sources_utilisees.join(', ')} | 
-                              <strong> Fiabilité :</strong> {benchmarkDataLLM.metadata.fiabilite_globale}% | 
-                              <strong> Analyse du :</strong> {new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR')}
+                              <strong>Benchmark basé sur :</strong> {benchmarkDataLLM.metadata.sources_utilisees?.join(', ') || 'Sources non disponibles'} | 
+                              <strong> Fiabilité :</strong> {benchmarkDataLLM.metadata.fiabilite_globale || 'N/A'}% | 
+                              <strong> Analyse du :</strong> {benchmarkDataLLM.date_analyse ? new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR') : 'Date non disponible'}
                             </Typography>
                           </Alert>
                         )}
@@ -805,7 +767,7 @@ const AnalysesFonctions: React.FC = () => {
                                           color={getNiveauColor(theme.niveau || '')}
                                           size="small"
                                         />
-                                        {benchmarkDataLLM && (
+                                        {benchmarkDataLLM && benchmarkDataLLM.thematiques && (
                                           <Chip
                                             label={`Benchmark: ${getBenchmarkScore(theme.nom, benchmarkDataLLM.thematiques).toFixed(1)}`}
                                             variant="outlined"
@@ -888,33 +850,35 @@ const AnalysesFonctions: React.FC = () => {
                       Recommandations LLM Publics
                     </Typography>
                     
-                    {benchmarkDataLLM && benchmarkDataLLM.thematiques.length > 0 ? (
+                    {benchmarkDataLLM && benchmarkDataLLM.thematiques && benchmarkDataLLM.thematiques.length > 0 ? (
                       <Box>
                         {/* Métadonnées de l'analyse */}
-                        <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
-                          <CardContent>
-                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                              Informations sur l'analyse benchmark
-                            </Typography>
-                            <Grid container spacing={2}>
-                              <Grid item xs={12} sm={4}>
-                                <Typography variant="body2">
-                                  <strong>Sources:</strong> {benchmarkDataLLM.metadata.sources_utilisees.join(', ')}
-                                </Typography>
+                        {benchmarkDataLLM.metadata && (
+                          <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
+                            <CardContent>
+                              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                Informations sur l'analyse benchmark
+                              </Typography>
+                              <Grid container spacing={2}>
+                                <Grid item xs={12} sm={4}>
+                                  <Typography variant="body2">
+                                    <strong>Sources:</strong> {benchmarkDataLLM.metadata.sources_utilisees?.join(', ') || 'Sources non disponibles'}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                  <Typography variant="body2">
+                                    <strong>Fiabilité globale:</strong> {benchmarkDataLLM.metadata.fiabilite_globale || 'N/A'}%
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                  <Typography variant="body2">
+                                    <strong>Date d'analyse:</strong> {benchmarkDataLLM.date_analyse ? new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR') : 'Date non disponible'}
+                                  </Typography>
+                                </Grid>
                               </Grid>
-                              <Grid item xs={12} sm={4}>
-                                <Typography variant="body2">
-                                  <strong>Fiabilité globale:</strong> {benchmarkDataLLM.metadata.fiabilite_globale}%
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={12} sm={4}>
-                                <Typography variant="body2">
-                                  <strong>Date d'analyse:</strong> {new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR')}
-                                </Typography>
-                              </Grid>
-                            </Grid>
-                          </CardContent>
-                        </Card>
+                            </CardContent>
+                          </Card>
+                        )}
 
                         {/* Recommandations par thématique */}
                         {benchmarkDataLLM.thematiques.map((thematique, index) => (
@@ -924,12 +888,12 @@ const AnalysesFonctions: React.FC = () => {
                               action={
                                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                   <Chip
-                                    label={`Score moyen: ${thematique.score_moyen.toFixed(1)}`}
+                                    label={`Score moyen: ${thematique.score_moyen ? thematique.score_moyen.toFixed(1) : 'N/A'}`}
                                     color="primary"
                                     size="small"
                                   />
                                   <Chip
-                                    label={`Écart-type: ${thematique.ecart_type.toFixed(2)}`}
+                                    label={`Écart-type: ${thematique.ecart_type ? thematique.ecart_type.toFixed(2) : 'N/A'}`}
                                     variant="outlined"
                                     size="small"
                                   />
@@ -938,51 +902,57 @@ const AnalysesFonctions: React.FC = () => {
                             />
                             <CardContent>
                               {/* Recommandations de chaque LLM */}
-                              <Grid container spacing={2}>
-                                {thematique.recommandations_llm.map((rec, recIndex) => (
-                                  <Grid item xs={12} md={4} key={recIndex}>
-                                    <Card variant="outlined" sx={{ height: '100%' }}>
-                                      <CardHeader
-                                        title={rec.source}
-                                        avatar={
-                                          <Box sx={{ 
-                                            width: 32, 
-                                            height: 32, 
-                                            borderRadius: '50%',
-                                            bgcolor: rec.source === 'ChatGPT' ? '#10a37f' : 
-                                                     rec.source === 'Grok' ? '#1da1f2' : '#ff6b35',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold'
-                                          }}>
-                                            {rec.source === 'ChatGPT' ? 'GPT' : 
-                                             rec.source === 'Grok' ? 'GRK' : 'CLD'}
-                                          </Box>
-                                        }
-                                        action={
-                                          <Box sx={{ textAlign: 'right' }}>
-                                            <Typography variant="body2" fontWeight="bold">
-                                              {rec.score.toFixed(1)}/5
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                              Confiance: {rec.niveau_confiance}%
-                                            </Typography>
-                                          </Box>
-                                        }
-                                        sx={{ pb: 1 }}
-                                      />
-                                      <CardContent sx={{ pt: 0 }}>
-                                        <Typography variant="body2">
-                                          {rec.recommandation}
-                                        </Typography>
-                                      </CardContent>
-                                    </Card>
-                                  </Grid>
-                                ))}
-                              </Grid>
+                              {thematique.recommandations_llm && thematique.recommandations_llm.length > 0 ? (
+                                <Grid container spacing={2}>
+                                  {thematique.recommandations_llm.map((rec, recIndex) => (
+                                    <Grid item xs={12} md={4} key={recIndex}>
+                                      <Card variant="outlined" sx={{ height: '100%' }}>
+                                        <CardHeader
+                                          title={rec.source}
+                                          avatar={
+                                            <Box sx={{ 
+                                              width: 32, 
+                                              height: 32, 
+                                              borderRadius: '50%',
+                                              bgcolor: rec.source === 'ChatGPT' ? '#10a37f' : 
+                                                       rec.source === 'Grok' ? '#1da1f2' : '#ff6b35',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              color: 'white',
+                                              fontSize: '0.75rem',
+                                              fontWeight: 'bold'
+                                            }}>
+                                              {rec.source === 'ChatGPT' ? 'GPT' : 
+                                               rec.source === 'Grok' ? 'GRK' : 'CLD'}
+                                            </Box>
+                                          }
+                                          action={
+                                            <Box sx={{ textAlign: 'right' }}>
+                                              <Typography variant="body2" fontWeight="bold">
+                                                {rec.score ? rec.score.toFixed(1) : 'N/A'}/5
+                                              </Typography>
+                                              <Typography variant="caption" color="text.secondary">
+                                                Confiance: {rec.niveau_confiance || 'N/A'}%
+                                              </Typography>
+                                            </Box>
+                                          }
+                                          sx={{ pb: 1 }}
+                                        />
+                                        <CardContent sx={{ pt: 0 }}>
+                                          <Typography variant="body2">
+                                            {rec.recommandation || 'Aucune recommandation disponible'}
+                                          </Typography>
+                                        </CardContent>
+                                      </Card>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              ) : (
+                                <Alert severity="info">
+                                  Aucune recommandation LLM disponible pour cette thématique.
+                                </Alert>
+                              )}
                             </CardContent>
                           </Card>
                         ))}
