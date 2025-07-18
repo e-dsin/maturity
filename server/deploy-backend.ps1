@@ -30,7 +30,7 @@ function Test-Prerequisites {
     # Vérifier Docker
     try {
         docker --version | Out-Null
-        Write-Host "✅ Docker installé" -ForegroundColor Green
+        Write-Host "  Docker installé" -ForegroundColor Green
     } catch {
         Write-Host "❌ Docker non installé ou non accessible" -ForegroundColor Red
         exit 1
@@ -39,7 +39,7 @@ function Test-Prerequisites {
     # Vérifier AWS CLI
     try {
         aws --version | Out-Null
-        Write-Host "✅ AWS CLI installé" -ForegroundColor Green
+        Write-Host "  AWS CLI installé" -ForegroundColor Green
     } catch {
         Write-Host "❌ AWS CLI non installé" -ForegroundColor Red
         exit 1
@@ -49,7 +49,7 @@ function Test-Prerequisites {
     try {
         $AccountId = aws sts get-caller-identity --query Account --output text
         if ($AccountId -eq $Config.ACCOUNT_ID) {
-            Write-Host "✅ AWS configuré - Compte: $AccountId" -ForegroundColor Green
+            Write-Host "  AWS configuré - Compte: $AccountId" -ForegroundColor Green
         } else {
             Write-Host "⚠️ Compte AWS différent attendu: $($Config.ACCOUNT_ID), actuel: $AccountId" -ForegroundColor Yellow
         }
@@ -64,7 +64,7 @@ function Test-Prerequisites {
         exit 1
     }
     
-    Write-Host "✅ Tous les prérequis sont satisfaits" -ForegroundColor Green
+    Write-Host "  Tous les prérequis sont satisfaits" -ForegroundColor Green
 }
 
 # Fonction pour créer le Dockerfile si nécessaire
@@ -111,9 +111,9 @@ CMD ["node", "server/server.js"]
 "@
         
         $DockerfileContent | Out-File -FilePath "Dockerfile" -Encoding UTF8
-        Write-Host "✅ Dockerfile créé" -ForegroundColor Green
+        Write-Host "  Dockerfile créé" -ForegroundColor Green
     } else {
-        Write-Host "✅ Dockerfile existant trouvé" -ForegroundColor Green
+        Write-Host "  Dockerfile existant trouvé" -ForegroundColor Green
     }
 }
 
@@ -154,7 +154,7 @@ tsconfig.json
 "@
         
         $DockerignoreContent | Out-File -FilePath ".dockerignore" -Encoding UTF8
-        Write-Host "✅ .dockerignore créé" -ForegroundColor Green
+        Write-Host "  .dockerignore cree" -ForegroundColor Green
     }
 }
 
@@ -170,7 +170,7 @@ function Connect-ECR {
     
     $LoginCommand | docker login --username AWS --password-stdin $Config.ECR_REPOSITORY
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Connexion ECR réussie" -ForegroundColor Green
+        Write-Host "  Connexion ECR réussie" -ForegroundColor Green
     } else {
         Write-Host "❌ Échec de la connexion ECR" -ForegroundColor Red
         exit 1
@@ -188,14 +188,14 @@ function Build-DockerImage {
     docker build -t $ImageName . --no-cache
     
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Build Docker réussi" -ForegroundColor Green
+        Write-Host "  Build Docker réussi" -ForegroundColor Green
         
         # Tagger l'image
         docker tag $ImageName`:latest $Config.ECR_REPOSITORY`:latest
         docker tag $ImageName`:latest $Config.ECR_REPOSITORY`:$Timestamp
         docker tag $ImageName`:latest $Config.ECR_REPOSITORY`:$ImageTag
         
-        Write-Host "✅ Images taguées" -ForegroundColor Green
+        Write-Host "  Images taguées" -ForegroundColor Green
         return $Timestamp
     } else {
         Write-Host "❌ Échec du build Docker" -ForegroundColor Red
@@ -221,7 +221,7 @@ function Push-ImageToECR {
     }
     
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Push vers ECR réussi" -ForegroundColor Green
+        Write-Host "  Push vers ECR réussi" -ForegroundColor Green
     } else {
         Write-Host "❌ Échec du push vers ECR" -ForegroundColor Red
         exit 1
@@ -241,7 +241,7 @@ function Update-ECSService {
         --no-cli-pager
     
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Déploiement initié" -ForegroundColor Green
+        Write-Host "  Déploiement initié" -ForegroundColor Green
         
         Write-Host "⏳ Attente de la stabilisation du service..." -ForegroundColor Yellow
         
@@ -269,7 +269,7 @@ function Update-ECSService {
                 Write-Host "📊 Status: $Status, Running: $RunningCount/$DesiredCount" -ForegroundColor Yellow
                 
                 if ($RunningCount -eq $DesiredCount -and $Status -eq "PRIMARY") {
-                    Write-Host "✅ Service déployé et stable!" -ForegroundColor Green
+                    Write-Host "  Service déployé et stable!" -ForegroundColor Green
                     break
                 }
             }
@@ -302,7 +302,7 @@ function Test-API {
             $Response = Invoke-WebRequest -Uri "$($Config.API_URL)/health" -Method GET -TimeoutSec 10 -UseBasicParsing
             
             if ($Response.StatusCode -eq 200) {
-                Write-Host "✅ API accessible et répond!" -ForegroundColor Green
+                Write-Host "  API accessible et répond!" -ForegroundColor Green
                 Write-Host "📊 Status Code: $($Response.StatusCode)" -ForegroundColor Green
                 return $true
             }

@@ -1,4 +1,4 @@
-// src/App.tsx - Version corrigée sans ToastProvider redondant
+// src/App.tsx - Version V2 avec redirection automatique EvaluationInvite
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -9,7 +9,6 @@ import { fr } from 'date-fns/locale';
 
 // Contexts
 import { AuthProvider } from './contexts/AuthContext';
-// ToastProvider déjà fourni dans main.tsx
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -17,30 +16,43 @@ import AuthLayout from './layouts/AuthLayout';
 
 // Pages d'authentification
 import Login from './pages/auth/Login';
+import EnterpriseRegistration from './pages/auth/EnterpriseRegistration';
+import EvaluationInvite from './pages/auth/EvaluationInvite'; 
 
-// Pages principales
+// Pages principales existantes
 import Dashboard from './pages/dashboard';
 import QuestionnaireIndex from './pages/dashboard/questionnaires';
 import QuestionnaireDetail from './pages/dashboard/questionnaires/[id]';
 import QuestionnaireAdmin from './pages/dashboard/questionnaires/admin';
 import Applications from './pages/dashboard/applications';
 import Organisations from './pages/dashboard/organisations';
-import AnalysesInterpretations from './pages/dashboard/AnalysesInterpretations';
-import AnalysesFonctions from './pages/dashboard/AnalysesInterpretationfunctions';
 import CalculateScore from './pages/dashboard/CalculateScore';
 import Forms from './pages/dashboard/forms';
 import FormDetail from './pages/dashboard/forms/FormDetail';
 import FormNew from './pages/dashboard/forms/FormNew';
 
-// Pages d'administration unifiées
+// Pages d'analyses - V1 et V2
+import AnalysesInterpretations from './pages/dashboard/AnalysesInterpretations';
+import AnalysesFonctions from './pages/dashboard/AnalysesInterpretationfunctions';
+import AnalysesInterpretationsEntreprises from './pages/dashboard/AnalysesInterpretationsEntreprises';
+
+// Nouvelles pages V2
+import MaturityEvaluation from './pages/MaturityEvaluation';
+
+// Pages d'administration
 import Administration from './pages/Administration';
 import MaturityModelAdmin from './pages/MaturityModelAdmin';
 
-// Composant de protection des routes avec permissions
+// Composants de protection
 import ProtectedRoute from './components/ProtectedRoute';
+
+// ✅ NOUVEAU : Composant de redirection automatique d'évaluation
+import EvaluationRedirectHandler from './components/evaluation/EvaluationRedirectHandler';
 
 // Utils
 import logger from './utils/logger';
+import FormsGlobalNew from './pages/dashboard/forms/FormsGlobalNew';
+import FormsGlobalDetail from './pages/dashboard/forms/FormsGlobalDetail';
 
 // Configuration du logger global
 if (typeof window !== 'undefined') {
@@ -89,20 +101,8 @@ const theme = createTheme({
   },
 }, frFR);
 
-// Composant de route protégée avec vérification de permissions spécifiques
-interface PermissionRouteProps {
-  children: React.ReactNode;
-  module: string;
-  action?: string;
-  adminOnly?: boolean;
-}
-
-const PermissionRoute: React.FC<PermissionRouteProps> = ({ 
-  children, 
-  module, 
-  action = 'voir',
-  adminOnly = false 
-}) => {
+// Composant de route protégée avec permissions
+const PermissionRoute = ({ children, module, action = 'voir', adminOnly = false }) => {
   return (
     <ProtectedRoute 
       module={module} 
@@ -115,17 +115,24 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   );
 };
 
-const App: React.FC = () => {
+const App = () => {
   useEffect(() => {
-    logger.info('Application initialisée avec administration unifiée', {
-      version: import.meta.env.VITE_APP_VERSION || 'développement',
+    logger.info('Application V2 initialisée', {
+      version: import.meta.env.VITE_APP_VERSION || '2.0.0-dev',
       environment: import.meta.env.MODE,
-      features: ['unified_administration', 'enhanced_permissions']
+      features: [
+        'enterprise_registration',
+        'maturity_evaluation', 
+        'enterprise_analysis',
+        'unified_administration',
+        'enhanced_permissions',
+        'automatic_evaluation_redirect' // ✅ NOUVEAU
+      ]
     });
 
     const loadTime = performance.now() - ((window as any).initialLoadTime || 0);
     if (loadTime > 0) {
-      logger.logPerformance('app-initial-load', loadTime);
+      logger.logPerformance('app-v2-initial-load', loadTime);
     }
 
     return () => {
@@ -137,238 +144,365 @@ const App: React.FC = () => {
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fr}>
         <AuthProvider>
-          <Routes>
-            {/* === ROUTES PUBLIQUES / AUTHENTIFICATION === */}
-            <Route path="/auth" element={<AuthLayout />}>
-              <Route path="login" element={<Login />} />
-              {/* Ajoutez d'autres routes d'auth ici si nécessaire */}
-            </Route>
+          {/* ✅ NOUVEAU : Wrapper avec redirection automatique d'évaluation */}
+          <EvaluationRedirectHandler>
+            <Routes>
+              {/* === ROUTES PUBLIQUES / AUTHENTIFICATION === */}
+              <Route path="/auth" element={<AuthLayout />}>
+                <Route path="login" element={<Login />} />
+                {/* 🆕 NOUVELLE ROUTE V2 - Enregistrement entreprise */}
+                <Route path="enterprise-registration" element={<EnterpriseRegistration />} />
+                <Route path="enterprise-registration/step/:step" element={<EnterpriseRegistration />} />
+                <Route path="evaluation-invite/:token" element={<EvaluationInvite />} />
+              </Route>
 
-            {/* === ROUTES PROTÉGÉES AVEC LAYOUT PRINCIPAL === */}
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute fallbackUrl="/auth/login">
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* Dashboard */}
+              {/* 🆕 NOUVELLES ROUTES V2 - Évaluation de maturité (hors AuthLayout) */}
               <Route 
-                index 
+                path="/maturity-evaluation/:enterpriseId" 
                 element={
-                  <PermissionRoute module="DASHBOARD">
-                    <Dashboard />
-                  </PermissionRoute>
+                  <ProtectedRoute fallbackUrl="/auth/login">
+                    <MaturityEvaluation />
+                  </ProtectedRoute>
                 } 
               />
 
-              {/* Analyses et recommandations */}
+              {/* ✅ NOUVEAU : Route pour évaluation sans ID entreprise (détection automatique) */}
               <Route 
-                path="analyses-interpretations" 
+                path="/maturity-evaluation" 
                 element={
-                  <PermissionRoute module="ANALYSES">
-                    <AnalysesInterpretations />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="analyses-fonctions" 
-                element={
-                  <PermissionRoute module="ANALYSES">
-                    <AnalysesFonctions />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="analyses-fonctions/:id" 
-                element={
-                  <PermissionRoute module="ANALYSES">
-                    <AnalysesFonctions />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="analyses-interpretations/:id" 
-                element={
-                  <PermissionRoute module="ANALYSES">
-                    <AnalysesInterpretations />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="analyses/calculer/:id" 
-                element={
-                  <PermissionRoute module="ANALYSES" action="editer">
-                    <CalculateScore />
-                  </PermissionRoute>
+                  <ProtectedRoute fallbackUrl="/auth/login">
+                    <MaturityEvaluation />
+                  </ProtectedRoute>
                 } 
               />
 
-              {/* Applications */}
               <Route 
-                path="applications" 
+                path="/maturity-analysis/:evaluationId" 
                 element={
-                  <PermissionRoute module="APPLICATIONS">
-                    <Applications />
-                  </PermissionRoute>
+                  <ProtectedRoute fallbackUrl="/auth/login">
+                    <AnalysesInterpretationsEntreprises />
+                  </ProtectedRoute>
                 } 
               />
 
-              {/* Formulaires */}
+              {/* === ROUTES PROTÉGÉES AVEC LAYOUT PRINCIPAL === */}
               <Route 
-                path="formulaires" 
+                path="/" 
                 element={
-                  <PermissionRoute module="FORMULAIRES">
-                    <Forms />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="formulaires/new" 
-                element={
-                  <PermissionRoute module="FORMULAIRES" action="editer">
-                    <FormNew />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="formulaires/:id" 
-                element={
-                  <PermissionRoute module="FORMULAIRES">
-                    <FormDetail />
-                  </PermissionRoute>
-                } 
-              />
+                  <ProtectedRoute fallbackUrl="/auth/login">
+                    <MainLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {/* Dashboard principal */}
+                <Route 
+                  index 
+                  element={
+                    <PermissionRoute module="DASHBOARD">
+                      <Dashboard />
+                    </PermissionRoute>
+                  } 
+                />
 
-              {/* Questionnaires */}
-              <Route 
-                path="questionnaires" 
-                element={
-                  <PermissionRoute module="QUESTIONNAIRES">
-                    <QuestionnaireIndex />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="questionnaires/:id" 
-                element={
-                  <PermissionRoute module="QUESTIONNAIRES">
-                    <QuestionnaireDetail />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="questionnaires/admin" 
-                element={
-                  <PermissionRoute module="QUESTIONNAIRES" action="administrer">
-                    <QuestionnaireAdmin />
-                  </PermissionRoute>
-                } 
-              />
+                {/* === ANALYSES ET INTERPRÉTATIONS === */}
+                
+                {/* V1 - Analyses par application (conservé) */}
+                <Route 
+                  path="analyses-interpretations" 
+                  element={
+                    <PermissionRoute module="ANALYSES">
+                      <AnalysesInterpretations />
+                    </PermissionRoute>
+                  } 
+                />
 
-              {/* Organisations/Entreprises */}
-              <Route 
-                path="organisations" 
-                element={
-                  <PermissionRoute module="ENTREPRISES">
-                    <Organisations />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="organisations/:name" 
-                element={
-                  <PermissionRoute module="ENTREPRISES">
-                    <Organisations />
-                  </PermissionRoute>
-                } 
-              />
+                {/* V1 - Analyses par fonction (conservé) */}
+                <Route 
+                  path="analyses-interpretations-functions" 
+                  element={
+                    <PermissionRoute module="ANALYSES">
+                      <AnalysesFonctions />
+                    </PermissionRoute>
+                  } 
+                />
 
-              {/* === ROUTES D'ADMINISTRATION UNIFIÉES === */}
+                {/* 🆕 V2 - Analyses par entreprise (nouveau) */}
+                <Route 
+                  path="analyses-interpretations-entreprises" 
+                  element={
+                    <PermissionRoute module="ANALYSES">
+                      <AnalysesInterpretationsEntreprises />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* Calcul de scores */}
+                <Route 
+                  path="calculate-score" 
+                  element={
+                    <PermissionRoute module="ANALYSES" action="editer">
+                      <CalculateScore />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* === QUESTIONNAIRES === */}
+                <Route 
+                  path="questionnaires" 
+                  element={
+                    <PermissionRoute module="QUESTIONNAIRES">
+                      <QuestionnaireIndex />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="questionnaires/:id" 
+                  element={
+                    <PermissionRoute module="QUESTIONNAIRES">
+                      <QuestionnaireDetail />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="questionnaires-admin" 
+                  element={
+                    <PermissionRoute module="QUESTIONNAIRES" action="administrer" adminOnly={true}>
+                      <QuestionnaireAdmin />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* === FORMULAIRES === */}
+                <Route 
+                  path="forms" 
+                  element={
+                    <PermissionRoute module="FORMULAIRES">
+                      <Forms />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="forms/new" 
+                  element={
+                    <PermissionRoute module="FORMULAIRES" action="editer">
+                      <FormNew />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="forms/:id" 
+                  element={
+                    <PermissionRoute module="FORMULAIRES">
+                      <FormDetail />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="/forms/maturity/new" 
+                  element={
+                    <PermissionRoute module="FORMULAIRES">
+                      <FormsGlobalNew /> 
+                     </PermissionRoute>
+                  }
+                />
+
+
+                <Route 
+                  path="/forms/maturity/:id/details" 
+                  element={
+                    <PermissionRoute module="FORMULAIRES">
+                      <FormsGlobalDetail />
+                    </PermissionRoute>
+                  } />
+
+                {/* === APPLICATIONS === */}
+                <Route 
+                  path="applications" 
+                  element={
+                    <PermissionRoute module="APPLICATIONS">
+                      <Applications />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* === ORGANISATIONS / ENTREPRISES === */}
+                <Route 
+                  path="organisations" 
+                  element={
+                    <PermissionRoute module="ENTREPRISES">
+                      <Organisations />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* === ADMINISTRATION === */}
+                
+                {/* Administration unifiée */}
+                <Route 
+                  path="administration" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" adminOnly={true}>
+                      <Administration />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* Gestion du modèle de maturité */}
+                <Route 
+                  path="maturity-model-admin" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" action="administrer" adminOnly={true}>
+                      <MaturityModelAdmin />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* 🆕 V2 - Routes d'administration spécifiques */}
+                <Route 
+                  path="administration/users" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" action="administrer">
+                      <Administration />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="administration/enterprises" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" action="administrer">
+                      <Administration />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="administration/roles" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" action="administrer" adminOnly={true}>
+                      <Administration />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="administration/permissions" 
+                  element={
+                    <PermissionRoute module="ADMINISTRATION" action="administrer" adminOnly={true}>
+                      <Administration />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* ✅ NOUVELLES ROUTES : Gestion des résultats d'évaluation */}
+                <Route 
+                  path="dashboard/results" 
+                  element={
+                    <PermissionRoute module="ANALYSES">
+                      <AnalysesInterpretationsEntreprises />
+                    </PermissionRoute>
+                  } 
+                />
+
+                <Route 
+                  path="evaluation/results/:evaluationId" 
+                  element={
+                    <PermissionRoute module="ANALYSES">
+                      <AnalysesInterpretationsEntreprises />
+                    </PermissionRoute>
+                  } 
+                />
+
+                {/* === ROUTES DE COMPATIBILITÉ === */}
+                
+                {/* Redirections pour compatibilité V1 */}
+                <Route path="analyses-functions" element={<Navigate to="/analyses-interpretations-functions" replace />} />
+                <Route path="analyses" element={<Navigate to="/analyses-interpretations" replace />} />
+                <Route path="admin" element={<Navigate to="/administration" replace />} />
+                
+                {/* 🆕 Route par défaut vers analyses entreprises pour les nouveaux utilisateurs */}
+                <Route path="welcome" element={<Navigate to="/analyses-interpretations-entreprises" replace />} />
+
+                {/* ✅ NOUVEAU : Routes de redirection d'évaluation */}
+                <Route path="evaluation" element={<Navigate to="/maturity-evaluation" replace />} />
+                <Route path="my-evaluation" element={<Navigate to="/maturity-evaluation" replace />} />
+              </Route>
+
+              {/* === ROUTES DE FALLBACK === */}
               
+              {/* Redirection racine intelligente */}
               <Route 
-                path="admin" 
+                path="/" 
                 element={
-                  <PermissionRoute module="ADMINISTRATION" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
+                  <ProtectedRoute fallbackUrl="/auth/login">
+                    <Navigate to="/dashboard" replace />
+                  </ProtectedRoute>
                 } 
               />
 
-              <Route 
-                path="admin/users" 
-                element={
-                  <PermissionRoute module="ADMIN_USERS" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
-                } 
-              />
-              
-              <Route 
-                path="admin/users/:id" 
-                element={
-                  <PermissionRoute module="ADMIN_USERS" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
-                } 
-              />
+              {/* Routes d'erreur et fallback */}
+              <Route path="/unauthorized" element={
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  minHeight: '100vh',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  <h1>🚫 Accès non autorisé</h1>
+                  <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+                  <button onClick={() => window.history.back()}>
+                    Retour
+                  </button>
+                </div>
+              } />
 
-              <Route 
-                path="admin/permissions" 
-                element={
-                  <PermissionRoute module="ADMIN_PERMISSIONS" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
-                } 
-              />
+              <Route path="/maintenance" element={
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  minHeight: '100vh',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  <h1>🔧 Maintenance en cours</h1>
+                  <p>La plateforme est temporairement indisponible pour maintenance.</p>
+                  <p>Veuillez réessayer dans quelques minutes.</p>
+                </div>
+              } />
 
-              <Route 
-                path="admin/roles" 
-                element={
-                  <PermissionRoute module="ADMIN_ROLES" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
-                } 
-              />
-
-              <Route 
-                path="admin/maturity-model" 
-                element={
-                  <PermissionRoute module="ADMIN_MATURITY" adminOnly={true}>
-                    <MaturityModelAdmin />
-                  </PermissionRoute>
-                } 
-              />
-
-              <Route 
-                path="admin/system" 
-                element={
-                  <PermissionRoute module="ADMIN_SYSTEM" adminOnly={true}>
-                    <Administration />
-                  </PermissionRoute>
-                } 
-              />
-
-              {/* === REDIRECTIONS POUR RÉTROCOMPATIBILITÉ === */}
-              <Route 
-                path="users" 
-                element={<Navigate to="/admin/users" replace />} 
-              />
-              <Route 
-                path="users/:id" 
-                element={<Navigate to="/admin/users" replace />} 
-              />
-              <Route 
-                path="permissions" 
-                element={<Navigate to="/admin/permissions" replace />} 
-              />
-            </Route>
-            
-            {/* === REDIRECTIONS VERS LOGIN === */}
-            <Route path="/login" element={<Navigate to="/auth/login" replace />} />
-            <Route path="*" element={<Navigate to="/auth/login" replace />} />
-          </Routes>
+              {/* Catch-all - 404 */}
+              <Route path="*" element={
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  minHeight: '100vh',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  <h1>📄 Page non trouvée</h1>
+                  <p>La page que vous recherchez n'existe pas.</p>
+                  <div>
+                    <button onClick={() => window.location.href = '/'} style={{ marginRight: '10px' }}>
+                      Accueil
+                    </button>
+                    <button onClick={() => window.history.back()}>
+                      Retour
+                    </button>
+                  </div>
+                </div>
+              } />
+            </Routes>
+          </EvaluationRedirectHandler>
+          {/* ✅ FIN du wrapper EvaluationRedirectHandler */}
         </AuthProvider>
       </LocalizationProvider>
     </ThemeProvider>

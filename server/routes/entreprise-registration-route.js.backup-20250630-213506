@@ -1,0 +1,341 @@
+// server/routes/entreprise-registration-route.js
+
+const express = require('express');
+const router = express.Router();
+const { pool } = require('../db/dbConnection');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
+const { body, validationResult } = require('express-validator');
+
+// Validation des données d'entrée
+const validateEnterpriseRegistration = [
+  body('nom_entreprise').isLength({ min: 2 }).withMessage('Nom d\'entreprise trop court'),
+  body('secteur').isIn([
+    'Banque/Finance', 'Assurance', 'Industrie', 'Commerce/Distribution',
+    'AgroPastoral', 'Santé', 'Éducation', 'Administration publique',
+    'Transport/Logistique', 'Énergie/Utilities', 'Télécommunications',
+    'Services et conseils', 'Autre'
+  ]).withMessage('Secteur invalide'),
+  body('email').isEmail().withMessage('Email entreprise invalide'),
+  body('taille_entreprise').isIn(['TPE', 'PME', 'ETI', 'GE']).withMessage('Taille d\'entreprise invalide'),
+  body('chiffre_affaires').isNumeric().withMessage('Chiffre d\'affaires invalide'),
+  body('effectif_total').isInt({ min: 1 }).withMessage('Effectif total invalide'),
+  body('manager_nom_prenom').isLength({ min: 2 }).withMessage('Nom du manager trop court'),
+  body('manager_email').isEmail().withMessage('Email du manager invalide'),
+  body('manager_mot_de_passe').isLength({ min: 8 }).withMessage('Mot de passe trop court (minimum 8 caractères)')
+];
+
+// Helper function pour obtenir ou créer le rôle Manager
+const getOrCreateManagerRole = async (connection) => {
+  try {
+    // Chercher le rôle Manager existant
+    const [roles] = await connection.query(
+      'SELECT id_role FROM roles WHERE nom_role = ? ',
+      ['Manager']
+    );
+    
+    if (roles.length > 0) {
+      return roles[0].id_role;
+    }
+    
+    // Créer le rôle Manager s'il n'existe pas
+    const roleId = uuidv4();
+    await connection.query(`
+      INSERT INTO roles (
+        id_role, nom_role, description, niveau_acces
+      ) VALUES (?, ?, ?, ?)
+    `, [
+      roleId,
+      'Manager',
+      'Manager d\'entreprise - Responsable de l\'évaluation de maturité et de la gestion d\'équipe',
+      'ENTREPRISE'
+    ]);
+    
+    logger.info('Rôle Manager créé automatiquement:', roleId);
+    return roleId;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération/création du rôle Manager:', error);
+    throw error;
+  }
+};
+
+// Helper function pour obtenir ou créer le rôle Intervenant
+const getOrCreateIntervenantRole = async (connection) => {
+  try {
+    // Chercher le rôle Intervenant existant
+    const [roles] = await connection.query(
+      'SELECT id_role FROM roles WHERE nom_role = ?',
+      ['Intervenant']
+    );
+    
+    if (roles.length > 0) {
+      return roles[0].id_role;
+    }
+    
+    // Créer le rôle Intervenant s'il n'existe pas
+    const roleId = uuidv4();
+    await connection.query(`
+      INSERT INTO roles (
+        id_role, nom_role, description, niveau_acces
+      ) VALUES (?, ?, ?, ?)
+    `, [
+      roleId,
+      'Intervenant',
+      'Intervenant dans l\'évaluation de maturité - Participant aux questionnaires',
+      'ENTREPRISE'
+    ]);
+    
+    logger.info('Rôle Intervenant créé automatiquement:', roleId);
+    return roleId;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération/création du rôle Intervenant:', error);
+    throw error;
+  }
+};
+
+// Helper function pour créer les permissions par défaut selon le rôle
+const createDefaultPermissions = async (connection, actorId, roleId, enterpriseId) => {
+  try {
+    // Récupérer le nom du rôle pour définir les permissions
+    const [roleData] = await connection.query(
+      'SELECT nom_role FROM roles WHERE id_role = ?',
+      [roleId]
+    );
+    
+    if (roleData.length === 0) {
+      throw new Error('Rôle non trouvé');
+    }
+    
+    const roleName = roleData[0].nom_role;
+    
+    // Récupérer tous les modules actifs
+    const [modules] = await connection.query(
+      'SELECT id_module, nom_module FROM modules WHERE actif = TRUE'
+    );
+    
+    // Définir les permissions selon le rôle
+    const permissions = {
+      'Manager': {
+        default: {
+          peut_voir: true,
+          peut_editer: true,
+          peut_supprimer: false,
+          peut_administrer: true
+        },
+        specific: {
+          'USERS': { peut_supprimer: true, peut_administrer: true },
+          'EVALUATIONS': { peut_supprimer: true, peut_administrer: true },
+          'RAPPORTS': { peut_supprimer: false, peut_administrer: true }
+        }
+      },
+      'Intervenant': {
+        default: {
+          peut_voir: true,
+          peut_editer: false,
+          peut_supprimer: false,
+          peut_administrer: false
+        },
+        specific: {
+          'QUESTIONNAIRES': { peut_editer: true },
+          'EVALUATIONS': { peut_editer: true },
+          'PROFIL': { peut_editer: true }
+        }
+      }
+    };
+    
+    const rolePermissions = permissions[roleName] || permissions['Intervenant'];
+    
+    // Créer les permissions pour chaque module
+    for (const module of modules) {
+      const modulePermissions = {
+        ...rolePermissions.default,
+        ...(rolePermissions.specific[module.nom_module] || {})
+      };
+      
+      const permissionId = uuidv4();
+      await connection.query(`
+        INSERT INTO permissions (
+          id_permission, id_acteur, id_module, type_ressource,
+          peut_voir, peut_editer, peut_supprimer, peut_administrer,
+          conditions, date_creation
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `, [
+        permissionId,
+        actorId,
+        module.id_module,
+        'GENERAL',
+        modulePermissions.peut_voir,
+        modulePermissions.peut_editer,
+        modulePermissions.peut_supprimer,
+        modulePermissions.peut_administrer,
+        JSON.stringify({ entreprise_id: enterpriseId })
+      ]);
+    }
+    
+    logger.info(`Permissions ${roleName} créées pour l'acteur ${actorId}`);
+    
+  } catch (error) {
+    logger.warn('Erreur lors de la création des permissions (non bloquant):', error.message);
+  }
+};
+
+// POST /api/enterprise-registration - Création d'entreprise avec système de rôles unifié
+router.post('/', validateEnterpriseRegistration, async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+    
+    // Vérification des erreurs de validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Données de validation invalides',
+        errors: errors.array()
+      });
+    }
+    
+    const {
+      // Données entreprise
+      nom_entreprise,
+      secteur,
+      description = '',
+      adresse = '',
+      telephone = '',
+      email,
+      site_web = '',
+      taille_entreprise,
+      chiffre_affaires,
+      effectif_total,
+      ville_siege_social,
+      pays_siege_social = 'France',
+      
+      // Données manager
+      manager_nom_prenom,
+      manager_email,
+      manager_mot_de_passe
+    } = req.body;
+    
+    logger.info('🏢 Début création entreprise avec rôles unifiés:', { nom_entreprise, manager_email });
+    
+    // 1. Vérifier que l'email entreprise n'existe pas
+    const [existingEnterprise] = await connection.query(
+      'SELECT id_entreprise FROM entreprises WHERE email = ?',
+      [email]
+    );
+    
+    if (existingEnterprise.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Une entreprise avec cet email existe déjà'
+      });
+    }
+    
+    // 2. Vérifier que l'email manager n'existe pas
+    const [existingManager] = await connection.query(
+      'SELECT id_acteur FROM acteurs WHERE email = ?',
+      [manager_email]
+    );
+    
+    if (existingManager.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Un utilisateur avec cet email existe déjà'
+      });
+    }
+    
+    // 3. Créer l'entreprise
+    const id_entreprise = uuidv4();
+    const now = new Date();
+    
+    await connection.query(`
+      INSERT INTO entreprises (
+        id_entreprise, nom_entreprise, secteur, description, adresse,
+        telephone, email, site_web, taille_entreprise, chiffre_affaires,
+        effectif_total, ville_siege_social, pays_siege_social,
+        statut_evaluation, date_creation, date_modification
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'EN_ATTENTE', ?, ?)
+    `, [
+      id_entreprise, nom_entreprise, secteur, description, adresse,
+      telephone, email, site_web, taille_entreprise, chiffre_affaires,
+      effectif_total, ville_siege_social, pays_siege_social, now, now
+    ]);
+    
+    logger.info('✅ Entreprise créée:', { id_entreprise, nom_entreprise });
+    
+    // 4. Obtenir ou créer le rôle Manager
+    const managerRoleId = await getOrCreateManagerRole(connection);
+    
+    // 5. Créer le manager avec le rôle Manager
+    const id_acteur_manager = uuidv4();
+    const hashedPassword = await bcrypt.hash(manager_mot_de_passe, 12);
+    
+    await connection.query(`
+      INSERT INTO acteurs (
+        id_acteur, nom_prenom, email, mot_de_passe, organisation,
+        id_entreprise, id_role, anciennete_role, is_active,
+        date_creation, date_modification
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?)
+    `, [
+      id_acteur_manager, manager_nom_prenom, manager_email, hashedPassword,
+      nom_entreprise, id_entreprise, managerRoleId, now, now
+    ]);
+    
+    logger.info('✅ Manager créé avec rôle Manager:', { id_acteur_manager, manager_email });
+    
+    // 6. Créer les permissions par défaut pour le manager
+    await createDefaultPermissions(connection, id_acteur_manager, managerRoleId, id_entreprise);
+    
+    // 7. S'assurer que le rôle Intervenant existe aussi pour les futurs employés
+    await getOrCreateIntervenantRole(connection);
+    
+    // 8. Commit de la transaction
+    await connection.commit();
+    
+    // 9. Récupérer les données complètes pour la réponse
+    const [managerData] = await connection.query(`
+      SELECT a.*, r.nom_role, e.nom_entreprise
+      FROM acteurs a
+      JOIN roles r ON a.id_role = r.id_role
+      JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+      WHERE a.id_acteur = ?
+    `, [id_acteur_manager]);
+    
+    const [enterpriseData] = await connection.query(
+      'SELECT * FROM entreprises WHERE id_entreprise = ?',
+      [id_entreprise]
+    );
+    
+    logger.info('🎉 Création entreprise terminée avec succès');
+    
+    // 10. Réponse avec la nouvelle structure (sans id_manager séparé)
+    res.status(201).json({
+      message: 'Entreprise et manager créés avec succès',
+      entreprise: enterpriseData[0],
+      manager: {
+        id_acteur: managerData[0].id_acteur,  // ID unique de l'acteur
+        nom_prenom: managerData[0].nom_prenom,
+        email: managerData[0].email,
+        role: managerData[0].nom_role,
+        id_entreprise: managerData[0].id_entreprise,
+        nom_entreprise: managerData[0].nom_entreprise
+      }
+    });
+    
+  } catch (error) {
+    await connection.rollback();
+    logger.error('❌ Erreur création entreprise:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la création de l\'entreprise',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  } finally {
+    connection.release();
+  }
+});
+
+module.exports = router;

@@ -408,11 +408,3 @@ noscript {
   padding: 20px;
 }
 
-.app-wrapper,
-.main-layout,
-.dashboard-container,
-.page-container {
-  padding-top: var(--header-height); 
-  position: relative;
-  z-index: 1;
-}

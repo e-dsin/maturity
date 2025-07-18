@@ -37,14 +37,22 @@ import {
   Settings as SettingsIcon,
   ModelTraining as MaturityIcon,
   Logout as LogoutIcon,
-  Business as OrganizationIcon
+  Business as OrganizationIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon,
+  BarChart as BarChartIcon,
+  Apps as AppsIcon,
+  Storage as StorageIcon,
+  Code as CodeIcon,
+  Lightbulb as LightbulbIcon,
+  Analytics as AnalyticsIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const drawerWidth = 280; // Largeur augmentée pour les sous-menus
+const drawerWidth = 300; // Largeur augmentée pour les nouveaux sous-menus
 
-// Configuration des éléments de menu avec permissions
+// Configuration des éléments de menu avec permissions V2
 interface MenuItem {
   text: string;
   icon: React.ReactElement;
@@ -54,6 +62,8 @@ interface MenuItem {
   subItems?: MenuItem[];
   adminOnly?: boolean;
   divider?: boolean;
+  badge?: string;
+  newFeature?: boolean;
 }
 
 const MainLayout: React.FC = () => {
@@ -61,6 +71,7 @@ const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(!isMobile);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [analysesMenuOpen, setAnalysesMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { 
@@ -73,8 +84,9 @@ const MainLayout: React.FC = () => {
     logout,
     getAdminSubModules
   } = useAuth();
+  
 
-  // Configuration des éléments de menu avec la nouvelle structure
+  // Configuration des éléments de menu avec la nouvelle structure V2
   const menuItems: MenuItem[] = [
     {
       text: 'Dashboard',
@@ -83,17 +95,36 @@ const MainLayout: React.FC = () => {
       module: 'DASHBOARD',
       action: 'voir'
     },
+    
+    // === ANALYSES & RECOMMANDATIONS (V2 étendu) ===
     {
       text: 'Analyses & Recommandations',
-      icon: <AssessmentIcon />,
-      path: '/analyses-fonctions',
+      icon: <AnalyticsIcon />,
       module: 'ANALYSES',
-      action: 'voir'
+      action: 'voir',
+      subItems: [
+        {
+          text: 'Vue Entreprise',
+          icon: <BusinessIcon />,
+          path: '/analyses-interpretations-entreprises',
+          module: 'ANALYSES',
+          action: 'voir'
+        },
+        {
+          text: 'Vue par Fonctions',
+          icon: <TimelineIcon />,
+          path: '/analyses-interpretations-functions',
+          module: 'ANALYSES',
+          action: 'voir'
+        }
+      ]
     },
+
+    // === GESTION DES CONTENUS ===
     {
       text: 'Formulaires',
       icon: <AssignmentIcon />,
-      path: '/formulaires',
+      path: '/forms',
       module: 'FORMULAIRES',
       action: 'voir'
     },
@@ -104,6 +135,20 @@ const MainLayout: React.FC = () => {
       module: 'QUESTIONNAIRES',
       action: 'voir'
     },
+    {
+      text: 'Applications',
+      icon: <ComputerIcon />,
+      path: '/applications',
+      module: 'APPLICATIONS',
+      action: 'voir'
+    },
+    {
+      text: 'Organisations',
+      icon: <OrganizationIcon />,
+      path: '/organisations',
+      module: 'ENTREPRISES',
+      action: 'voir'
+    },
       
     // Divider avant administration
     {
@@ -111,7 +156,8 @@ const MainLayout: React.FC = () => {
       icon: <></>,
       divider: true
     },
-    // === MODULE D'ADMINISTRATION UNIFIÉ ===
+    
+    // === MODULE D'ADMINISTRATION UNIFIÉ V2 ===
     {
       text: 'Administration',
       icon: <AdminIcon />,
@@ -122,35 +168,36 @@ const MainLayout: React.FC = () => {
         {
           text: 'Gestion des Utilisateurs',
           icon: <PeopleIcon />,
-          path: '/admin',
+          path: '/administration',
           module: 'ADMIN_USERS',
           action: 'voir'
         },
         {
-          text: 'Permissions & Rôles',
-          icon: <SecurityIcon />,
-          path: '/admin',
-          module: 'ADMIN_PERMISSIONS',
-          action: 'voir'
+          text: 'Gestion des Entreprises',
+          icon: <BusinessIcon />,
+          path: '/administration',
+          module: 'ADMINISTRATION',
+          action: 'voir',
+          newFeature: true
         },
         {
-          text: 'Entreprises',
-          icon: <BusinessIcon />,
-          path: '/admin',
-          module: 'ADMINISTRATION',
+          text: 'Permissions & Rôles',
+          icon: <SecurityIcon />,
+          path: '/administration',
+          module: 'ADMIN_PERMISSIONS',
           action: 'voir'
         },
         {
           text: 'Modèle de Maturité',
           icon: <MaturityIcon />,
-          path: '/admin/maturity-model',
+          path: '/maturity-model-admin',
           module: 'ADMIN_MATURITY',
           action: 'voir'
         },
         {
           text: 'Configuration Système',
           icon: <SettingsIcon />,
-          path: '/admin/system',
+          path: '/administration',
           module: 'ADMIN_SYSTEM',
           action: 'voir'
         }
@@ -167,6 +214,10 @@ const MainLayout: React.FC = () => {
     if (isMobile) {
       setOpen(false);
     }
+  };
+
+  const handleAnalysesMenuToggle = () => {
+    setAnalysesMenuOpen(!analysesMenuOpen);
   };
 
   const handleAdminMenuToggle = () => {
@@ -206,7 +257,7 @@ const MainLayout: React.FC = () => {
   const isMenuItemActive = (item: MenuItem): boolean => {
     if (item.path) {
       // Pour les items d'administration, considérer comme actif si on est sur /admin
-      if (item.path === '/admin' && location.pathname.startsWith('/admin')) {
+      if (item.path === '/administration' && location.pathname.startsWith('/administration')) {
         return true;
       }
       return location.pathname === item.path || location.pathname.startsWith(item.path + '/');
@@ -214,9 +265,14 @@ const MainLayout: React.FC = () => {
     return false;
   };
 
+  // Fonction pour vérifier si le menu analyses contient des éléments actifs
+  const isAnalysesMenuActive = (): boolean => {
+    return location.pathname.includes('analyses') || location.pathname.includes('calculate-score');
+  };
+
   // Fonction pour vérifier si le menu admin contient des éléments actifs
   const isAdminMenuActive = (): boolean => {
-    return location.pathname.startsWith('/admin');
+    return location.pathname.startsWith('/administration') || location.pathname.startsWith('/maturity-model-admin');
   };
 
   // Fonction pour rendre un élément de menu
@@ -233,12 +289,16 @@ const MainLayout: React.FC = () => {
     const hasSubItems = item.subItems && item.subItems.length > 0;
 
     return (
-      <ListItem key={item.text} disablePadding sx={{ pl: isSubItem ? 4 : 0 }}>
+      <ListItem key={item.text} disablePadding sx={{ pl: isSubItem ? 2 : 0 }}>
         <ListItemButton 
-          selected={isActive}
+          selected={isActive && !hasSubItems}
           onClick={() => {
-            if (hasSubItems && item.text === 'Administration') {
-              handleAdminMenuToggle();
+            if (hasSubItems) {
+              if (item.text === 'Administration') {
+                handleAdminMenuToggle();
+              } else if (item.text === 'Analyses & Recommandations') {
+                handleAnalysesMenuToggle();
+              }
             } else if (item.path) {
               handleNavigate(item.path);
             }
@@ -247,7 +307,8 @@ const MainLayout: React.FC = () => {
             borderRadius: 1,
             mx: 1,
             mb: 0.5,
-            ...(isActive && {
+            minHeight: 48,
+            ...(isActive && !hasSubItems && {
               backgroundColor: 'primary.main',
               color: 'primary.contrastText',
               '&:hover': {
@@ -265,32 +326,154 @@ const MainLayout: React.FC = () => {
           <ListItemText 
             primary={
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400 }}>
+                <Typography variant="body2" sx={{ fontWeight: isActive && !hasSubItems ? 600 : 400 }}>
                   {item.text}
                 </Typography>
-                {item.adminOnly && (
-                  <Chip 
-                    label="Admin" 
-                    size="small" 
-                    color="secondary" 
-                    sx={{ 
-                      height: 20, 
-                      fontSize: '0.7rem',
-                      ...(isActive && {
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                        color: 'inherit'
-                      })
-                    }} 
-                  />
-                )}
-                {hasSubItems && (
-                  adminMenuOpen ? <ExpandLess /> : <ExpandMore />
-                )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {item.newFeature && (
+                    <Chip 
+                      label="Nouveau" 
+                      size="small" 
+                      color="success" 
+                      sx={{ 
+                        height: 18, 
+                        fontSize: '0.65rem',
+                        fontWeight: 600
+                      }} 
+                    />
+                  )}
+                  {item.badge && (
+                    <Chip 
+                      label={item.badge} 
+                      size="small" 
+                      color="primary" 
+                      sx={{ 
+                        height: 18, 
+                        fontSize: '0.65rem',
+                        fontWeight: 600,
+                        ...(isActive && !hasSubItems && {
+                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit'
+                        })
+                      }} 
+                    />
+                  )}
+                  {item.adminOnly && (
+                    <Chip 
+                      label="Admin" 
+                      size="small" 
+                      color="secondary" 
+                      sx={{ 
+                        height: 18, 
+                        fontSize: '0.65rem',
+                        ...(isActive && !hasSubItems && {
+                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit'
+                        })
+                      }} 
+                    />
+                  )}
+                  {hasSubItems && (
+                    (item.text === 'Administration' && adminMenuOpen) || 
+                    (item.text === 'Analyses & Recommandations' && analysesMenuOpen) ? 
+                    <ExpandLess /> : <ExpandMore />
+                  )}
+                </Box>
               </Box>
             }
           />
         </ListItemButton>
       </ListItem>
+    );
+  };
+
+  // Fonction pour rendre les sous-éléments d'analyses
+  const renderAnalysesSubItems = () => {
+    const analysesItem = menuItems.find(item => item.text === 'Analyses & Recommandations');
+    if (!analysesItem || !analysesItem.subItems) return null;
+
+    return (
+      <Collapse in={analysesMenuOpen} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {analysesItem.subItems.map(subItem => {
+            if (!isMenuItemAccessible(subItem)) return null;
+            
+            const isActive = isMenuItemActive(subItem);
+            
+            return (
+              <ListItem key={subItem.text} disablePadding sx={{ pl: 2 }}>
+                <ListItemButton 
+                  selected={isActive}
+                  onClick={() => subItem.path && handleNavigate(subItem.path)}
+                  sx={{
+                    borderRadius: 1,
+                    mx: 1,
+                    mb: 0.5,
+                    minHeight: 40,
+                    backgroundColor: isActive ? 'primary.main' : 'transparent',
+                    color: isActive ? 'primary.contrastText' : 'inherit',
+                    '&:hover': {
+                      backgroundColor: isActive ? 'primary.dark' : 'rgba(0, 0, 0, 0.04)',
+                    },
+                    ...(isActive && {
+                      '& .MuiListItemIcon-root': {
+                        color: 'primary.contrastText',
+                      }
+                    })
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, ml: 1 }}>
+                    {subItem.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400, fontSize: '0.875rem' }}>
+                          {subItem.text}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {subItem.newFeature && (
+                            <Chip 
+                              label="Nouveau" 
+                              size="small" 
+                              color="success" 
+                              sx={{ 
+                                height: 16, 
+                                fontSize: '0.6rem',
+                                fontWeight: 600,
+                                ...(isActive && {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                  color: 'inherit'
+                                })
+                              }} 
+                            />
+                          )}
+                          {subItem.badge && (
+                            <Chip 
+                              label={subItem.badge} 
+                              size="small" 
+                              color="primary" 
+                              sx={{ 
+                                height: 16, 
+                                fontSize: '0.6rem',
+                                fontWeight: 600,
+                                ...(isActive && {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                  color: 'inherit'
+                                })
+                              }} 
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Collapse>
     );
   };
 
@@ -316,20 +499,45 @@ const MainLayout: React.FC = () => {
                     borderRadius: 1,
                     mx: 1,
                     mb: 0.5,
-                    backgroundColor: isActive ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                    minHeight: 40,
+                    backgroundColor: isActive ? 'primary.main' : 'transparent',
+                    color: isActive ? 'primary.contrastText' : 'inherit',
                     '&:hover': {
-                      backgroundColor: isActive ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.04)',
-                    }
+                      backgroundColor: isActive ? 'primary.dark' : 'rgba(0, 0, 0, 0.04)',
+                    },
+                    ...(isActive && {
+                      '& .MuiListItemIcon-root': {
+                        color: 'primary.contrastText',
+                      }
+                    })
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40, ml: 2 }}>
+                  <ListItemIcon sx={{ minWidth: 40, ml: 1 }}>
                     {subItem.icon}
                   </ListItemIcon>
                   <ListItemText 
                     primary={
-                      <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400 }}>
-                        {subItem.text}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400, fontSize: '0.875rem' }}>
+                          {subItem.text}
+                        </Typography>
+                        {subItem.newFeature && (
+                          <Chip 
+                            label="Nouveau" 
+                            size="small" 
+                            color="success" 
+                            sx={{ 
+                              height: 16, 
+                              fontSize: '0.6rem',
+                              fontWeight: 600,
+                              ...(isActive && {
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                color: 'inherit'
+                              })
+                            }} 
+                          />
+                        )}
+                      </Box>
                     }
                   />
                 </ListItemButton>
@@ -341,8 +549,11 @@ const MainLayout: React.FC = () => {
     );
   };
 
-  // Auto-ouvrir le menu admin si on est sur une page d'administration
+  // Auto-ouvrir les menus si on est sur les pages correspondantes
   React.useEffect(() => {
+    if (isAnalysesMenuActive()) {
+      setAnalysesMenuOpen(true);
+    }
     if (isAdminMenuActive()) {
       setAdminMenuOpen(true);
     }
@@ -374,8 +585,20 @@ const MainLayout: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Plateforme d'Évaluation de Maturité - DSIN
+            Plateforme d'Évaluation de Maturité DSIN
           </Typography>
+          
+          {/* Indicateur Version V2 */}
+          <Chip 
+            label="V2" 
+            color="success" 
+            size="small" 
+            sx={{ 
+              mr: 2, 
+              fontWeight: 600,
+              display: { xs: 'none', sm: 'flex' }
+            }} 
+          />
           
           {/* Informations utilisateur et déconnexion */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -435,6 +658,7 @@ const MainLayout: React.FC = () => {
               alt="Logo" 
               style={{ height: 32, width: 'auto' }}
             />
+            
            </Box>
           <IconButton onClick={handleDrawerToggle}>
             <ChevronLeftIcon />
@@ -445,7 +669,15 @@ const MainLayout: React.FC = () => {
         <Box sx={{ overflow: 'auto', flex: 1 }}>
           <List component="nav" sx={{ px: 1, py: 2 }}>
             {menuItems.map((item) => {
-              if (item.text === 'Administration') {
+              if (item.text === 'Analyses & Recommandations') {
+                // Traitement spécial pour le menu analyses
+                return (
+                  <React.Fragment key="analyses">
+                    {renderMenuItem(item)}
+                    {renderAnalysesSubItems()}
+                  </React.Fragment>
+                );
+              } else if (item.text === 'Administration') {
                 // Traitement spécial pour le menu administration
                 return (
                   <React.Fragment key="administration">
@@ -470,17 +702,34 @@ const MainLayout: React.FC = () => {
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
             {currentUser?.nom_prenom}
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {currentUser?.nom_role || currentUser?.role}
-            {(isAdmin() || isSuperAdmin()) && (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {currentUser?.nom_role || currentUser?.role}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              {(isAdmin() || isSuperAdmin()) && (
+                <Chip 
+                  label="Admin" 
+                  size="small" 
+                  color="primary" 
+                  sx={{ height: 16, fontSize: '0.65rem' }} 
+                />
+              )}
               <Chip 
-                label="Admin" 
+                label="V2" 
                 size="small" 
-                color="primary" 
-                sx={{ ml: 1, height: 16, fontSize: '0.7rem' }} 
+                color="success" 
+                sx={{ height: 16, fontSize: '0.65rem' }} 
               />
-            )}
-          </Typography>
+            </Box>
+          </Box>
+          
+          {/* Entreprise de l'utilisateur */}
+          {currentUser?.nom_entreprise && (
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+              📍 {currentUser.nom_entreprise}
+            </Typography>
+          )}
         </Box>
       </Drawer>
       

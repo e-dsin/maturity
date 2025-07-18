@@ -1,0 +1,304 @@
+﻿// server/routes/acteurs-route.js - VERSION CORRIGÃ‰E
+const express = require('express');
+const router = express.Router();
+const { pool } = require('../db/dbConnection');
+const { v4: uuidv4 } = require('uuid');
+const { 
+  authenticateToken, 
+  checkPermission, 
+  filterByEntreprise,
+  requireManagerOrConsultant
+} = require('../middlewares/auth-middleware');
+
+// GET tous les acteurs (avec filtrage par entreprise)
+router.get('/', 
+  authenticateToken, 
+  checkPermission('USERS', 'voir'), 
+  filterByEntreprise,
+  async (req, res) => {
+    try {
+      let query = `
+        SELECT a.*, r.nom_role, r.niveau_acces, e.nom_entreprise
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+      `;
+      
+      let params = [];
+      
+      // Filtrer par entreprise si l'utilisateur n'a pas accÃ¨s global
+      if (!req.user.hasGlobalAccess && req.entrepriseFilter) {
+        query += ' WHERE a.id_entreprise = ?';
+        params.push(req.entrepriseFilter);
+      }
+      
+      query += ' ORDER BY a.nom_prenom';
+      
+      const [acteurs] = await pool.query(query, params);
+      res.status(200).json(acteurs);
+    } catch (error) {
+      console.error('Erreur lors de la rÃ©cupÃ©ration des acteurs:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de la rÃ©cupÃ©ration des acteurs' });
+    }
+  }
+);
+
+// GET informations de l'utilisateur connecté avec son entreprise
+router.get('/me', 
+  authenticateToken, 
+  async (req, res) => {
+    try {
+      console.log('🔍 Récupération infos utilisateur connecté:', req.user.id_acteur);
+      
+      // Récupérer les informations complètes de l'utilisateur connecté
+      const [users] = await pool.query(`
+        SELECT 
+          a.id_acteur,
+          a.nom_prenom,
+          a.email,
+          a.organisation,
+          a.id_entreprise,
+          a.date_creation,
+          a.derniere_connexion,
+          a.statut_acteur,
+          r.nom_role,
+          r.niveau_acces,
+          e.nom_entreprise,
+          e.secteur,
+          e.taille_entreprise,
+          e.ville_siege_social,
+          e.pays_siege_social
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+        WHERE a.id_acteur = ?
+      `, [req.user.id_acteur]);
+
+      if (users.length === 0) {
+        return res.status(404).json({ 
+          message: 'Utilisateur non trouvé' 
+        });
+      }
+
+      const user = users[0];
+
+      // ✅ Déterminer l'accès et l'entreprise selon les permissions
+      const hasGlobalAccess = ['SUPER-ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT'].includes(user.nom_role);
+      
+      // Préparer la réponse
+      const response = {
+        user: {
+          id_acteur: user.id_acteur,
+          nom_prenom: user.nom_prenom,
+          email: user.email,
+          organisation: user.organisation,
+          nom_role: user.nom_role,
+          niveau_acces: user.niveau_acces,
+          statut_acteur: user.statut_acteur,
+          derniere_connexion: user.derniere_connexion
+        },
+        entreprise: null,
+        hasGlobalAccess,
+        canAccessAllEntreprises: hasGlobalAccess
+      };
+
+      // ✅ Ajouter les infos d'entreprise si disponibles
+      if (user.id_entreprise && user.nom_entreprise) {
+        response.entreprise = {
+          id_entreprise: user.id_entreprise,
+          nom_entreprise: user.nom_entreprise,
+          secteur: user.secteur,
+          taille_entreprise: user.taille_entreprise,
+          ville_siege_social: user.ville_siege_social,
+          pays_siege_social: user.pays_siege_social
+        };
+      }
+
+      console.log('✅ Infos utilisateur récupérées:', {
+        nom: user.nom_prenom,
+        role: user.nom_role,
+        entreprise: user.nom_entreprise || 'Aucune',
+        hasGlobalAccess
+      });
+
+      res.json(response);
+
+    } catch (error) {
+      console.error('❌ Erreur récupération utilisateur:', error);
+      res.status(500).json({ 
+        message: 'Erreur lors de la récupération des informations utilisateur' 
+      });
+    }
+  }
+);
+
+// GET entreprise de l'utilisateur connecté (endpoint simplifié)
+router.get('/my-enterprise', 
+  authenticateToken, 
+  async (req, res) => {
+    try {
+      const [users] = await pool.query(`
+        SELECT 
+          a.id_entreprise,
+          e.nom_entreprise,
+          e.secteur,
+          r.nom_role,
+          r.niveau_acces
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+        WHERE a.id_acteur = ?
+      `, [req.user.id_acteur]);
+
+      if (users.length === 0) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      const user = users[0];
+      const hasGlobalAccess = ['SUPER-ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT'].includes(user.nom_role);
+
+      res.json({
+        id_entreprise: user.id_entreprise,
+        nom_entreprise: user.nom_entreprise,
+        secteur: user.secteur,
+        hasGlobalAccess,
+        canSelectEnterprise: hasGlobalAccess
+      });
+
+    } catch (error) {
+      console.error('❌ Erreur récupération entreprise:', error);
+      res.status(500).json({ 
+        message: 'Erreur lors de la récupération de l\'entreprise' 
+      });
+    }
+  }
+);
+
+// GET acteur par ID (avec vÃ©rification d'accÃ¨s)
+router.get('/:id', 
+  authenticateToken, 
+  checkPermission('USERS', 'voir'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      let query = `
+        SELECT a.*, r.nom_role, r.niveau_acces, e.nom_entreprise
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+        WHERE a.id_acteur = ?
+      `;
+      
+      let params = [id];
+      
+      // Ajouter le filtre entreprise si nÃ©cessaire
+      if (!req.user.hasGlobalAccess && req.user.id_entreprise) {
+        query += ' AND a.id_entreprise = ?';
+        params.push(req.user.id_entreprise);
+      }
+      
+      const [acteurs] = await pool.query(query, params);
+      
+      if (acteurs.length === 0) {
+        return res.status(404).json({ message: 'Acteur non trouvÃ© ou accÃ¨s non autorisÃ©' });
+      }
+      
+      res.status(200).json(acteurs[0]);
+    } catch (error) {
+      console.error('Erreur lors de la rÃ©cupÃ©ration de l\'acteur:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de la rÃ©cupÃ©ration de l\'acteur' });
+    }
+  }
+);
+
+// POST nouvel acteur (version simplifiÃ©e)
+router.post('/', 
+  authenticateToken, 
+  checkPermission('USERS', 'editer'),
+  async (req, res) => {
+    try {
+      const { 
+        nom_prenom, 
+        email,
+        organisation,
+        id_entreprise,
+        id_role,
+        anciennete_role = 0
+      } = req.body;
+      
+      if (!nom_prenom || !email || !id_role) {
+        return res.status(400).json({ 
+          message: 'DonnÃ©es invalides: nom_prenom, email et id_role sont requis' 
+        });
+      }
+      
+      // VÃ©rifier que l'utilisateur peut crÃ©er un acteur dans cette entreprise
+      if (!req.user.hasGlobalAccess && id_entreprise !== req.user.id_entreprise) {
+        return res.status(403).json({ 
+          message: 'Vous ne pouvez crÃ©er des acteurs que pour votre entreprise' 
+        });
+      }
+      
+      const id_acteur = uuidv4();
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      
+      await pool.query(`
+        INSERT INTO acteurs (
+          id_acteur, nom_prenom, email, organisation, 
+          id_entreprise, id_role, anciennete_role,
+          date_creation, date_modification
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id_acteur, nom_prenom, email, organisation || '',
+        id_entreprise, id_role, anciennete_role, now, now
+      ]);
+      
+      // RÃ©cupÃ©rer l'acteur crÃ©Ã©
+      const [newActeur] = await pool.query(`
+        SELECT a.*, r.nom_role, r.niveau_acces, e.nom_entreprise
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+        WHERE a.id_acteur = ?
+      `, [id_acteur]);
+      
+      res.status(201).json(newActeur[0]);
+    } catch (error) {
+      console.error('Erreur lors de la crÃ©ation de l\'acteur:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de la crÃ©ation de l\'acteur' });
+    }
+  }
+);
+
+// GET acteurs par entreprise
+router.get('/entreprise/:entrepriseId', 
+  authenticateToken, 
+  checkPermission('USERS', 'voir'),
+  async (req, res) => {
+    try {
+      const { entrepriseId } = req.params;
+      
+      // VÃ©rifier l'accÃ¨s Ã  cette entreprise
+      if (!req.user.hasGlobalAccess && entrepriseId !== req.user.id_entreprise) {
+        return res.status(403).json({ message: 'AccÃ¨s non autorisÃ© Ã  cette entreprise' });
+      }
+      
+      const [acteurs] = await pool.query(`
+        SELECT a.*, r.nom_role, r.niveau_acces, e.nom_entreprise
+        FROM acteurs a
+        JOIN roles r ON a.id_role = r.id_role
+        LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+        WHERE a.id_entreprise = ?
+        ORDER BY a.nom_prenom
+      `, [entrepriseId]);
+      
+      res.status(200).json(acteurs);
+    } catch (error) {
+      console.error('Erreur lors de la rÃ©cupÃ©ration des acteurs par entreprise:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de la rÃ©cupÃ©ration des acteurs' });
+    }
+  }
+);
+
+module.exports = router;

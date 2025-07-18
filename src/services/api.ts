@@ -1,386 +1,327 @@
-// src/services/api.ts - Version mise à jour pour le backend déployé
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
-import logger from '../utils/logger';
+// src/services/api.ts - VERSION SIMPLIFIÉE avec méthodes génériques seulement
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
-// Configuration des URLs selon l'environnement
-const getAPIBaseURL = (): string => {
-  // En production ou quand VITE_API_URL est définie, utiliser la valeur configurée
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  
-  // Par défaut, utiliser le backend déployé
-  return 'https://api-dev.dev-maturity.e-dsin.fr';
-};
+interface ApiConfig {
+  baseURL: string;
+  environment: string;
+  isDev: boolean;
+  customUrl?: string;
+}
 
-const API_URL = getAPIBaseURL();
-const API_PREFIX = '/api';
+class ApiService {
+  private api: AxiosInstance;
+  private config: ApiConfig;
 
-console.log('🌐 Configuration API:', {
-  baseURL: API_URL,
-  environment: import.meta.env.MODE,
-  isDev: import.meta.env.DEV,
-  customUrl: import.meta.env.VITE_API_URL
-});
-
-// Créer une instance d'axios avec la configuration de base
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  // Ajouter timeout et credentials
-  timeout: 30000,
-  withCredentials: true,
-});
-
-// Intercepteur pour les requêtes
-apiClient.interceptors.request.use(
-  (config) => {
-    // Ajouter un marqueur de temps pour mesurer la durée
-    (config as any).metadata = { startTime: Date.now() };
+  constructor() {
+    // ✅ CORRECTION : Utiliser import.meta.env au lieu de process.env côté client
+    const environment = import.meta.env.MODE || 'development';
+    const isDev = environment === 'development';
     
-    // Récupérer le token d'authentification du localStorage
-    const token = localStorage.getItem('auth_token');
+    // Configuration API par environnement
+    let baseURL: string;
     
-    // Ajouter le token aux en-têtes si disponible
-    if (token && config.headers) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    if (isDev) {
+      baseURL = import.meta.env.VITE_API_BASE_URL || 'https://api-dev.dev-maturity.e-dsin.fr';
+    } else {
+      baseURL = import.meta.env.VITE_API_BASE_URL || 'https://api-prod.your-domain.com';
     }
-    
-    // Ajouter les headers CORS explicites
-    if (config.headers) {
-      config.headers['Accept'] = 'application/json';
-      config.headers['Cache-Control'] = 'no-cache';
+
+    // Retirer '/api' du baseURL si présent car on l'ajoute dans les intercepteurs
+    if (baseURL.endsWith('/api')) {
+      baseURL = baseURL.slice(0, -4);
     }
-    
-    // Logger la requête en toute sécurité
-    const logData = {
-      method: config.method?.toUpperCase() || 'GET',
-      url: config.url || 'unknown',
-      baseURL: config.baseURL,
-      hasToken: !!token
+
+    this.config = {
+      baseURL,
+      environment,
+      isDev,
+      customUrl: import.meta.env.VITE_API_BASE_URL
     };
-    
-    // Ajouter les données de manière sécurisée en mode dev uniquement
-    if (import.meta.env.DEV && config.data) {
-      try {
-        const dataString = typeof config.data === 'string' 
-          ? config.data 
-          : JSON.stringify(config.data);
-        
-        logData['data'] = dataString.substring(0, 500);
-      } catch (err) {
-        // Ignorer les erreurs de sérialisation
+
+    // ✅ Log de configuration (seulement en développement)
+    if (isDev) {
+      console.log('🌐 Configuration API:', this.config);
+    }
+
+    // Créer l'instance Axios
+    this.api = axios.create({
+      baseURL: this.config.baseURL,
+      timeout: 30000,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
+    });
+
+    // Configuration des intercepteurs
+    this.setupInterceptors();
+  }
+
+  private setupInterceptors() {
+    // Request interceptor
+    this.api.interceptors.request.use(
+      (config) => {
+        // Normaliser l'URL - ajouter /api si pas présent
+        if (config.url && !config.url.startsWith('/api/')) {
+          const originalUrl = config.url.replace(/^\/+/, '');
+          config.url = `/api/${originalUrl}`;
+          if (this.config.isDev) {
+            console.log(`🔄 URL Normalization: "${originalUrl}" → "${config.url}"`);
+          }
+        }
+
+        // Ajouter le token d'authentification si disponible
+        const token = this.getAuthToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          if (this.config.isDev) {
+            console.log('🔑 Token trouvé, ajouté à la requête');
+          }
+        }
+
+        // Ajouter metadata pour tracking des performances
+        config.metadata = { startTime: Date.now() };
+
+        return config;
+      },
+      (error) => {
+        if (this.config.isDev) {
+          console.error('❌ Request Error:', error);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Response interceptor
+    this.api.interceptors.response.use(
+      (response: AxiosResponse) => {
+        // Log des réponses API en développement
+        if (this.config.isDev) {
+          const duration = response.config.metadata?.startTime 
+            ? Date.now() - response.config.metadata.startTime 
+            : 0;
+          
+          console.log(`[INFO] API Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`, {
+            status: response.status,
+            statusText: response.statusText,
+            duration,
+            size: JSON.stringify(response.data).length,
+            url: response.config.url
+          });
+        }
+
+        return response;
+      },
+      (error: AxiosError) => {
+        // Gestion des erreurs
+        if (this.config.isDev) {
+          console.error('❌ API Error:', {
+            url: error.config?.url,
+            method: error.config?.method,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            message: error.message,
+            data: error.response?.data
+          });
+        }
+
+        // Gestion spécifique des erreurs d'authentification
+        if (error.response?.status === 401) {
+          this.handleAuthError();
+        }
+
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  /**
+   * Récupérer le token d'authentification
+   */
+  private getAuthToken(): string | null {
+    try {
+      return localStorage.getItem('authToken') || 
+             sessionStorage.getItem('authToken') || 
+             this.getCookieValue('authToken');
+    } catch (error) {
+      if (this.config.isDev) {
+        console.warn('⚠️ Impossible de récupérer le token:', error);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Récupérer une valeur de cookie
+   */
+  private getCookieValue(name: string): string | null {
+    try {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop()?.split(';').shift() || null;
+      }
+    } catch (error) {
+      // Ignore cookie errors
+    }
+    return null;
+  }
+
+  /**
+   * Gérer les erreurs d'authentification
+   */
+  private handleAuthError() {
+    // Nettoyer les tokens
+    this.clearAuthToken();
+
+    if (this.config.isDev) {
+      console.warn('🔑 Token expiré, redirection vers /auth/login');
     }
     
-    logger.debug(`API Request: ${logData.method} ${logData.url}`, logData);
-    
-    return config;
-  },
-  (error) => {
-    // Logger l'erreur de requête en toute sécurité
-    const errorMessage = error?.message || 'Erreur inconnue de requête API';
-    const errorStack = error?.stack || '';
-    
-    logger.error('Erreur de requête API', {
-      message: errorMessage,
-      stack: errorStack
-    });
-    
-    return Promise.reject(error);
-  }
-);
-
-// Intercepteur pour les réponses
-apiClient.interceptors.response.use(
-  (response) => {
-    // Calculer la durée de la requête de manière sécurisée
-    const duration = calculateRequestDuration(response.config);
-    const url = response.config?.url || 'unknown';
-    const method = response.config?.method?.toUpperCase() || 'GET';
-    
-    // Logger la réponse réussie
-    logger.info(`API Response: ${method} ${url} - ${response.status}`, {
-      status: response.status,
-      statusText: response.statusText || '',
-      duration,
-      size: response.data ? JSON.stringify(response.data).length : 0,
-      url
-    });
-    
-    // Traitement des réponses réussies
-    return response;
-  },
-  (error) => {
-    // Préparer les données de l'erreur de manière sécurisée
-    const errorData = {
-      url: error.config?.url || 'unknown',
-      method: error.config?.method?.toUpperCase() || 'UNKNOWN',
-      status: error.response?.status,
-      statusText: error.response?.statusText || '',
-      duration: error.config ? calculateRequestDuration(error.config) : null,
-      message: error?.message || 'Erreur inconnue',
-      baseURL: error.config?.baseURL
-    };
-    
-    // Gestion spécifique des erreurs
-    if (error.response?.status === 401) {
-      logger.warn('Session expirée ou non authentifiée', errorData);
-      // Nettoyer le token et rediriger vers login
-      localStorage.removeItem('auth_token');
-      
-      // Éviter les redirections infinies
-      if (!window.location.pathname.includes('/auth/login')) {
+    // Utiliser setTimeout pour éviter les problèmes de navigation immédiate
+    setTimeout(() => {
+      if (window.location.pathname !== '/auth/login') {
         window.location.href = '/auth/login';
       }
-    } else if (error.response?.status === 0 || error.code === 'NETWORK_ERROR') {
-      // Erreur de réseau
-      logger.error('Erreur de réseau - Backend inaccessible', {
-        ...errorData,
-        type: 'NETWORK_ERROR',
-        backendURL: API_URL
-      });
-    } else if (error.response?.status >= 500) {
-      // Erreur serveur
-      logger.error('Erreur serveur backend', {
-        ...errorData,
-        type: 'SERVER_ERROR'
-      });
-    } else {
-      // Autres erreurs (400, 403, 404, etc.)
-      logger.error('Erreur de réponse API', {
-        ...errorData,
-        // Inclure les données de réponse en développement uniquement
-        ...(import.meta.env.DEV && error.response?.data && { 
-          response: JSON.stringify(error.response.data).substring(0, 500),
-          stack: error?.stack || ''
-        })
-      });
+    }, 100);
+  }
+
+  // ====================================
+  // MÉTHODES HTTP GÉNÉRIQUES
+  // ====================================
+
+  /**
+   * ✅ Requête GET générique
+   */
+  async get<T = any>(url: string, config?: any): Promise<T> {
+    const response = await this.api.get(url, config);
+    return response.data;
+  }
+
+  /**
+   * ✅ Requête POST générique  
+   */
+  async post<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.api.post(url, data, config);
+    return response.data;
+  }
+
+  /**
+   * ✅ Requête PUT générique
+   */
+  async put<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.api.put(url, data, config);
+    return response.data;
+  }
+
+  /**
+   * ✅ Requête PATCH générique
+   */
+  async patch<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.api.patch(url, data, config);
+    return response.data;
+  }
+
+  /**
+   * ✅ Requête DELETE générique
+   */
+  async delete<T = any>(url: string, config?: any): Promise<T> {
+    const response = await this.api.delete(url, config);
+    return response.data;
+  }
+
+  // ====================================
+  // MÉTHODES UTILITAIRES
+  // ====================================
+
+  /**
+   * Configurer manuellement le token d'authentification
+   */
+  setAuthToken(token: string): void {
+    try {
+      localStorage.setItem('authToken', token);
+      if (this.config.isDev) {
+        console.log('🔑 Token d\'authentification configuré');
+      }
+    } catch (error) {
+      if (this.config.isDev) {
+        console.error('❌ Impossible de sauvegarder le token:', error);
+      }
     }
-    
-    return Promise.reject(error);
   }
-);
 
-// Fonction utilitaire pour normaliser les chemins d'API
-const normalizePath = (url: string): string => {
-  // Si l'URL commence déjà par API_PREFIX, ne pas l'ajouter à nouveau
-  if (url.startsWith(API_PREFIX)) {
-    return url;
-  }
-  
-  // Endpoints spéciaux qui ne nécessitent pas /api/ (health checks, etc.)
-  const specialEndpoints = ['/health', '/health-simple'];
-  if (specialEndpoints.some(endpoint => url.startsWith(endpoint))) {
-    return url;
-  }
-  
-  // Pour tous les autres endpoints, ajouter /api/
-  const normalizedUrl = `${API_PREFIX}${url.startsWith('/') ? url : `/${url}`}`;
-  
-  // Debug en développement
-  if (import.meta.env.DEV) {
-    console.log(`🔄 URL Normalization: "${url}" → "${normalizedUrl}"`);
-  }
-  
-  return normalizedUrl;
-};
-
-// Fonction pour calculer la durée d'une requête de manière sécurisée
-const calculateRequestDuration = (config: any): number => {
-  try {
-    if (config?.metadata?.startTime) {
-      return Date.now() - config.metadata.startTime;
+  /**
+   * Supprimer le token d'authentification
+   */
+  clearAuthToken(): void {
+    try {
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      // Nettoyer aussi les cookies si nécessaire
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      if (this.config.isDev) {
+        console.log('🔑 Token d\'authentification supprimé');
+      }
+    } catch (error) {
+      if (this.config.isDev) {
+        console.error('❌ Impossible de supprimer le token:', error);
+      }
     }
-  } catch (err) {
-    // Ignorer les erreurs
   }
-  return 0;
-};
 
-// Fonctions de wrapper pour mesurer les performances et gérer les exceptions
-const withPerformanceLogging = async <T>(
-  method: string,
-  url: string,
-  operation: () => Promise<T>,
-  extraDetails: Record<string, any> = {}
-): Promise<T> => {
-  const normalizedUrl = normalizePath(url);
-  const startTime = performance.now();
-  
-  try {
-    const result = await operation();
-    const duration = performance.now() - startTime;
-    
-    // Logger le succès uniquement si la durée est anormalement longue
-    if (duration > 2000) { // Plus de 2 secondes
-      logger.warn(`API Performance: ${method} ${normalizedUrl} - ${Math.round(duration)}ms (SLOW)`, {
-        ...extraDetails,
-        duration,
-        baseURL: API_URL
-      });
+  /**
+   * Vérifier si l'utilisateur est authentifié (vérification basique)
+   */
+  isAuthenticated(): boolean {
+    const token = this.getAuthToken();
+    if (!token) return false;
+
+    try {
+      // Vérifier que le token n'est pas expiré (basique)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Date.now() / 1000;
+      return payload.exp > now;
+    } catch (error) {
+      if (this.config.isDev) {
+        console.warn('⚠️ Token invalide:', error);
+      }
+      return false;
     }
-    
-    return result;
-  } catch (error) {
-    // L'erreur est déjà loggée dans l'intercepteur de réponse
-    throw error;
   }
-};
 
-// Test de connectivité
-export const testConnection = async (): Promise<boolean> => {
-  try {
-    await apiClient.get('/health', { timeout: 5000 });
-    logger.info('✅ Test de connectivité réussi', { backendURL: API_URL });
-    return true;
-  } catch (error) {
-    logger.error('❌ Test de connectivité échoué', { 
-      backendURL: API_URL,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-    return false;
+  /**
+   * Obtenir la configuration actuelle
+   */
+  getConfig(): ApiConfig {
+    return { ...this.config };
   }
-};
-
-// Service API avec gestion des erreurs améliorée
-const api = {
-  /**
-   * Test de connectivité au backend
-   */
-  testConnection,
 
   /**
-   * Récupère l'URL de base configurée
+   * Obtenir l'URL de base
    */
-  getBaseURL: () => API_URL,
-
-  /**
-   * Effectue une requête GET
-   * @param url - URL de la requête
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'GET',
-      normalizedUrl,
-      () => apiClient.get<T>(normalizedUrl, config).then((response: AxiosResponse<T>) => response.data),
-      { params: config?.params }
-    );
-  },
-  
-  /**
-   * Effectue une requête POST
-   * @param url - URL de la requête
-   * @param data - Données à envoyer
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'POST',
-      normalizedUrl,
-      () => apiClient.post<T>(normalizedUrl, data, config).then((response: AxiosResponse<T>) => response.data),
-      { dataSize: data ? JSON.stringify(data).length : 0 }
-    );
-  },
-  
-  /**
-   * Effectue une requête PUT
-   * @param url - URL de la requête
-   * @param data - Données à envoyer
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'PUT',
-      normalizedUrl,
-      () => apiClient.put<T>(normalizedUrl, data, config).then((response: AxiosResponse<T>) => response.data),
-      { dataSize: data ? JSON.stringify(data).length : 0 }
-    );
-  },
-  
-  /**
-   * Effectue une requête PATCH
-   * @param url - URL de la requête
-   * @param data - Données à envoyer
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'PATCH',
-      normalizedUrl,
-      () => apiClient.patch<T>(normalizedUrl, data, config).then((response: AxiosResponse<T>) => response.data),
-      { dataSize: data ? JSON.stringify(data).length : 0 }
-    );
-  },
-  
-  /**
-   * Effectue une requête DELETE
-   * @param url - URL de la requête
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'DELETE',
-      normalizedUrl,
-      () => apiClient.delete<T>(normalizedUrl, config).then((response: AxiosResponse<T>) => response.data),
-      {}
-    );
-  },
-  
-  /**
-   * Effectue une requête de téléchargement de fichier (en blob)
-   * @param url - URL de la requête
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données blob de la réponse
-   */
-  downloadFile: (url: string, config?: AxiosRequestConfig): Promise<Blob> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<Blob>(
-      'GET',
-      normalizedUrl,
-      () => apiClient.get(normalizedUrl, { 
-        ...config,
-        responseType: 'blob' 
-      }).then(response => response.data),
-      { responseType: 'blob' }
-    );
-  },
-  
-  /**
-   * Effectue un téléversement de fichier
-   * @param url - URL de la requête
-   * @param formData - FormData contenant le fichier
-   * @param config - Configuration Axios optionnelle
-   * @returns Promesse avec les données de la réponse
-   */
-  uploadFile: <T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> => {
-    const normalizedUrl = normalizePath(url);
-    return withPerformanceLogging<T>(
-      'POST',
-      normalizedUrl,
-      () => apiClient.post<T>(normalizedUrl, formData, {
-        ...config,
-        headers: {
-          ...config?.headers,
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(response => response.data),
-      { formDataEntries: Array.from(formData.keys()).join(',') }
-    );
+  getBaseURL(): string {
+    return this.config.baseURL;
   }
-};
 
+  /**
+   * Vérifier si on est en mode développement
+   */
+  isDevMode(): boolean {
+    return this.config.isDev;
+  }
+
+  /**
+   * Obtenir l'instance Axios brute (pour cas avancés)
+   */
+  getAxiosInstance(): AxiosInstance {
+    return this.api;
+  }
+}
+
+// Exporter une instance singleton
+const api = new ApiService();
 export default api;
+
+// Exporter les types pour utilisation externe
+export type { ApiConfig };

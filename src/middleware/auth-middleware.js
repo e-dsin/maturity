@@ -1,9 +1,18 @@
-// server/middlewares/auth-middleware.js - Version améliorée
+// server/middlewares/auth-middleware.js - Version améliorée avec nouvelle hiérarchie
 const jwt = require('jsonwebtoken');
 const { pool } = require('../db/dbConnection');
 const logger = require('../utils/logger');
 
-// Middleware d'authentification principal
+// Nouvelle hiérarchie des rôles
+const ROLE_HIERARCHY = {
+  INTERVENANT: { level: 1, scope: 'ENTREPRISE_PERSONNEL' },
+  MANAGER: { level: 2, scope: 'ENTREPRISE_COMPLETE' },
+  CONSULTANT: { level: 3, scope: 'GLOBAL' },
+  ADMINISTRATEUR: { level: 4, scope: 'GLOBAL' },
+  SUPER_ADMINISTRATEUR: { level: 5, scope: 'GLOBAL' }
+};
+
+// Middleware d'authentification principal (conservé et amélioré)
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
@@ -31,16 +40,30 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const user = users[0];
-    
-    // Enrichir l'objet utilisateur avec des informations de scope
     const userRole = user.nom_role || user.role;
-    user.hasGlobalAccess = (
-      user.niveau_acces === 'GLOBAL' ||
-      userRole === 'SUPER_ADMINISTRATEUR' ||
-      userRole === 'CONSULTANT'
-    );
     
-    // Déterminer le scope d'accès
+    // ✨ NOUVEAU: Enrichir avec la nouvelle hiérarchie
+    const roleConfig = ROLE_HIERARCHY[userRole];
+    if (roleConfig) {
+      user.roleLevel = roleConfig.level;
+      user.roleScope = roleConfig.scope;
+      user.hasGlobalAccess = roleConfig.scope === 'GLOBAL';
+      user.hasEnterpriseAccess = ['GLOBAL', 'ENTREPRISE_COMPLETE'].includes(roleConfig.scope);
+      user.hasPersonalAccess = roleConfig.scope === 'ENTREPRISE_PERSONNEL';
+    } else {
+      // Fallback pour rôles non définis
+      user.roleLevel = 0;
+      user.roleScope = 'UNKNOWN';
+      user.hasGlobalAccess = (
+        user.niveau_acces === 'GLOBAL' ||
+        userRole === 'SUPER_ADMINISTRATEUR' ||
+        userRole === 'CONSULTANT'
+      );
+      user.hasEnterpriseAccess = true;
+      user.hasPersonalAccess = false;
+    }
+    
+    // Conserver la compatibilité avec l'ancien système
     user.scope = user.hasGlobalAccess ? 'GLOBAL' : 'ENTREPRISE';
     
     req.user = user;
@@ -48,7 +71,9 @@ const authenticateToken = async (req, res, next) => {
     console.log('🔐 Utilisateur authentifié:', {
       email: user.email,
       role: userRole,
-      scope: user.scope,
+      level: user.roleLevel,
+      scope: user.roleScope,
+      legacy_scope: user.scope,
       entreprise: user.id_entreprise
     });
     
@@ -65,7 +90,194 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Middleware pour vérifier les permissions sur un module spécifique
+// ✨ NOUVEAU: Middleware pour définir les permissions selon la nouvelle hiérarchie
+const setEnhancedUserPermissions = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentification requise' });
+  }
+
+  const userRole = req.user.nom_role || req.user.role;
+  const roleConfig = ROLE_HIERARCHY[userRole];
+
+  if (!roleConfig) {
+    console.warn('⚠️ Rôle non reconnu dans la nouvelle hiérarchie:', userRole);
+    return next(); // Continuer avec l'ancien système
+  }
+
+  // Enrichir req.user avec les nouvelles permissions
+  req.userPermissions = {
+    role: userRole,
+    level: roleConfig.level,
+    scope: roleConfig.scope,
+    entreprise_id: req.user.id_entreprise,
+    
+    // Permissions par module selon la nouvelle hiérarchie
+    canAccessModule: (module, action = 'voir') => {
+      return canUserAccessModule(userRole, module, action, req.user.id_entreprise);
+    },
+    
+    // Accès aux entreprises
+    canSelectAllEnterprises: () => roleConfig.scope === 'GLOBAL',
+    canAccessEnterprise: (enterpriseId) => {
+      if (roleConfig.scope === 'GLOBAL') return true;
+      return req.user.id_entreprise === enterpriseId;
+    },
+    
+    // Gestion des utilisateurs
+    canManageUser: (targetUserRole) => {
+      const targetLevel = ROLE_HIERARCHY[targetUserRole]?.level || 0;
+      
+      // Règles spéciales
+      if (targetUserRole === 'ADMINISTRATEUR' && userRole !== 'SUPER_ADMINISTRATEUR') {
+        return false;
+      }
+      if (targetUserRole === 'SUPER_ADMINISTRATEUR' && userRole !== 'SUPER_ADMINISTRATEUR') {
+        return false;
+      }
+      
+      return roleConfig.level > targetLevel;
+    },
+    
+    // Filtres de données
+    getDataFilters: () => {
+      switch (roleConfig.scope) {
+        case 'GLOBAL':
+          return { global: true, entreprise: null, acteur: null };
+        case 'ENTREPRISE_COMPLETE':
+          return { global: false, entreprise: req.user.id_entreprise, acteur: null };
+        case 'ENTREPRISE_PERSONNEL':
+          return { global: false, entreprise: req.user.id_entreprise, acteur: req.user.id_acteur };
+        default:
+          return { global: false, entreprise: req.user.id_entreprise, acteur: null };
+      }
+    }
+  };
+
+  console.log('✨ Permissions améliorées configurées:', {
+    user: req.user.email,
+    role: userRole,
+    level: roleConfig.level,
+    scope: roleConfig.scope
+  });
+
+  next();
+};
+
+// ✨ NOUVEAU: Fonction pour vérifier l'accès aux modules selon la nouvelle hiérarchie
+const canUserAccessModule = (userRole, module, action, userEntrepriseId) => {
+  const modulePermissions = {
+    INTERVENANT: {
+      FORMULAIRES: { voir: 'OWN_ONLY', editer: 'OWN_ONLY', supprimer: false, administrer: false },
+      DASHBOARD: { voir: true, editer: false, supprimer: false, administrer: false },
+      ANALYSES: { voir: 'OWN_ONLY', editer: false, supprimer: false, administrer: false }
+    },
+    MANAGER: {
+      FORMULAIRES: { voir: true, editer: true, supprimer: true, administrer: false },
+      DASHBOARD: { voir: true, editer: true, supprimer: false, administrer: false },
+      ANALYSES: { voir: true, editer: true, supprimer: false, administrer: false },
+      GESTION_EQUIPES: { voir: true, editer: true, supprimer: false, administrer: false },
+      ENTREPRISES: { voir: 'ENTREPRISE_ONLY', editer: 'ENTREPRISE_ONLY', supprimer: false, administrer: false }
+    },
+    CONSULTANT: {
+      FORMULAIRES: { voir: true, editer: true, supprimer: true, administrer: false },
+      DASHBOARD: { voir: true, editer: true, supprimer: false, administrer: false },
+      ANALYSES: { voir: true, editer: true, supprimer: false, administrer: false },
+      ENTREPRISES: { voir: true, editer: true, supprimer: false, administrer: false },
+      GESTION_EQUIPES: { voir: true, editer: false, supprimer: false, administrer: false }
+    },
+    ADMINISTRATEUR: {
+      FORMULAIRES: { voir: true, editer: true, supprimer: true, administrer: true },
+      DASHBOARD: { voir: true, editer: true, supprimer: true, administrer: true },
+      ANALYSES: { voir: true, editer: true, supprimer: true, administrer: true },
+      ENTREPRISES: { voir: true, editer: true, supprimer: true, administrer: true },
+      GESTION_EQUIPES: { voir: true, editer: true, supprimer: true, administrer: true },
+      ADMINISTRATION: { voir: true, editer: true, supprimer: true, administrer: false }
+    },
+    SUPER_ADMINISTRATEUR: {
+      FORMULAIRES: { voir: true, editer: true, supprimer: true, administrer: true },
+      DASHBOARD: { voir: true, editer: true, supprimer: true, administrer: true },
+      ANALYSES: { voir: true, editer: true, supprimer: true, administrer: true },
+      ENTREPRISES: { voir: true, editer: true, supprimer: true, administrer: true },
+      GESTION_EQUIPES: { voir: true, editer: true, supprimer: true, administrer: true },
+      ADMINISTRATION: { voir: true, editer: true, supprimer: true, administrer: true },
+      CONFIGURATIONS_SYSTEME: { voir: true, editer: true, supprimer: true, administrer: true }
+    }
+  };
+
+  const userPermissions = modulePermissions[userRole];
+  if (!userPermissions || !userPermissions[module]) {
+    return false;
+  }
+
+  const permission = userPermissions[module][action];
+  
+  if (permission === true) return true;
+  if (permission === false) return false;
+  if (permission === 'OWN_ONLY') return true; // Géré côté application
+  if (permission === 'ENTREPRISE_ONLY') return true; // Géré côté application
+  
+  return false;
+};
+
+// ✨ NOUVEAU: Middleware pour vérifier l'accès aux modules avec la nouvelle hiérarchie
+const requireModuleAccess = (module, action = 'voir') => {
+  return (req, res, next) => {
+    if (!req.userPermissions) {
+      // Fallback vers l'ancien système
+      return checkPermission(module, action)(req, res, next);
+    }
+
+    if (!req.userPermissions.canAccessModule(module, action)) {
+      logAccess(req, action, module, false);
+      return res.status(403).json({ 
+        message: `Accès ${action} au module ${module} non autorisé`,
+        required_permission: `${module}:${action}`,
+        user_role: req.userPermissions.role,
+        user_level: req.userPermissions.level
+      });
+    }
+
+    logAccess(req, action, module, true);
+    console.log(`✅ Accès ${action} au module ${module} autorisé pour ${req.userPermissions.role}`);
+    next();
+  };
+};
+
+// ✨ NOUVEAU: Middleware pour filtrer les données selon les nouvelles permissions
+const applyDataFilters = (req, res, next) => {
+  if (!req.userPermissions) {
+    // Fallback vers l'ancien système
+    return filterByEntreprise(req, res, next);
+  }
+
+  const filters = req.userPermissions.getDataFilters();
+  req.dataFilters = filters;
+
+  console.log('🔍 Filtres de données appliqués:', {
+    user: req.user.email,
+    role: req.userPermissions.role,
+    filters: filters
+  });
+
+  next();
+};
+
+// ✨ NOUVEAU: Middleware pour vérifier le niveau hiérarchique minimum
+const requireMinLevel = (minLevel) => {
+  return (req, res, next) => {
+    if (!req.userPermissions || req.userPermissions.level < minLevel) {
+      const currentLevel = req.userPermissions?.level || 0;
+      return res.status(403).json({ 
+        message: `Niveau hiérarchique insuffisant (requis: ${minLevel}, actuel: ${currentLevel})`,
+        user_role: req.userPermissions?.role || 'unknown',
+        required_level: minLevel
+      });
+    }
+    next();
+  };
+};
+
+// Middleware pour vérifier les permissions sur un module spécifique (conservé)
 const checkPermission = (moduleName, action = 'voir') => {
   return async (req, res, next) => {
     try {
@@ -140,7 +352,7 @@ const checkPermission = (moduleName, action = 'voir') => {
   };
 };
 
-// Middleware pour exiger le rôle Consultant ou supérieur
+// Middleware pour exiger le rôle Consultant ou supérieur (conservé)
 const requireConsultant = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentification requise' });
@@ -161,13 +373,14 @@ const requireConsultant = (req, res, next) => {
   next();
 };
 
-// Middleware pour exiger le rôle Manager, Consultant ou supérieur
+// Middleware pour exiger le rôle Manager, Consultant ou supérieur (conservé et amélioré)
 const requireManagerOrConsultant = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentification requise' });
   }
 
   const userRole = req.user.nom_role || req.user.role;
+  // ✨ NOUVEAU: Inclure INTERVENANT si nécessaire pour certaines routes
   const authorizedRoles = ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER'];
   
   if (!authorizedRoles.includes(userRole)) {
@@ -182,7 +395,28 @@ const requireManagerOrConsultant = (req, res, next) => {
   next();
 };
 
-// Middleware pour contrôler l'accès selon le scope (entreprise vs global)
+// ✨ NOUVEAU: Middleware pour exiger l'accès aux formulaires (incluant INTERVENANT)
+const requireFormAccess = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentification requise' });
+  }
+
+  const userRole = req.user.nom_role || req.user.role;
+  const authorizedRoles = ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER', 'INTERVENANT'];
+  
+  if (!authorizedRoles.includes(userRole)) {
+    console.log('❌ Accès formulaires refusé pour le rôle:', userRole);
+    return res.status(403).json({ 
+      message: 'Accès aux formulaires non autorisé',
+      userRole: userRole
+    });
+  }
+
+  console.log('✅ Accès formulaires autorisé pour:', userRole);
+  next();
+};
+
+// Middleware pour contrôler l'accès selon le scope (conservé)
 const requireScopeAccess = (requiredScope = 'ENTREPRISE') => {
   return (req, res, next) => {
     if (!req.user) {
@@ -205,7 +439,7 @@ const requireScopeAccess = (requiredScope = 'ENTREPRISE') => {
   };
 };
 
-// Middleware pour filtrer les données selon l'entreprise de l'utilisateur
+// Middleware pour filtrer les données selon l'entreprise de l'utilisateur (conservé)
 const filterByEntreprise = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentification requise' });
@@ -226,7 +460,7 @@ const filterByEntreprise = (req, res, next) => {
   next();
 };
 
-// Middleware pour vérifier les droits d'administration
+// Middleware pour vérifier les droits d'administration (conservé)
 const requireAdminLevel = (level = 'ADMIN') => {
   return (req, res, next) => {
     if (!req.user) {
@@ -249,6 +483,9 @@ const requireAdminLevel = (level = 'ADMIN') => {
       case 'MANAGER':
         hasRequiredLevel = ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER'].includes(userRole);
         break;
+      case 'INTERVENANT':
+        hasRequiredLevel = ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER', 'INTERVENANT'].includes(userRole);
+        break;
       default:
         hasRequiredLevel = false;
     }
@@ -266,7 +503,7 @@ const requireAdminLevel = (level = 'ADMIN') => {
   };
 };
 
-// Fonction utilitaire pour récupérer les permissions d'un utilisateur
+// Fonction utilitaire pour récupérer les permissions d'un utilisateur (conservée)
 const getUserPermissions = async (userId) => {
   try {
     const [permissions] = await pool.query(`
@@ -295,7 +532,7 @@ const getUserPermissions = async (userId) => {
   }
 };
 
-// Fonction utilitaire pour vérifier si un utilisateur peut accéder à une ressource spécifique
+// Fonction utilitaire pour vérifier si un utilisateur peut accéder à une ressource spécifique (conservée)
 const canAccessResource = async (userId, resourceType, resourceId, action = 'voir') => {
   try {
     const permissions = await getUserPermissions(userId);
@@ -326,50 +563,69 @@ const canAccessResource = async (userId, resourceType, resourceId, action = 'voi
   }
 };
 
-// Fonction utilitaire pour obtenir les droits d'un utilisateur
+// Fonction utilitaire pour obtenir les droits d'un utilisateur (conservée et améliorée)
 const getUserRights = (user) => {
   if (!user) return null;
   
   const userRole = user.nom_role || user.role;
   const hasGlobalAccess = user.hasGlobalAccess || user.scope === 'GLOBAL';
+  const roleConfig = ROLE_HIERARCHY[userRole];
   
   return {
+    // Nouveaux droits selon la hiérarchie
+    role: userRole,
+    level: roleConfig?.level || 0,
+    scope: roleConfig?.scope || 'UNKNOWN',
+    
+    // Anciens droits (conservés pour compatibilité)
     isSuperAdmin: userRole === 'SUPER_ADMINISTRATEUR',
     isAdmin: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole),
     isConsultant: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT'].includes(userRole),
     isManager: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER'].includes(userRole),
+    isIntervenant: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER', 'INTERVENANT'].includes(userRole),
+    
     hasGlobalAccess: hasGlobalAccess,
-    scope: hasGlobalAccess ? 'GLOBAL' : 'ENTREPRISE',
+    hasEnterpriseAccess: user.hasEnterpriseAccess || hasGlobalAccess,
+    hasPersonalAccess: user.hasPersonalAccess || false,
+    
     entrepriseId: user.id_entreprise,
     canViewAll: hasGlobalAccess || ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(userRole),
-    canEdit: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole),
-    canDelete: userRole === 'SUPER_ADMINISTRATEUR',
-    canManageUsers: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole),
+    canEdit: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(userRole),
+    canDelete: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole),
+    canManageUsers: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(userRole),
     canManageRoles: userRole === 'SUPER_ADMINISTRATEUR',
     canManagePermissions: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole),
-    canManageModules: userRole === 'SUPER_ADMINISTRATEUR'
+    canManageModules: userRole === 'SUPER_ADMINISTRATEUR',
+    
+    // Nouveaux droits spécifiques
+    canCreateForms: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'CONSULTANT', 'MANAGER', 'INTERVENANT'].includes(userRole),
+    canSelectAllEnterprises: roleConfig?.scope === 'GLOBAL',
+    canManageTeams: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(userRole),
+    canAccessSystemConfig: userRole === 'SUPER_ADMINISTRATEUR'
   };
 };
 
-// Middleware pour attacher les droits utilisateur à la requête
+// Middleware pour attacher les droits utilisateur à la requête (conservé et amélioré)
 const attachUserRights = (req, res, next) => {
   if (req.user) {
     req.userRights = getUserRights(req.user);
     console.log('📊 Droits utilisateur attachés:', {
       email: req.user.email,
       role: req.user.nom_role || req.user.role,
+      level: req.userRights.level,
       scope: req.userRights.scope,
-      rights: Object.keys(req.userRights).filter(key => req.userRights[key] === true)
+      legacy_scope: req.userRights.hasGlobalAccess ? 'GLOBAL' : 'ENTREPRISE'
     });
   }
   next();
 };
 
-// Fonction utilitaire pour logger les tentatives d'accès
+// Fonction utilitaire pour logger les tentatives d'accès (conservée)
 const logAccess = (req, action, resource, success) => {
   const logData = {
     user: req.user ? req.user.email : 'anonymous',
     role: req.user ? (req.user.nom_role || req.user.role) : 'none',
+    level: req.userPermissions ? req.userPermissions.level : 'unknown',
     action: action,
     resource: resource,
     success: success,
@@ -386,7 +642,17 @@ const logAccess = (req, action, resource, success) => {
 };
 
 module.exports = {
+  // Middlewares principaux
   authenticateToken,
+  setEnhancedUserPermissions,
+  applyDataFilters,
+  
+  // Nouveaux middlewares pour la hiérarchie
+  requireModuleAccess,
+  requireMinLevel,
+  requireFormAccess,
+  
+  // Middlewares existants (conservés)
   checkPermission,
   requireConsultant,
   requireManagerOrConsultant,
@@ -394,8 +660,14 @@ module.exports = {
   filterByEntreprise,
   requireAdminLevel,
   attachUserRights,
+  
+  // Fonctions utilitaires
   getUserPermissions,
   canAccessResource,
   getUserRights,
-  logAccess
+  logAccess,
+  canUserAccessModule,
+  
+  // Constantes
+  ROLE_HIERARCHY
 };

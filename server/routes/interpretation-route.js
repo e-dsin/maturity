@@ -51,15 +51,9 @@ router.get('/analyse/:idAnalyse', async (req, res) => {
     
     // Récupérer les données de la vue pour cette analyse
     const [interpretations] = await pool.query(`
-      SELECT ma.id_analyse, ma.id_application, a.nom_application, 
-             ma.date_analyse, ma.score_global,
-             'Niveau non défini' as niveau_global,
-             'Description non disponible' as description_globale,
-             'Recommandations non disponibles' as recommandations_globales  
-      FROM maturity_analyses ma
-      JOIN applications a ON ma.id_application = a.id_application
-      ORDER BY ma.date_analyse DESC
-    `);
+      SELECT * FROM vue_interpretation_resultats
+      WHERE id_analyse = ?
+    `, [idAnalyse]);
     
     if (interpretations.length === 0) {
       return res.status(404).json({ message: 'Interprétation non trouvée' });

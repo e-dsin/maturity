@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 router.get('/', async (req, res) => {
   try {
     const [permissions] = await pool.query(`
-      SELECT p.*, a.nom_acteur
+      SELECT p.*, a.nom_prenom
       FROM permissions p
       JOIN acteurs a ON p.id_acteur = a.id_acteur
     `);
@@ -24,7 +24,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const [permissions] = await pool.query(`
-      SELECT p.*, a.nom_acteur
+      SELECT p.*, a.nom_prenom
       FROM permissions p
       JOIN acteurs a ON p.id_acteur = a.id_acteur
       WHERE p.id_permission = ?

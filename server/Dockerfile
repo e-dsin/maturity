@@ -16,7 +16,7 @@ RUN if [ -f "package-lock.json" ]; then \
     fi
 
 # Copier le code du serveur
-COPY / ./
+COPY . ./
 
 # Exposer le port
 EXPOSE 3000

@@ -1,36 +1,60 @@
-// server/routes/auth-route.js - Version corrigée
+// server/routes/auth-route.js - Version corrigée avec password_hash
+
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../db/dbConnection');
+const { 
+  determineEvaluationRedirect, 
+  getEvaluationQuery, 
+  getProgressQuery 
+} = require('../utils/evaluationRedirectLogic');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs'); 
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
-// POST /api/auth/login - Connexion utilisateur
+// POST /api/auth/login - Connexion utilisateur CORRIGÉE
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    console.log('🔑 === DÉBUT DEBUG LOGIN ===');
+    console.log('📧 Email reçu:', email);
+    console.log('🔐 Password reçu:', password);
+    console.log('🔐 Password longueur:', password.length);
+    
     if (!email || !password) {
+      console.log('❌ Email ou password manquant');
       return res.status(400).json({ 
         message: 'Email et mot de passe requis' 
       });
     }
     
-    // Rechercher l'utilisateur par email avec ses informations complètes
+    // ÉTAPE 1 : Rechercher l'utilisateur avec le bon champ password_hash
+    console.log('🔍 Recherche utilisateur...');
     const [users] = await pool.query(`
       SELECT a.*, r.nom_role, r.niveau_acces, e.nom_entreprise
       FROM acteurs a
       JOIN roles r ON a.id_role = r.id_role
       LEFT JOIN entreprises e ON a.id_entreprise = e.id_entreprise
-      WHERE a.email = ?
+      WHERE a.email = ? AND a.is_active = 1
     `, [email]);
     
+    console.log('👥 Nombre d\'utilisateurs trouvés:', users.length);
+    
     if (users.length === 0) {
+      console.log('❌ PROBLÈME : Aucun utilisateur trouvé avec cet email');
+      
+      // DEBUG SUPPLÉMENTAIRE : Vérifier si l'utilisateur existe sans le filtre is_active
+      const [allUsers] = await pool.query(
+        'SELECT email, is_active, role FROM acteurs WHERE email = ?',
+        [email]
+      );
+      console.log('🔍 Debug - Utilisateurs avec cet email (tous statuts):', allUsers);
+      
       logger.warn(`Tentative de connexion avec email inexistant: ${email}`);
       return res.status(401).json({ 
         message: 'Email ou mot de passe incorrect' 
@@ -38,68 +62,177 @@ router.post('/login', async (req, res) => {
     }
     
     const user = users[0];
+    console.log('✅ Utilisateur trouvé:');
+    console.log('  - Email:', user.email);
+    console.log('  - Nom:', user.nom_prenom);
+    console.log('  - Rôle:', user.role, '/', user.nom_role);
+    console.log('  - ID rôle:', user.id_role);
+    console.log('  - Actif:', user.is_active);
+    console.log('  - Password hash existe:', !!user.password_hash); // ✅ CORRIGÉ
+    console.log('  - Password hash longueur:', user.password_hash?.length);
+    console.log('  - Password hash début:', user.password_hash?.substring(0, 10) + '...');
     
-    console.log('🔍 Utilisateur trouvé dans DB:', {
-      email: user.email,
-      nom_role: user.nom_role,
-      niveau_acces: user.niveau_acces,
-      id_entreprise: user.id_entreprise
+    // ÉTAPE 2 : Vérifier le password_hash (CORRIGÉ)
+    if (!user.password_hash) {
+      console.log('❌ PROBLÈME : Password hash est null/undefined');
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+    }
+    
+    if (user.password_hash.length < 50) {
+      console.log('❌ PROBLÈME : Password hash trop court:', user.password_hash.length);
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+    }
+    
+    // ETAPE : Vérification automatique du statut de l'evaluation
+
+    let evaluationStatus = null;
+try {
+  // Utiliser la requête centralisée
+  const { query, params } = getEvaluationQuery(user.id_acteur);
+  const [invitations] = await pool.query(query, params);
+  
+  if (invitations.length > 0) {
+    const invitation = invitations[0];
+    console.log('📊 Invitation trouvée:', {
+      statut_invitation: invitation.statut_invitation,
+      statut_evaluation: invitation.statut_evaluation,
+      role: invitation.role,
+      nom_role: invitation.nom_role
     });
     
-    // Vérifier le mot de passe (en production, utiliser bcrypt)
-    // Pour le développement, on peut accepter un mot de passe simple
-    const isValidPassword = password === 'password' || 
-                           (user.mot_de_passe && await bcrypt.compare(password, user.mot_de_passe));
+    // Vérifier le progrès si évaluation en cours
+    let progress = null;
+    if (invitation.id_evaluation) {
+      const { query: progressQuery, params: progressParams } = getProgressQuery(
+        invitation.id_evaluation, 
+        user.id_acteur
+      );
+      const [progressData] = await pool.query(progressQuery, progressParams);
+      
+      if (progressData[0]) {
+        progress = {
+          reponses_donnees: progressData[0].reponses_donnees,
+          total_questions: progressData[0].total_questions,
+          pourcentage_completion: Math.round(
+            (progressData[0].reponses_donnees / progressData[0].total_questions) * 100
+          )
+        };
+      }
+    }
+    
+    // ✅ Utiliser la logique centralisée pour déterminer la redirection
+    evaluationStatus = determineEvaluationRedirect(invitation, progress, user.id_acteur);
+    
+  } else {
+    console.log('📊 Aucune invitation d\'évaluation trouvée');
+    evaluationStatus = {
+      hasEvaluation: false,
+      status: 'NO_EVALUATION',
+      message: 'Aucune évaluation en attente',
+      redirectTo: '/dashboard'
+    };
+  }
+} catch (evalError) {
+  console.error('⚠️ Erreur lors de la vérification d\'évaluation (non bloquant):', evalError);
+  evaluationStatus = {
+    hasEvaluation: false,
+    status: 'ERROR',
+    message: 'Erreur lors de la vérification du statut d\'évaluation',
+    redirectTo: '/dashboard'
+  };
+}
+
+    // ÉTAPE 3 : Test de comparaison bcrypt (CORRIGÉ)
+    console.log('🔐 Test comparaison bcrypt...');
+    console.log('  - Password à tester:', password);
+    console.log('  - Hash stocké (début):', user.password_hash.substring(0, 20) + '...');
+    
+    const isValidPassword = await bcrypt.compare(password, user.password_hash); // ✅ CORRIGÉ
+    console.log('🔐 Résultat comparaison bcrypt:', isValidPassword);
     
     if (!isValidPassword) {
+      console.log('❌ PROBLÈME : Mot de passe incorrect');
+      
+      // DEBUG SUPPLÉMENTAIRE : Tester avec des mots de passe courants
+      console.log('🧪 Tests supplémentaires...');
+      const testPasswords = [
+        'password123', 
+        'Password123', 
+        '12345678', 
+        password.trim(),
+        'admin123',
+        'manager123'
+      ];
+      
+      for (const testPwd of testPasswords) {
+        try {
+          const testResult = await bcrypt.compare(testPwd, user.password_hash);
+          console.log(`  - Test "${testPwd}":`, testResult ? '✅ MATCH!' : '❌ non');
+          if (testResult) {
+            console.log('🎉 TROUVÉ : Le vrai mot de passe est:', testPwd);
+            break;
+          }
+        } catch (testError) {
+          console.log(`  - Test "${testPwd}": ❌ erreur`, testError.message);
+        }
+      }
+      
       logger.warn(`Tentative de connexion avec mot de passe incorrect pour: ${email}`);
       return res.status(401).json({ 
         message: 'Email ou mot de passe incorrect' 
       });
     }
     
-    // Préparer les données utilisateur pour le frontend
+    console.log('✅ Authentification réussie !');
+    
+    // ÉTAPE 4 : Préparer les données utilisateur pour le frontend
     const userData = {
       id_acteur: user.id_acteur,
       nom_prenom: user.nom_prenom,
       email: user.email,
       organisation: user.organisation,
-      nom_role: user.nom_role,           // ✅ CORRECTION: utiliser nom_role de la DB
-      niveau_acces: user.niveau_acces,   // ✅ CORRECTION: utiliser niveau_acces de la DB
+      nom_role: user.nom_role,           
+      niveau_acces: user.niveau_acces,   
       id_entreprise: user.id_entreprise,
       nom_entreprise: user.nom_entreprise
     };
     
-    console.log('📤 Données utilisateur envoyées au frontend:', userData);
+    console.log('👤 Données utilisateur préparées:', userData);
     
-    // Créer le token JWT
+    // ÉTAPE 5 : Créer le token JWT
     const token = jwt.sign(
       { 
         id_acteur: user.id_acteur,
         email: user.email,
-        nom_role: user.nom_role,        // ✅ CORRECTION: utiliser nom_role
-        niveau_acces: user.niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
+        nom_role: user.nom_role,        
+        niveau_acces: user.niveau_acces, 
         id_entreprise: user.id_entreprise
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
     
-    // Mettre à jour la dernière connexion
+    console.log('🔑 Token généré avec succès');
+    
+    // ÉTAPE 6 : Mettre à jour la dernière connexion
     await pool.query(
       'UPDATE acteurs SET date_modification = NOW() WHERE id_acteur = ?', 
       [user.id_acteur]
     );
     
     logger.info(`Connexion réussie pour l'utilisateur: ${email} (${user.nom_role})`);
+    console.log('🔑 === FIN DEBUG LOGIN - SUCCÈS ===');
     
     res.status(200).json({
       message: 'Connexion réussie',
       token,
-      user: userData  // ✅ CORRECTION: envoyer les données correctes
+      user: userData
     });
     
   } catch (error) {
+    console.log('❌ === ERREUR DANS LOGIN ===');
+    console.log('❌ Error:', error);
+    console.log('❌ Stack:', error.stack);
     logger.error('Erreur lors de la connexion:', error);
     res.status(500).json({ 
       message: 'Erreur serveur lors de la connexion' 
@@ -107,7 +240,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/register - Inscription utilisateur (pour les consultants uniquement)
+// POST /api/auth/register - Inscription utilisateur (CORRIGÉE)
 router.post('/register', async (req, res) => {
   try {
     const { 
@@ -155,8 +288,8 @@ router.post('/register', async (req, res) => {
       }
     }
     
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hasher le mot de passe (UTILISER LA MÊME MÉTHODE QUE DANS L'ENDPOINT CRÉATION)
+    const hashedPassword = await bcrypt.hash(password, 12); // ✅ MÊME SALT ROUNDS
     
     // Créer l'utilisateur
     const id_acteur = uuidv4();
@@ -164,19 +297,19 @@ router.post('/register', async (req, res) => {
     
     await pool.query(`
       INSERT INTO acteurs (
-        id_acteur, nom_prenom, email, organisation, 
-        id_entreprise, id_role, mot_de_passe, anciennete_role,
+        id_acteur, nom_prenom, email, password_hash, role, organisation, 
+        id_entreprise, id_role, anciennete_role, is_active,
         date_creation, date_modification
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?)
     `, [
       id_acteur, 
       nom_prenom, 
       email, 
+      hashedPassword,          // ✅ CORRIGÉ: password_hash
+      roles[0].nom_role,       // ✅ CORRIGÉ: role (varchar)
       organisation || 'Non spécifié',
       id_entreprise,
-      id_role,
-      hashedPassword,
-      0,
+      id_role,                 // ✅ CORRIGÉ: id_role (FK)
       now, 
       now
     ]);
@@ -189,8 +322,8 @@ router.post('/register', async (req, res) => {
       nom_prenom,
       email,
       organisation: organisation || 'Non spécifié',
-      nom_role: roles[0].nom_role,        // ✅ CORRECTION: utiliser nom_role du rôle
-      niveau_acces: roles[0].niveau_acces, // ✅ CORRECTION: utiliser niveau_acces du rôle
+      nom_role: roles[0].nom_role,        
+      niveau_acces: roles[0].niveau_acces, 
       id_entreprise
     };
     
@@ -199,8 +332,8 @@ router.post('/register', async (req, res) => {
       { 
         id_acteur,
         email,
-        nom_role: roles[0].nom_role,        // ✅ CORRECTION: utiliser nom_role
-        niveau_acces: roles[0].niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
+        nom_role: roles[0].nom_role,        
+        niveau_acces: roles[0].niveau_acces, 
         id_entreprise
       },
       JWT_SECRET,
@@ -210,7 +343,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
       token,
-      user: userData  // ✅ CORRECTION: envoyer les données correctes
+      user: userData
     });
     
   } catch (error) {
@@ -224,9 +357,6 @@ router.post('/register', async (req, res) => {
 // POST /api/auth/logout - Déconnexion utilisateur
 router.post('/logout', (req, res) => {
   try {
-    // Dans une implémentation complète, on pourrait maintenir une blacklist des tokens
-    // Pour le moment, on fait confiance au client pour supprimer le token
-    
     res.status(200).json({ 
       message: 'Déconnexion réussie' 
     });
@@ -272,8 +402,8 @@ router.get('/me', async (req, res) => {
       nom_prenom: user.nom_prenom,
       email: user.email,
       organisation: user.organisation,
-      nom_role: user.nom_role,           // ✅ CORRECTION: utiliser nom_role de la DB
-      niveau_acces: user.niveau_acces,   // ✅ CORRECTION: utiliser niveau_acces de la DB
+      nom_role: user.nom_role,           
+      niveau_acces: user.niveau_acces,   
       id_entreprise: user.id_entreprise,
       nom_entreprise: user.nom_entreprise
     };
@@ -281,7 +411,7 @@ router.get('/me', async (req, res) => {
     console.log('📤 /auth/me - Données utilisateur:', userData);
     
     res.status(200).json({
-      user: userData  // ✅ CORRECTION: envoyer les données correctes
+      user: userData
     });
     
   } catch (error) {
@@ -329,8 +459,8 @@ router.post('/refresh', async (req, res) => {
       { 
         id_acteur: user.id_acteur,
         email: user.email,
-        nom_role: user.nom_role,        // ✅ CORRECTION: utiliser nom_role
-        niveau_acces: user.niveau_acces, // ✅ CORRECTION: utiliser niveau_acces
+        nom_role: user.nom_role,        
+        niveau_acces: user.niveau_acces, 
         id_entreprise: user.id_entreprise
       },
       JWT_SECRET,

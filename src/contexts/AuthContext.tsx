@@ -1,540 +1,259 @@
-// src/contexts/AuthContext.tsx - Version corrigée pour le rôle
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+// src/contexts/AuthContext.tsx - VERSION CORRIGÉE avec système de permissions
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import api from '../services/api';
 
-// === CONFIGURATION DES MODULES (conservée) ===
-const ALL_APP_MODULES = {
-  DASHBOARD: {
-    nom_module: 'DASHBOARD',
-    route_base: '/',
-    description: 'Tableau de bord principal',
-    icone: 'dashboard',
-    ordre: 1
-  },
-  QUESTIONNAIRES: {
-    nom_module: 'QUESTIONNAIRES',
-    route_base: '/questionnaires',
-    description: 'Gestion des questionnaires',
-    icone: 'quiz',
-    ordre: 2
-  },
-  FORMULAIRES: {
-    nom_module: 'FORMULAIRES',
-    route_base: '/formulaires',
-    description: 'Gestion des formulaires',
-    icone: 'assignment',
-    ordre: 3
-  },
-  ANALYSES: {
-    nom_module: 'ANALYSES',
-    route_base: '/analyses-fonctions',
-    description: 'Analyses et recommandations',
-    icone: 'analytics',
-    ordre: 4
-  },
-  APPLICATIONS: {
-    nom_module: 'APPLICATIONS',
-    route_base: '/applications',
-    description: 'Portfolio applications',
-    icone: 'apps',
-    ordre: 5
-  },
-  ENTREPRISES: {
-    nom_module: 'ENTREPRISES',
-    route_base: '/organisations',
-    description: 'Gestion des organisations',
-    icone: 'business',
-    ordre: 6
-  },
-  ADMINISTRATION: {
-    nom_module: 'ADMINISTRATION',
-    route_base: '/admin',
-    description: 'Administration système',
-    icone: 'admin_panel_settings',
-    ordre: 10,
-    sous_modules: {
-      USERS: {
-        nom_module: 'ADMIN_USERS',
-        route_base: '/admin/users',
-        description: 'Gestion des utilisateurs',
-        icone: 'people'
-      },
-      PERMISSIONS: {
-        nom_module: 'ADMIN_PERMISSIONS',
-        route_base: '/admin/permissions',
-        description: 'Gestion des permissions',
-        icone: 'security'
-      },
-      ROLES: {
-        nom_module: 'ADMIN_ROLES',
-        route_base: '/admin/roles',
-        description: 'Gestion des rôles',
-        icone: 'account_circle'
-      },
-      MATURITY: {
-        nom_module: 'ADMIN_MATURITY',
-        route_base: '/admin/maturity-model',
-        description: 'Modèle de maturité',
-        icone: 'model_training'
-      },
-      SYSTEM: {
-        nom_module: 'ADMIN_SYSTEM',
-        route_base: '/admin/system',
-        description: 'Configuration système',
-        icone: 'settings'
-      }
-    }
-  }
-} as const;
-
-// === INTERFACES ADAPTÉES ===
-interface Acteur {
+interface User {
   id_acteur: string;
   nom_prenom: string;
   email: string;
-  organisation: string;
+  organisation?: string;
   nom_role: string;
-  niveau_acces: 'ENTREPRISE' | 'GLOBAL';
+  niveau_acces?: string;
   id_entreprise?: string;
   nom_entreprise?: string;
-  anciennete_role?: number;
+  role?: string; // Alias pour compatibilité
 }
 
 interface Permission {
   nom_module: string;
-  route_base: string;
   peut_voir: boolean;
   peut_editer: boolean;
   peut_supprimer: boolean;
   peut_administrer: boolean;
-  sous_permissions?: Permission[];
+  route_base?: string;
 }
 
 interface AuthContextType {
-  currentUser: Acteur | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  // ✅ Propriétés existantes
+  user: User | null;
+  currentUser: User | null; // Alias pour user
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
-  updateProfile: (userData: Partial<Acteur>) => Promise<void>;
-  error: string | null;
+  isAuthenticated: boolean;
+  checkAuthStatus: () => Promise<void>;
+  
+  // ✅ Nouvelles propriétés pour les permissions
   permissions: Permission[];
-  hasGlobalAccess: boolean;
-  hasPermission: (module: string, action: string) => boolean;
+  hasPermission: (module: string, action?: string) => boolean;
   canAccessRoute: (route: string) => boolean;
-  canAccessAdminModule: (subModule: string) => boolean;
-  getAccessibleModules: () => Permission[];
-  getAdminSubModules: () => Permission[];
-  refreshPermissions: () => Promise<void>;
+  canAccessAdminModule: (module: string) => boolean;
   isAdmin: () => boolean;
   isSuperAdmin: () => boolean;
-  getAllAppModules: () => typeof ALL_APP_MODULES;
+  getAdminSubModules: () => string[];
 }
 
 interface RegisterData {
   nom_prenom: string;
   email: string;
   password: string;
-  organisation: string;
+  organisation?: string;
   id_entreprise?: string;
-  id_role: string;
 }
-
-const AuthContext = createContext<AuthContextType>({
-  currentUser: null,
-  isAuthenticated: false,
-  isLoading: true,
-  login: async () => {},
-  logout: async () => {},
-  register: async () => {},
-  forgotPassword: async () => {},
-  updateProfile: async () => {},
-  error: null,
-  permissions: [],
-  hasGlobalAccess: false,
-  hasPermission: () => false,
-  canAccessRoute: () => false,
-  canAccessAdminModule: () => false,
-  getAccessibleModules: () => [],
-  getAdminSubModules: () => [],
-  refreshPermissions: async () => {},
-  isAdmin: () => false,
-  isSuperAdmin: () => false,
-  getAllAppModules: () => ALL_APP_MODULES,
-});
-
-export const useAuth = () => useContext(AuthContext);
 
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // États
-  const [currentUser, setCurrentUser] = useState<Acteur | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [hasGlobalAccess, setHasGlobalAccess] = useState<boolean>(false);
 
-  // === FONCTIONS HELPER OPTIMISÉES ===
-  const isUserAdmin = useCallback((user: Acteur | null): boolean => {
-    if (!user) return false;
-    
-    const role = user.nom_role?.toUpperCase();
-    return role === 'ADMINISTRATEUR' || 
-           role === 'SUPER_ADMINISTRATEUR' ||
-           user.niveau_acces === 'GLOBAL';
+  /**
+   * ✅ Vérifier le statut d'authentification au démarrage
+   */
+  useEffect(() => {
+    checkAuthStatus();
   }, []);
 
-  const isUserSuperAdmin = useCallback((user: Acteur | null): boolean => {
-    if (!user) return false;
-    
-    const role = user.nom_role?.toUpperCase();
-    return role === 'SUPER_ADMINISTRATEUR';
-  }, []);
-
-  // === GÉNÉRATION AUTOMATIQUE DES PERMISSIONS ADMIN ===
-  const generateFullAdminPermissions = useCallback((): Permission[] => {
-    const permissions: Permission[] = [];
-    
-    Object.values(ALL_APP_MODULES).forEach(module => {
-      const mainPermission: Permission = {
-        nom_module: module.nom_module,
-        route_base: module.route_base,
-        peut_voir: true,
-        peut_editer: true,
-        peut_supprimer: true,
-        peut_administrer: true
-      };
-
-      if ('sous_modules' in module && module.sous_modules) {
-        mainPermission.sous_permissions = Object.values(module.sous_modules).map(sousModule => ({
-          nom_module: sousModule.nom_module,
-          route_base: sousModule.route_base,
-          peut_voir: true,
-          peut_editer: true,
-          peut_supprimer: true,
-          peut_administrer: true
-        }));
-      }
-
-      permissions.push(mainPermission);
-    });
-
-    return permissions;
-  }, []);
-
-  // === PERMISSIONS PAR DÉFAUT BASÉES SUR LES RÔLES ===
-  const getDefaultPermissionsForRole = useCallback((nomRole: string, niveauAcces: string): Permission[] => {
-    const basePermissions: Permission[] = [
-      { 
-        nom_module: 'DASHBOARD', 
-        route_base: '/', 
-        peut_voir: true, 
-        peut_editer: false, 
-        peut_supprimer: false, 
-        peut_administrer: false 
-      },
-      { 
-        nom_module: 'QUESTIONNAIRES', 
-        route_base: '/questionnaires', 
-        peut_voir: true, 
-        peut_editer: true, 
-        peut_supprimer: false, 
-        peut_administrer: false 
-      },
-      { 
-        nom_module: 'FORMULAIRES', 
-        route_base: '/formulaires', 
-        peut_voir: true, 
-        peut_editer: true, 
-        peut_supprimer: false, 
-        peut_administrer: false 
-      },
-      { 
-        nom_module: 'ANALYSES', 
-        route_base: '/analyses-fonctions', 
-        peut_voir: true, 
-        peut_editer: false, 
-        peut_supprimer: false, 
-        peut_administrer: false 
-      }
-    ];
-
-    // Normaliser le nom du rôle pour la comparaison
-    const roleUpper = nomRole?.toUpperCase();
-    
-    console.log('🔑 Analyse du rôle:', {
-      nomRole: nomRole,
-      roleUpper: roleUpper,
-      niveauAcces: niveauAcces
-    });
-
-    // === SUPER ADMINISTRATEUR ET ADMINISTRATEUR : TOUTES LES PERMISSIONS ===
-    if (roleUpper === 'SUPER_ADMINISTRATEUR' || roleUpper === 'ADMINISTRATEUR' || niveauAcces === 'GLOBAL') {
-      console.log('🔑 Génération permissions Administrateur (TOUTES PERMISSIONS)');
-      return generateFullAdminPermissions();
-    }
-    
-    // === CONSULTANT : PERMISSIONS ÉTENDUES ===
-    if (roleUpper === 'CONSULTANT') {
-      console.log('🔑 Génération permissions Consultant (ÉTENDUES)');
-      return basePermissions.map(p => ({
-        ...p,
-        peut_voir: true,
-        peut_editer: true,
-        peut_supprimer: true,
-        peut_administrer: false
-      })).concat([
-        { 
-          nom_module: 'APPLICATIONS', 
-          route_base: '/applications', 
-          peut_voir: true, 
-          peut_editer: true, 
-          peut_supprimer: false, 
-          peut_administrer: false 
-        },
-        { 
-          nom_module: 'ENTREPRISES', 
-          route_base: '/organisations', 
-          peut_voir: true, 
-          peut_editer: true, 
-          peut_supprimer: false, 
-          peut_administrer: false 
-        }
-      ]);
-    }
-
-    // === MANAGER : PERMISSIONS MOYENNES ===
-    if (roleUpper === 'MANAGER') {
-      console.log('🔑 Génération permissions Manager (MOYENNES)');
-      return basePermissions.map(p => ({
-        ...p,
-        peut_voir: true,
-        peut_editer: p.nom_module !== 'DASHBOARD',
-        peut_supprimer: false,
-        peut_administrer: false
-      })).concat([
-        { 
-          nom_module: 'APPLICATIONS', 
-          route_base: '/applications', 
-          peut_voir: true, 
-          peut_editer: false, 
-          peut_supprimer: false, 
-          peut_administrer: false 
-        }
-      ]);
-    }
-
-    // === INTERVENANT : PERMISSIONS DE BASE ===
-    console.log('🔑 Génération permissions Intervenant (BASE)');
-    return basePermissions;
-  }, [generateFullAdminPermissions]);
-
-  // === VÉRIFICATION AUTH ===
-  const checkAuthStatus = useCallback(async () => {
+  /**
+   * ✅ Vérifier si l'utilisateur est connecté ET récupérer ses permissions
+   */
+  const checkAuthStatus = async (): Promise<void> => {
     try {
-      setIsLoading(true);
-      const token = localStorage.getItem('auth_token');
-      
-      if (token) {
-        console.log('🔑 Token trouvé, vérification...');
-        
-        try {
-          // Essayer le nouveau endpoint avec permissions si disponible
-          const permissionsResponse = await api.get('user/permissions');
-          
-          setCurrentUser(permissionsResponse.user);
-          setPermissions(permissionsResponse.permissions || []);
-          setHasGlobalAccess(permissionsResponse.hasGlobalAccess || isUserAdmin(permissionsResponse.user));
-          setIsAuthenticated(true);
-          setError(null);
-          
-          console.log('✅ Utilisateur authentifié avec système de permissions');
-          
-        } catch (permErr) {
-          console.log('⚠️ Endpoint permissions non disponible, utilisation /auth/me...');
-          
-          // Fallback sur /auth/me
-          const response = await api.get('auth/me');
-          const user = response.user || response.data?.user;
-          
-          if (user) {
-            console.log('🔍 Utilisateur depuis /auth/me:', user);
-            
-            setCurrentUser(user);
-            setPermissions(getDefaultPermissionsForRole(user.nom_role, user.niveau_acces));
-            setHasGlobalAccess(isUserAdmin(user));
-            setIsAuthenticated(true);
-            setError(null);
-            
-            console.log('✅ Utilisateur authentifié (fallback /auth/me)');
-          }
-        }
-      } else {
-        console.log('ℹ️ Aucun token trouvé');
-      }
-    } catch (err: any) {
-      console.warn('⚠️ Erreur d\'authentification:', err.message);
-      localStorage.removeItem('auth_token');
-      setCurrentUser(null);
-      setPermissions([]);
-      setHasGlobalAccess(false);
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isUserAdmin, getDefaultPermissionsForRole]);
+      setLoading(true);
 
-  // === FONCTION LOGIN ===
-  const login = async (email: string, password: string) => {
-    try {
-      setError(null);
-      setIsLoading(true);
+      // Vérifier d'abord si on a un token
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.log('🔑 Aucun token trouvé');
+        setUser(null);
+        setIsAuthenticated(false);
+        setPermissions([]);
+        return;
+      }
+
+      console.log('🔑 Token trouvé, vérification...');
+
+      // ✅ Récupérer l'utilisateur ET ses permissions
+      const response = await api.get('/user/permissions');
       
-      console.log('🔄 === DÉBUT LOGIN ===');
-      console.log('📧 Email:', email);
-      
-      const response = await api.post('auth/login', { email, password });
-      
-      if (response.token && response.user) {
-        console.log('🔍 Réponse login complète:', response);
-        console.log('🔍 Utilisateur reçu:', response.user);
-        
-        localStorage.setItem('auth_token', response.token);
-        
-        setCurrentUser(response.user);
-        setPermissions(getDefaultPermissionsForRole(response.user.nom_role, response.user.niveau_acces));
-        setHasGlobalAccess(isUserAdmin(response.user));
+      if (response && response.user) {
+        setUser(response.user);
+        setPermissions(response.permissions || []);
         setIsAuthenticated(true);
+        console.log('✅ Utilisateur authentifié avec permissions:', response.permissions?.length || 0);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erreur vérification auth:', error);
+      
+      // Fallback vers /auth/me si /user/permissions n'existe pas
+      try {
+        const fallbackResponse = await api.get('/auth/me');
+        if (fallbackResponse && fallbackResponse.nom_prenom) {
+          setUser(fallbackResponse);
+          setPermissions([]); // Permissions vides en fallback
+          setIsAuthenticated(true);
+          console.log('✅ Utilisateur authentifié (fallback)');
+          return;
+        }
+      } catch (fallbackError) {
+        console.error('❌ Erreur fallback auth:', fallbackError);
+      }
+      
+      // Token invalide ou expiré
+      if (error.response?.status === 401) {
+        console.log('🔑 Token invalide/expiré, nettoyage...');
+        localStorage.removeItem('authToken');
+      }
+      
+      setUser(null);
+      setIsAuthenticated(false);
+      setPermissions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * ✅ Connexion utilisateur - APPROCHE GÉNÉRIQUE
+   */
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      setLoading(true);
+      
+      // ✅ Utiliser api.post pour une approche générique
+      const response = await api.post('/auth/login', {
+        email,
+        password
+      });
+
+      if (response && response.token) {
+        // Stocker le token
+        localStorage.setItem('authToken', response.token);
         
-        console.log('✅ === LOGIN RÉUSSI ===');
-        console.log('👤 Utilisateur:', {
-          email: response.user.email,
-          nom_role: response.user.nom_role,
-          niveau_acces: response.user.niveau_acces,
-          isAdmin: isUserAdmin(response.user),
-          isSuperAdmin: isUserSuperAdmin(response.user)
-        });
+        // Récupérer les données utilisateur et permissions
+        await checkAuthStatus();
+        
+        console.log('✅ Connexion réussie');
       } else {
         throw new Error('Réponse de connexion invalide');
       }
-      
-    } catch (err: any) {
-      console.error('❌ === ERREUR LOGIN ===');
-      console.error('Message:', err.response?.data?.message || err.message);
-      
-      const errorMessage = err.response?.data?.message || err.message || 'Erreur de connexion';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-      console.log('🏁 === FIN LOGIN ===');
-    }
-  };
 
-  // === AUTRES FONCTIONS (adaptées) ===
-  const logout = async () => {
-    try {
-      await api.post('auth/logout');
-    } catch (err) {
-      console.warn('Erreur lors de la déconnexion:', err);
-    } finally {
-      localStorage.removeItem('auth_token');
-      setCurrentUser(null);
-      setPermissions([]);
-      setHasGlobalAccess(false);
+    } catch (error: any) {
+      console.error('❌ Erreur de connexion:', error);
+      
+      // Nettoyer en cas d'erreur
+      setUser(null);
       setIsAuthenticated(false);
-      console.log('✅ Déconnexion réussie');
-    }
-  };
-
-  const register = async (userData: RegisterData) => {
-    try {
-      setError(null);
-      setIsLoading(true);
+      setPermissions([]);
+      localStorage.removeItem('authToken');
       
-      const response = await api.post('auth/register', userData);
-      
-      if (response.token && response.user) {
-        localStorage.setItem('auth_token', response.token);
-        
-        setCurrentUser(response.user);
-        setPermissions(getDefaultPermissionsForRole(response.user.nom_role, response.user.niveau_acces));
-        setHasGlobalAccess(isUserAdmin(response.user));
-        setIsAuthenticated(true);
-      }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erreur lors de l\'inscription';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const forgotPassword = async (email: string) => {
+  /**
+   * ✅ Déconnexion utilisateur - APPROCHE GÉNÉRIQUE
+   */
+  const logout = async (): Promise<void> => {
     try {
-      setError(null);
-      await api.post('auth/forgot-password', { email });
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erreur lors de la récupération';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
-
-  const updateProfile = async (userData: Partial<Acteur>) => {
-    try {
-      setError(null);
-      const response = await api.put('auth/profile', userData);
+      console.log('🔐 Déconnexion utilisateur...');
       
-      if (response.user) {
-        setCurrentUser(response.user);
-        setHasGlobalAccess(isUserAdmin(response.user));
+      // ✅ Utiliser api.post pour le logout
+      try {
+        await api.post('/auth/logout');
+      } catch (error) {
+        // Continuer même si l'appel API échoue
+        console.warn('⚠️ Erreur logout API (continuant quand même):', error);
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erreur lors de la mise à jour';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      
+      // Nettoyer l'état local et le token
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      setUser(null);
+      setIsAuthenticated(false);
+      setPermissions([]);
+      
+      console.log('✅ Déconnexion réussie');
+
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la déconnexion:', error);
+      
+      // Même en cas d'erreur, nettoyer l'état local
+      setUser(null);
+      setIsAuthenticated(false);
+      setPermissions([]);
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
     }
   };
 
-  // === FONCTIONS PERMISSIONS ===
-  const isAdmin = useCallback((): boolean => {
-    return isUserAdmin(currentUser);
-  }, [currentUser, isUserAdmin]);
-
-  const isSuperAdmin = useCallback((): boolean => {
-    return isUserSuperAdmin(currentUser);
-  }, [currentUser, isUserSuperAdmin]);
-
-  const hasPermission = useCallback((module: string, action: string): boolean => {
-    if (isUserAdmin(currentUser) || isUserSuperAdmin(currentUser) || hasGlobalAccess) {
-      return true;
-    }
-
-    let permission = permissions.find(p => 
-      p.nom_module.toUpperCase() === module.toUpperCase()
-    );
-
-    if (!permission) {
-      for (const p of permissions) {
-        if (p.sous_permissions) {
-          permission = p.sous_permissions.find(sp => 
-            sp.nom_module.toUpperCase() === module.toUpperCase()
-          );
-          if (permission) break;
-        }
+  /**
+   * ✅ Fonction d'inscription (à implémenter selon vos besoins)
+   */
+  const register = async (userData: RegisterData): Promise<void> => {
+    try {
+      setLoading(true);
+      
+      const response = await api.post('/auth/register', userData);
+      
+      if (response && response.token) {
+        localStorage.setItem('authToken', response.token);
+        await checkAuthStatus();
+        console.log('✅ Inscription réussie');
       }
+
+    } catch (error: any) {
+      console.error('❌ Erreur d\'inscription:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // ========================================
+  // 🆕 NOUVELLES FONCTIONS DE PERMISSIONS
+  // ========================================
+
+  /**
+   * ✅ Vérifier si l'utilisateur a une permission spécifique
+   */
+  const hasPermission = useCallback((module: string, action: string = 'voir'): boolean => {
+    if (!user || !isAuthenticated) return false;
+
+    const userRole = user.nom_role || user.role;
+    
+    // Super admin a toutes les permissions
+    if (userRole === 'SUPER_ADMINISTRATEUR') return true;
+
+    // Chercher la permission pour ce module
+    const permission = permissions.find(p => 
+      p.nom_module === module || 
+      p.nom_module.toLowerCase() === module.toLowerCase()
+    );
 
     if (!permission) return false;
 
+    // Vérifier l'action demandée
     switch (action.toLowerCase()) {
       case 'voir':
       case 'view':
@@ -549,124 +268,131 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       case 'admin':
         return permission.peut_administrer;
       default:
-        return false;
+        return permission.peut_voir;
     }
-  }, [currentUser, permissions, hasGlobalAccess, isUserAdmin, isUserSuperAdmin]);
+  }, [user, isAuthenticated, permissions]);
 
+  /**
+   * ✅ Vérifier si l'utilisateur peut accéder à une route
+   */
   const canAccessRoute = useCallback((route: string): boolean => {
-    if (isUserAdmin(currentUser) || isUserSuperAdmin(currentUser) || hasGlobalAccess) {
-      return true;
-    }
+    if (!user || !isAuthenticated) return false;
 
-    const cleanRoute = route.startsWith('/') ? route.substring(1) : route;
+    const userRole = user.nom_role || user.role;
     
-    const routeToModuleMap: { [key: string]: string } = {
-      '': 'DASHBOARD',
-      'dashboard': 'DASHBOARD',
-      'questionnaires': 'QUESTIONNAIRES',
-      'formulaires': 'FORMULAIRES',
-      'analyses-fonctions': 'ANALYSES',
-      'analyses-interpretations': 'ANALYSES',
-      'applications': 'APPLICATIONS',
-      'organisations': 'ENTREPRISES',
-      'admin': 'ADMINISTRATION',
-      'admin/users': 'ADMIN_USERS',
-      'admin/permissions': 'ADMIN_PERMISSIONS',
-      'admin/roles': 'ADMIN_ROLES',
-      'admin/maturity-model': 'ADMIN_MATURITY',
-      'admin/system': 'ADMIN_SYSTEM',
-      'users': 'ADMIN_USERS',
+    // Super admin a accès à tout
+    if (userRole === 'SUPER_ADMINISTRATEUR') return true;
+
+    // Mapping des routes vers les modules
+    const routeToModule: { [key: string]: string } = {
+      '/': 'DASHBOARD',
+      '/dashboard': 'DASHBOARD',
+      '/analyses-interpretations': 'ANALYSES',
+      '/analyses-interpretations-entreprises': 'ANALYSES',
+      '/analyses-interpretations-functions': 'ANALYSES',
+      '/forms': 'FORMULAIRES',
+      '/questionnaires': 'QUESTIONNAIRES',
+      '/applications': 'APPLICATIONS',
+      '/organisations': 'ENTREPRISES',
+      '/administration': 'ADMINISTRATION',
+      '/maturity-model-admin': 'ADMINISTRATION'
     };
 
-    let moduleForRoute = null;
-    for (const [routePath, moduleName] of Object.entries(routeToModuleMap)) {
-      if (cleanRoute.startsWith(routePath)) {
-        moduleForRoute = moduleName;
-        break;
-      }
-    }
+    const module = routeToModule[route];
+    if (!module) return true; // Route publique
 
-    if (!moduleForRoute) return false;
+    return hasPermission(module, 'voir');
+  }, [user, isAuthenticated, hasPermission]);
+
+  /**
+   * ✅ Vérifier si l'utilisateur peut accéder aux modules d'administration
+   */
+  const canAccessAdminModule = useCallback((module: string): boolean => {
+    if (!user || !isAuthenticated) return false;
+
+    const userRole = user.nom_role || user.role;
     
-    return hasPermission(moduleForRoute, 'voir');
-  }, [currentUser, hasGlobalAccess, hasPermission, isUserAdmin, isUserSuperAdmin]);
+    // Vérifier si l'utilisateur est admin
+    if (!isAdmin()) return false;
 
-  const canAccessAdminModule = useCallback((subModule: string): boolean => {
-    if (isUserAdmin(currentUser) || isUserSuperAdmin(currentUser) || hasGlobalAccess) {
-      return true;
-    }
+    return hasPermission(module, 'administrer');
+  }, [user, isAuthenticated, hasPermission]);
 
-    return hasPermission(`ADMIN_${subModule.toUpperCase()}`, 'voir');
-  }, [currentUser, hasGlobalAccess, hasPermission, isUserAdmin, isUserSuperAdmin]);
+  /**
+   * ✅ Vérifier si l'utilisateur est administrateur
+   */
+  const isAdmin = useCallback((): boolean => {
+    if (!user) return false;
+    
+    const userRole = user.nom_role || user.role;
+    return ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(userRole);
+  }, [user]);
 
-  const getAccessibleModules = useCallback((): Permission[] => {
-    if (isUserAdmin(currentUser) || isUserSuperAdmin(currentUser) || hasGlobalAccess) {
-      return generateFullAdminPermissions();
-    }
-    return permissions.filter(permission => permission.peut_voir);
-  }, [currentUser, hasGlobalAccess, permissions, generateFullAdminPermissions, isUserAdmin, isUserSuperAdmin]);
+  /**
+   * ✅ Vérifier si l'utilisateur est super administrateur
+   */
+  const isSuperAdmin = useCallback((): boolean => {
+    if (!user) return false;
+    
+    const userRole = user.nom_role || user.role;
+    return userRole === 'SUPER_ADMINISTRATEUR';
+  }, [user]);
 
-  const getAdminSubModules = useCallback((): Permission[] => {
-    if (isUserAdmin(currentUser) || isUserSuperAdmin(currentUser) || hasGlobalAccess) {
-      const adminModule = ALL_APP_MODULES.ADMINISTRATION;
-      if (adminModule.sous_modules) {
-        return Object.values(adminModule.sous_modules).map(sousModule => ({
-          nom_module: sousModule.nom_module,
-          route_base: sousModule.route_base,
-          peut_voir: true,
-          peut_editer: true,
-          peut_supprimer: true,
-          peut_administrer: true
-        }));
-      }
-    }
+  /**
+   * ✅ Obtenir les sous-modules d'administration accessibles
+   */
+  const getAdminSubModules = useCallback((): string[] => {
+    if (!isAdmin()) return [];
 
-    const adminPermission = permissions.find(p => p.nom_module === 'ADMINISTRATION');
-    return adminPermission?.sous_permissions?.filter(sp => sp.peut_voir) || [];
-  }, [currentUser, hasGlobalAccess, permissions, isUserAdmin, isUserSuperAdmin]);
+    const adminModules = [
+      'ADMIN_USERS',
+      'ADMIN_PERMISSIONS', 
+      'ADMIN_MATURITY',
+      'ADMIN_SYSTEM'
+    ];
 
-  const refreshPermissions = useCallback(async (): Promise<void> => {
-    if (isAuthenticated) {
-      await checkAuthStatus();
-    }
-  }, [isAuthenticated, checkAuthStatus]);
+    return adminModules.filter(module => hasPermission(module, 'voir'));
+  }, [isAdmin, hasPermission]);
 
-  const getAllAppModules = useCallback(() => ALL_APP_MODULES, []);
-
-  // === EFFET D'INITIALISATION ===
-  useEffect(() => {
-    checkAuthStatus();
-  }, [checkAuthStatus]);
-
-  // === VALEUR DU CONTEXTE ===
-  const value = {
-    currentUser,
-    isAuthenticated,
-    isLoading,
+  // Valeur du contexte avec toutes les propriétés requises
+  const contextValue: AuthContextType = {
+    // Propriétés existantes
+    user,
+    currentUser: user, // Alias pour compatibilité
+    loading,
     login,
     logout,
     register,
-    forgotPassword,
-    updateProfile,
-    error,
+    isAuthenticated,
+    checkAuthStatus,
+    
+    // Nouvelles propriétés de permissions
     permissions,
-    hasGlobalAccess,
     hasPermission,
     canAccessRoute,
     canAccessAdminModule,
-    getAccessibleModules,
-    getAdminSubModules,
-    refreshPermissions,
     isAdmin,
     isSuperAdmin,
-    getAllAppModules,
+    getAdminSubModules
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthContext;
+/**
+ * ✅ Hook pour utiliser le contexte d'authentification
+ */
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Exporter les types pour utilisation externe
+export type { AuthContextType, RegisterData, User, Permission };

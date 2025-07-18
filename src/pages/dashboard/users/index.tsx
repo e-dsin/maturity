@@ -540,7 +540,7 @@ const Users: React.FC = () => {
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography component="h1" variant="h5" color="primary">
-                  Gestion Utilisateurs
+                  Gestion des Utilisateurs
                 </Typography>
                 <Button
                   variant="contained"

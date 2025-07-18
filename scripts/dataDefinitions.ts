@@ -245,7 +245,7 @@ export const CONFIG = {
   export const GRILLE_INTERPRETATION = [
     // Grille globale
     {
-      fonction: 'DevSecOps-Global',
+      fonction: 'DevSecOps',
       score_min: 0,
       score_max: 1.5,
       niveau: 'Niveau 1 - Initial',
@@ -253,7 +253,7 @@ export const CONFIG = {
       recommandations: 'Priorité à la sensibilisation et à la formation des équipes. Établir les fondations avec une automatisation progressive et des quick-wins visibles.'
     },
     {
-      fonction: 'DevSecOps-Global',
+      fonction: 'DevSecOps',
       score_min: 1.5,
       score_max: 2.5,
       niveau: 'Niveau 2 - Défini',
@@ -261,7 +261,7 @@ export const CONFIG = {
       recommandations: 'Renforcer l\'intégration de la sécurité dans les pipelines, développer le partage de connaissance entre équipes et standardiser les pratiques.'
     },
     {
-      fonction: 'DevSecOps-Global',
+      fonction: 'DevSecOps',
       score_min: 2.5,
       score_max: 3.5,
       niveau: 'Niveau 3 - Mesuré',
@@ -269,7 +269,7 @@ export const CONFIG = {
       recommandations: 'Automatiser davantage les contrôles, améliorer l\'observabilité et renforcer la culture d\'amélioration continue basée sur les métriques.'
     },
     {
-      fonction: 'DevSecOps-Global',
+      fonction: 'DevSecOps',
       score_min: 3.5,
       score_max: 4.5,
       niveau: 'Niveau 4 - Géré',
@@ -277,7 +277,7 @@ export const CONFIG = {
       recommandations: 'Perfectionner l\'orchestration des outils, développer des mécanismes prédictifs et partager les bonnes pratiques à l\'échelle de l\'organisation.'
     },
     {
-      fonction: 'DevSecOps-Global',
+      fonction: 'DevSecOps',
       score_min: 4.5,
       score_max: 5,
       niveau: 'Niveau 5 - Optimisé',

@@ -20,10 +20,18 @@ console.log('====================================');
 const app = express();
 const PORT = process.env.PORT || 3000; // Corrigé : 3000 pour ECS
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://api-dev.dev-maturity.e-dsin.fr/',
+  process.env.FRONTEND_URL, 
+].filter(Boolean); // Remove undefined/null values
+
 // === CONFIGURATION CORS ===
 app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const isAllowedOrigin = allowedOrigins.includes(origin);
   // Headers CORS permissifs
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Origin', isAllowedOrigin ? origin : allowedOrigins[0]);
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-Auth-Token');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -227,7 +235,8 @@ app.get('/api/health/detailed', (req, res) => {
       healthDetailed: '/api/health/detailed',
       testCors: '/api/test-cors',
       authLogin: 'POST /api/auth/login',
-      userPermissions: '/api/user/permissions'
+      userPermissions: '/api/user/permissions',
+      maturityGlobalFunctions: '/api/maturity-global-functions'
     }
   };
 
@@ -314,7 +323,14 @@ const routesToLoad = [
   { name: 'maturity-model-route', mount: '/api/maturity-model' },
   { name: 'grille-interpretation-route', mount: '/api/grille-interpretation' },
   { name: 'permissions-management-route', mount: '/api/permissions-management' },
-    { name: 'benchmark-route', mount: '/api/benchmark' }
+  { name: 'benchmark-route', mount: '/api/benchmark' },
+  { name: 'entreprise-registration-route', mount: '/api/entreprise-registration' },
+  { name: 'entreprise-global-route', mount: '/api/entreprise-global' },
+  { name: 'evaluation-invite-route', mount: '/api/evaluation-invite'},
+  { name: 'maturity-evaluation-route', mount: '/api/maturity-evaluation'},
+  { name: 'evaluation-status-route', mount: '/api/evaluation-status'},
+  { name: 'maturity-global-route', mount: '/api/maturity-global' },
+  { name: 'maturity-global-functions-route', mount: '/api/maturity-global-functions' }
 ];
 
 let loadedRoutes = 0;
@@ -432,7 +448,7 @@ if (process.env.NODE_ENV === 'production') {
         return res.status(404).json({ 
           message: 'Route API non trouvée',
           path: req.path,
-          availableEndpoints: ['/health', '/api/health', '/api/health/database', '/api/auth/login']
+          availableEndpoints: ['/health', '/api/health', '/api/health/database', '/api/auth/login', '/api/maturity-global-functions']
         });
       }
       
@@ -453,7 +469,8 @@ if (process.env.NODE_ENV === 'production') {
           availableEndpoints: {
             health: ['/health', '/health-simple', '/api/health', '/api/health/database', '/api/health/detailed'],
             auth: ['POST /api/auth/login', 'GET /api/user/permissions'],
-            test: ['/api/test-cors']
+            test: ['/api/test-cors'],
+            maturity: ['/api/maturity-global-functions', '/api/maturity-evaluation', '/api/maturity-model']
           }
         });
       }
@@ -481,6 +498,11 @@ if (process.env.NODE_ENV === 'production') {
           },
           test: {
             cors: '/api/test-cors'
+          },
+          maturity: {
+            globalFunctions: '/api/maturity-global-functions',
+            evaluation: '/api/maturity-evaluation',
+            model: '/api/maturity-model'
           }
         },
         loadedRoutes: `${loadedRoutes}/${totalRoutes}`
@@ -505,6 +527,8 @@ const server = app.listen(PORT, () => {
   console.log('📍 Routes d\'authentification temporaires:');
   console.log(`   🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
   console.log(`   🔑 Permissions: GET http://localhost:${PORT}/api/user/permissions`);
+  console.log('📍 Nouvelles routes de maturité:');
+  console.log(`   🎯 Fonctions globales: http://localhost:${PORT}/api/maturity-global-functions`);
   console.log('===============================\n');
 });
 

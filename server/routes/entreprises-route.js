@@ -5,6 +5,15 @@ const { pool } = require('../db/dbConnection');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
+const { 
+  authenticateToken,
+  setEnhancedUserPermissions,
+  applyDataFilters,
+  requireFormAccess,
+  requireModuleAccess,
+  checkPermission,  // Fallback pour compatibilité
+  filterByEntreprise  // Fallback pour compatibilité
+} = require('../middlewares/auth-middleware');
 
 const calculateEntrepriseScore = async (pool, entrepriseId) => {
   try {
@@ -139,6 +148,37 @@ async function findThematicLevelFromDB(connection, idFonction, thematiqueNom, sc
   }
 }
 
+const conditionalPermissions = (req, res, next) => {
+  // Essayer d'appliquer les nouvelles permissions, sinon passer
+  if (typeof setEnhancedUserPermissions === 'function') {
+    setEnhancedUserPermissions(req, res, (err) => {
+      if (err) {
+        console.log('⚠️ Nouvelles permissions non disponibles, utilisation système existant');
+      }
+      next();
+    });
+  } else {
+    console.log('🔄 Utilisation système de permissions existant');
+    next();
+  }
+};
+
+
+const applyEnterpriseFiltering = (req, res, next) => {
+  // Tentative d'application des nouveaux filtres
+  if (req.userPermissions && typeof applyDataFilters === 'function') {
+    applyDataFilters(req, res, next);
+  } else {
+    // Fallback vers l'ancien système
+    if (typeof filterByEntreprise === 'function') {
+      filterByEntreprise(req, res, next);
+    } else {
+      // Pas de filtrage si aucun système disponible
+      next();
+    }
+  }
+};
+
 // GET all enterprises with their scores
 router.get('/', async (req, res) => {
   try {
@@ -167,6 +207,251 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Server error while retrieving enterprises' });
   }
 });
+
+
+router.get('/accessible/forms', 
+  authenticateToken || ((req, res, next) => next()), // Optionnel si middleware pas disponible
+  conditionalPermissions,
+  applyEnterpriseFiltering,
+  async (req, res) => {
+    try {
+      console.log('📥 GET /api/entreprises/accessible/forms');
+      console.log('👤 Utilisateur:', req.user?.email || 'Anonymous', 'Rôle:', req.user?.nom_role || 'Unknown');
+      
+      let query = `
+        SELECT e.id_entreprise, e.nom_entreprise, e.secteur, e.taille_entreprise,
+               e.actif, e.date_creation, e.date_modification,
+               COUNT(DISTINCT a.id_acteur) as nombre_acteurs,
+               COUNT(DISTINCT ev.id_evaluation) as nombre_evaluations
+        FROM entreprises e
+        LEFT JOIN acteurs a ON e.id_entreprise = a.id_entreprise
+        LEFT JOIN evaluations_maturite_globale ev ON e.id_entreprise = ev.id_entreprise
+        WHERE e.actif = 1
+      `;
+      
+      let params = [];
+      let permissionsInfo = {};
+      
+      // Appliquer les filtres selon les permissions disponibles
+      if (req.userPermissions && req.dataFilters) {
+        // Nouveau système de permissions
+        const filters = req.dataFilters;
+        
+        if (!filters.global && filters.entreprise) {
+          query += ' AND e.id_entreprise = ?';
+          params.push(filters.entreprise);
+          console.log('🔒 Nouveau système - Accès restreint à l\'entreprise:', filters.entreprise);
+        } else {
+          console.log('🌍 Nouveau système - Accès global');
+        }
+        
+        permissionsInfo = {
+          role: req.userPermissions.role,
+          level: req.userPermissions.level,
+          scope: req.userPermissions.scope,
+          can_create_forms: req.userPermissions.canAccessModule ? req.userPermissions.canAccessModule('FORMULAIRES', 'editer') : true,
+          can_view_all_companies: req.userPermissions.canSelectAllEnterprises ? req.userPermissions.canSelectAllEnterprises() : false,
+          restriction_message: getRestrictionMessage(req.userPermissions.scope, req.userPermissions.role)
+        };
+      } else if (req.user) {
+        // Fallback vers l'ancien système ou système simple
+        const hasGlobalAccess = req.user.hasGlobalAccess || req.user.scope === 'GLOBAL' || 
+                               ['SUPER_ADMINISTRATEUR', 'CONSULTANT'].includes(req.user.nom_role);
+        
+        if (!hasGlobalAccess && req.user.id_entreprise) {
+          query += ' AND e.id_entreprise = ?';
+          params.push(req.user.id_entreprise);
+          console.log('🔒 Ancien système - Accès restreint à:', req.user.id_entreprise);
+        } else {
+          console.log('🌍 Ancien système - Accès global');
+        }
+        
+        permissionsInfo = {
+          role: req.user.nom_role || req.user.role || 'UNKNOWN',
+          level: 'legacy',
+          scope: hasGlobalAccess ? 'GLOBAL' : 'ENTREPRISE',
+          can_create_forms: true,
+          can_view_all_companies: hasGlobalAccess,
+          restriction_message: hasGlobalAccess ? null : 'Accès restreint à votre entreprise'
+        };
+      } else {
+        // Pas d'authentification - retourner toutes les entreprises (ou erreur selon config)
+        console.log('⚠️ Aucune authentification détectée');
+        permissionsInfo = {
+          role: 'ANONYMOUS',
+          level: 0,
+          scope: 'NONE',
+          can_create_forms: false,
+          can_view_all_companies: true,
+          restriction_message: 'Authentification requise'
+        };
+      }
+      
+      query += ' GROUP BY e.id_entreprise, e.nom_entreprise, e.secteur, e.taille_entreprise, e.actif, e.date_creation, e.date_modification';
+      query += ' ORDER BY e.nom_entreprise';
+      
+      const [entreprises] = await pool.query(query, params);
+      
+      // Construire la réponse avec métadonnées de permissions
+      const response = {
+        entreprises: entreprises,
+        user_permissions: permissionsInfo
+      };
+      
+      console.log('✅ Entreprises accessibles:', entreprises.length);
+      console.log('📊 Permissions utilisateur:', permissionsInfo);
+      
+      res.status(200).json(response);
+    } catch (error) {
+      console.error('❌ Erreur récupération entreprises accessibles:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+);
+
+
+router.get('/permissions/user-rights', 
+  authenticateToken || ((req, res, next) => next()),
+  conditionalPermissions,
+  async (req, res) => {
+    try {
+      console.log('📥 GET /api/entreprises/permissions/user-rights');
+      
+      let userRights = {};
+      
+      if (req.userPermissions) {
+        // Nouveau système
+        userRights = {
+          role: req.userPermissions.role,
+          level: req.userPermissions.level,
+          scope: req.userPermissions.scope,
+          entreprise_id: req.user?.id_entreprise,
+          entreprise_name: req.user?.nom_entreprise,
+          
+          // Permissions spécifiques
+          can_create_forms: req.userPermissions.canAccessModule('FORMULAIRES', 'editer'),
+          can_view_all_companies: req.userPermissions.canSelectAllEnterprises(),
+          can_manage_teams: req.userPermissions.canAccessModule('GESTION_EQUIPES', 'editer'),
+          can_access_admin: req.userPermissions.canAccessModule('ADMINISTRATION', 'voir'),
+          can_access_system_config: req.userPermissions.canAccessModule('CONFIGURATIONS_SYSTEME', 'voir'),
+          
+          // Messages d'aide
+          restriction_message: getRestrictionMessage(req.userPermissions.scope, req.userPermissions.role),
+          scope_description: getScopeDescription(req.userPermissions.scope)
+        };
+      } else if (req.user) {
+        // Fallback ancien système
+        const hasGlobalAccess = req.user.hasGlobalAccess || req.user.scope === 'GLOBAL' ||
+                               ['SUPER_ADMINISTRATEUR', 'CONSULTANT'].includes(req.user.nom_role);
+        
+        userRights = {
+          role: req.user.nom_role || req.user.role || 'UNKNOWN',
+          level: 'legacy',
+          scope: hasGlobalAccess ? 'GLOBAL' : 'ENTREPRISE',
+          entreprise_id: req.user.id_entreprise,
+          entreprise_name: req.user.nom_entreprise,
+          
+          can_create_forms: true,
+          can_view_all_companies: hasGlobalAccess,
+          can_manage_teams: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(req.user.nom_role),
+          can_access_admin: ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR'].includes(req.user.nom_role),
+          can_access_system_config: req.user.nom_role === 'SUPER_ADMINISTRATEUR',
+          
+          restriction_message: hasGlobalAccess ? null : 'Accès restreint à votre entreprise',
+          scope_description: hasGlobalAccess ? 'Accès global' : 'Accès entreprise'
+        };
+      } else {
+        // Pas d'authentification
+        userRights = {
+          role: 'ANONYMOUS',
+          level: 0,
+          scope: 'NONE',
+          can_create_forms: false,
+          can_view_all_companies: false,
+          restriction_message: 'Authentification requise'
+        };
+      }
+      
+      console.log('✅ Droits utilisateur envoyés:', userRights);
+      res.status(200).json(userRights);
+    } catch (error) {
+      console.error('❌ Erreur récupération droits utilisateur:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+);
+
+router.get('/:id/access-check', 
+  authenticateToken || ((req, res, next) => next()),
+  conditionalPermissions,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      console.log('📥 GET /api/entreprises/:id/access-check');
+      console.log('🎯 Entreprise cible:', id, 'Utilisateur:', req.user?.email || 'Anonymous');
+      
+      let hasAccess = false;
+      let reason = '';
+      let permissions = {};
+      
+      if (req.userPermissions) {
+        // Nouveau système
+        hasAccess = req.userPermissions.canAccessEnterprise(id);
+        reason = hasAccess ? 
+          `Accès autorisé selon votre rôle ${req.userPermissions.role}` :
+          `Accès restreint - Votre rôle ${req.userPermissions.role} ne permet pas d'accéder à cette entreprise`;
+        
+        permissions = {
+          can_view: hasAccess && req.userPermissions.canAccessModule('FORMULAIRES', 'voir'),
+          can_edit: hasAccess && req.userPermissions.canAccessModule('FORMULAIRES', 'editer'),
+          can_create: hasAccess && req.userPermissions.canAccessModule('FORMULAIRES', 'editer'),
+          can_manage_teams: hasAccess && req.userPermissions.canAccessModule('GESTION_EQUIPES', 'editer')
+        };
+      } else if (req.user) {
+        // Fallback ancien système
+        const hasGlobalAccess = req.user.hasGlobalAccess || req.user.scope === 'GLOBAL' ||
+                               ['SUPER_ADMINISTRATEUR', 'CONSULTANT'].includes(req.user.nom_role);
+        hasAccess = hasGlobalAccess || req.user.id_entreprise === id;
+        reason = hasAccess ? 'Accès autorisé' : 'Accès restreint à votre entreprise';
+        
+        permissions = {
+          can_view: hasAccess,
+          can_edit: hasAccess,
+          can_create: hasAccess,
+          can_manage_teams: hasAccess && ['SUPER_ADMINISTRATEUR', 'ADMINISTRATEUR', 'MANAGER'].includes(req.user.nom_role)
+        };
+      } else {
+        // Pas d'authentification
+        hasAccess = false;
+        reason = 'Authentification requise';
+        permissions = {
+          can_view: false,
+          can_edit: false,
+          can_create: false,
+          can_manage_teams: false
+        };
+      }
+      
+      const response = {
+        has_access: hasAccess,
+        reason: reason,
+        user_role: req.userPermissions?.role || req.user?.nom_role || 'ANONYMOUS',
+        user_scope: req.userPermissions?.scope || req.user?.scope || 'NONE',
+        user_level: req.userPermissions?.level || 'unknown',
+        user_entreprise: req.user?.id_entreprise,
+        requested_entreprise: id,
+        permissions: permissions
+      };
+      
+      console.log('🔍 Résultat vérification accès:', response);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error('❌ Erreur vérification accès:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de la vérification d\'accès' });
+    }
+  }
+);
 
 router.get('/:id/maturity-analysis', async (req, res) => {
   const connection = await pool.getConnection();
@@ -1013,5 +1298,156 @@ router.post('/:id/calculate', async (req, res) => {
     res.status(500).json({ message: 'Server error while calculating enterprise score' });
   }
 });
+
+// GET /api/entreprises/:id/evaluation-maturite - Récupérer l'évaluation de maturité V2
+router.get('/:id/evaluation-maturite', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { id } = req.params;
+    logger.debug(`GET /api/entreprises/${id}/evaluation-maturite - Récupération évaluation V2`);
+
+    // Vérifier que l'entreprise existe
+    const [entreprises] = await connection.query(
+      'SELECT * FROM entreprises WHERE id_entreprise = ?',
+      [id]
+    );
+    
+    if (entreprises.length === 0) {
+      return res.status(404).json({ message: 'Entreprise non trouvée' });
+    }
+
+    // Récupérer la dernière évaluation terminée
+    const [evaluations] = await connection.query(`
+      SELECT * FROM evaluations_maturite_globale 
+      WHERE id_entreprise = ? AND statut = 'TERMINE'
+      ORDER BY date_evaluation DESC 
+      LIMIT 1
+    `, [id]);
+
+    if (evaluations.length === 0) {
+      return res.status(404).json({ 
+        message: 'Aucune évaluation de maturité terminée pour cette entreprise',
+        entreprise: entreprises[0],
+        has_evaluation: false
+      });
+    }
+
+    const evaluation = evaluations[0];
+
+    // Récupérer les réponses détaillées
+    const [reponses] = await connection.query(`
+      SELECT r.*, q.fonction, q.texte_question, q.description
+      FROM reponses_maturite_globale r
+      JOIN questions_maturite_globale q ON r.id_question = q.id_question
+      WHERE r.id_evaluation = ?
+      ORDER BY q.ordre_affichage
+    `, [evaluation.id_evaluation]);
+
+    // Grouper les réponses par fonction
+    const reponsesByFunction = reponses.reduce((acc, reponse) => {
+      if (!acc[reponse.fonction]) {
+        acc[reponse.fonction] = [];
+      }
+      acc[reponse.fonction].push(reponse);
+      return acc;
+    }, {});
+
+    // Calculer les statistiques détaillées
+    const functionStats = {};
+    Object.keys(reponsesByFunction).forEach(fonction => {
+      const responses = reponsesByFunction[fonction];
+      const scores = responses.map(r => r.score_question);
+      const avgScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+      
+      functionStats[fonction] = {
+        score_moyen: Math.round(avgScore * 100) / 100,
+        nombre_questions: responses.length,
+        score_min: Math.min(...scores),
+        score_max: Math.max(...scores),
+        progression: responses.length === 6 ? 100 : (responses.length / 6) * 100
+      };
+    });
+
+    // Préparer la réponse complète
+    const response = {
+      entreprise: {
+        ...entreprises[0],
+        has_evaluation: true
+      },
+      evaluation: {
+        ...evaluation,
+        completion_date: evaluation.date_evaluation,
+        duration_minutes: evaluation.duree_evaluation
+      },
+      scores_detailles: {
+        global: evaluation.score_global,
+        par_fonction: {
+          cybersecurite: evaluation.score_cybersecurite,
+          maturite_digitale: evaluation.score_maturite_digitale,
+          gouvernance_donnees: evaluation.score_gouvernance_donnees,
+          devsecops: evaluation.score_devsecops,
+          innovation_numerique: evaluation.score_innovation_numerique
+        }
+      },
+      niveaux_detailles: {
+        global: evaluation.niveau_global,
+        par_fonction: {
+          cybersecurite: evaluation.niveau_cybersecurite,
+          maturite_digitale: evaluation.niveau_maturite_digitale,
+          gouvernance_donnees: evaluation.niveau_gouvernance_donnees,
+          devsecops: evaluation.niveau_devsecops,
+          innovation_numerique: evaluation.niveau_innovation_numerique
+        }
+      },
+      statistiques_fonctions: functionStats,
+      reponses_par_fonction: reponsesByFunction,
+      metadata: {
+        total_questions: 30,
+        questions_repondues: reponses.length,
+        taux_completion: (reponses.length / 30) * 100,
+        date_derniere_evaluation: evaluation.date_evaluation
+      }
+    };
+
+    logger.info(`✅ Évaluation V2 récupérée pour entreprise ${id}: score ${evaluation.score_global}`);
+    res.json(response);
+
+  } catch (error) {
+    logger.error(`Erreur lors de la récupération de l'évaluation V2 pour ${req.params.id}:`, error);
+    res.status(500).json({ 
+      message: 'Erreur serveur lors de la récupération de l\'évaluation',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  } finally {
+    connection.release();
+  }
+});
+
+const getRestrictionMessage = (scope, role) => {
+  switch (scope) {
+    case 'GLOBAL':
+      return null; // Pas de restriction
+    case 'ENTREPRISE_COMPLETE':
+      return 'Vous avez accès complet à votre entreprise mais ne pouvez pas voir les autres entreprises';
+    case 'ENTREPRISE_PERSONNEL':
+      return 'Vous ne pouvez accéder qu\'à vos propres formulaires dans votre entreprise';
+    default:
+      return 'Accès restreint selon votre rôle';
+  }
+};
+
+const getScopeDescription = (scope) => {
+  switch (scope) {
+    case 'GLOBAL':
+      return 'Accès global à toutes les entreprises';
+    case 'ENTREPRISE_COMPLETE':
+      return 'Accès complet à votre entreprise';
+    case 'ENTREPRISE_PERSONNEL':
+      return 'Accès personnel uniquement';
+    default:
+      return 'Accès standard';
+  }
+};
+
 
 module.exports = router;

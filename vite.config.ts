@@ -18,6 +18,7 @@ export default defineConfig({
       '@layouts': path.resolve(__dirname, './src/layouts'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@services': path.resolve(__dirname, './src/services'),
+      '@contexts': path.resolve(__dirname, './src/contexts'),
       '@types': path.resolve(__dirname, './src/types'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@assets': path.resolve(__dirname, './src/assets'),
@@ -66,7 +67,12 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-      }
+      },
+      '/health': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false
+        }
     },
   },
   // Configuration pour le logger frontend

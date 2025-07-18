@@ -35,9 +35,7 @@ interface Entreprise {
   id_entreprise: string;
   nom_entreprise: string;
   secteur?: string;
-  score_global: string;
-  niveau_global: string;
-  recommandations_globales: string;
+  // SUPPRIMÉ: score_global, niveau_global, recommandations_globales
   fonctions: Fonction[];
 }
 
@@ -195,36 +193,6 @@ const generateMockBenchmarkData = (
       fiabilite_globale: 87
     }
   };
-};
-
-// Derive global level and recommendations from score_global
-const deriveGlobalLevelAndRecommendations = (scoreGlobal: number): { niveau_global: string; recommandations_globales: string } => {
-  if (scoreGlobal >= 4.5) {
-    return {
-      niveau_global: 'Niveau 5 - Optimisé',
-      recommandations_globales: 'Maintenir l\'excellence par l\'innovation continue et le partage des bonnes pratiques.'
-    };
-  } else if (scoreGlobal >= 3.5) {
-    return {
-      niveau_global: 'Niveau 4 - Géré',
-      recommandations_globales: 'Perfectionner les processus existants et développer des capacités prédictives.'
-    };
-  } else if (scoreGlobal >= 2.5) {
-    return {
-      niveau_global: 'Niveau 3 - Mesuré',
-      recommandations_globales: 'Renforcer la culture d\'amélioration continue et automatiser davantage les processus.'
-    };
-  } else if (scoreGlobal >= 1.5) {
-    return {
-      niveau_global: 'Niveau 2 - Défini',
-      recommandations_globales: 'Standardiser les pratiques et formaliser les processus dans toute l\'organisation.'
-    };
-  } else {
-    return {
-      niveau_global: 'Niveau 1 - Initial',
-      recommandations_globales: 'Initier une démarche d\'amélioration structurée et identifier les processus critiques.'
-    };
-  }
 };
 
 const AnalysesFonctions: React.FC = () => {
@@ -387,14 +355,12 @@ const AnalysesFonctions: React.FC = () => {
         return;
       }
 
-      // Transformer les données d'entreprises au format attendu
+      // Transformer les données d'entreprises au format attendu (SANS données globales)
       const formattedEntreprises = entreprisesData.map(ent => ({
         id_entreprise: ent.id_entreprise,
         nom_entreprise: ent.nom_entreprise || ent.nom || 'Entreprise inconnue',
         secteur: ent.secteur || 'Non défini',
-        score_global: '0',
-        niveau_global: 'Non évalué',
-        recommandations_globales: 'Aucune évaluation disponible',
+        // SUPPRIMÉ: score_global, niveau_global, recommandations_globales
         fonctions: []
       }));
 
@@ -418,7 +384,8 @@ const AnalysesFonctions: React.FC = () => {
       setLoading(true);
       console.log('Loading details for enterprise:', entrepriseId); // Debug log
       
-      // Récupérer les détails de l'entreprise et ses fonctions depuis le bon endpoint
+      // Récupérer SEULEMENT les détails de l'entreprise et les fonctions
+      // SUPPRIMÉ l'utilisation des données globales
       const [entrepriseResponse, fonctionsResponse] = await Promise.all([
         api.get(`entreprises/${entrepriseId}`),
         api.get(`entreprises/${entrepriseId}/fonctions`)
@@ -443,21 +410,16 @@ const AnalysesFonctions: React.FC = () => {
         fonctionsData = fonctionsResponse;
       }
       
-      // Construire l'objet entreprise details
-      const scoreGlobal = ensureValidScore(fonctionsData.score_global || 0);
-      const derivedData = deriveGlobalLevelAndRecommendations(scoreGlobal);
-      
+      // Construire l'objet entreprise details SANS les données globales
       const entrepriseDetails: Entreprise = {
         id_entreprise: entrepriseId,
         nom_entreprise: entrepriseData.nom_entreprise || fonctionsData.entreprise || "Entreprise inconnue",
         secteur: entrepriseData.secteur || "Non défini",
-        score_global: String(scoreGlobal),
-        niveau_global: fonctionsData.niveau_global || derivedData.niveau_global,
-        recommandations_globales: fonctionsData.recommandations_globales || derivedData.recommandations_globales,
+        // SUPPRIMÉ: score_global, niveau_global, recommandations_globales
         fonctions: Array.isArray(fonctionsData.fonctions) ? fonctionsData.fonctions : []
       };
       
-      console.log('Final entreprise details:', entrepriseDetails); // Debug log
+      console.log('Final entreprise details (without global data):', entrepriseDetails); // Debug log
       setEntrepriseDetails(entrepriseDetails);
       
       // Auto-select first function if available
@@ -475,44 +437,6 @@ const AnalysesFonctions: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Convert thematiques to radar chart data with benchmark
-  // const convertToRadarData = (
-  //   thematiques: Thematique[] = [], 
-  //   secteur: string = "Finance", 
-  //   fonctionName: string = "RH"
-  // ) => {
-  //   console.log('Converting radar data:', { thematiques, secteur, fonctionName }); // Debug log
-    
-  //   if (!Array.isArray(thematiques) || thematiques.length === 0) {
-  //     console.warn('No thematiques data available for radar chart');
-  //     return [];
-  //   }
-
-  //   // Obtenir les données benchmark
-  //   const benchmarkData = getBenchmarkData(secteur, fonctionName);
-  //   console.log('Benchmark data:', benchmarkData); // Debug log
-    
-  //   const radarData = thematiques.map((theme) => {
-  //     const score = ensureValidScore(theme.score || theme.score_moyen);
-      
-  //     // Trouver le score benchmark correspondant
-  //     const benchmarkScore = benchmarkData.find(b => 
-  //       b.nom.toLowerCase().includes(theme.nom.toLowerCase()) || 
-  //       theme.nom.toLowerCase().includes(b.nom.toLowerCase())
-  //     )?.score || 3.5; // Score par défaut si pas de correspondance
-      
-  //     return {
-  //       thematique: theme.nom || 'Thématique inconnue',
-  //       score: score,
-  //       benchmark: benchmarkScore,
-  //       fullMark: 5,
-  //     };
-  //   }).filter(item => item.score > 0);
-    
-  //   console.log('Final radar data:', radarData); // Debug log
-  //   return radarData;
-  // };
 
   // Handle enterprise selection
   const handleEntrepriseChange = (event: any) => {
@@ -553,7 +477,7 @@ const AnalysesFonctions: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Enterprise selection */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography component="h1" variant="h5" color="primary">
@@ -597,19 +521,14 @@ const AnalysesFonctions: React.FC = () => {
                 <CardHeader
                   title={`Entreprise: ${entrepriseDetails.nom_entreprise}`}
                   subheader={`Secteur: ${entrepriseDetails.secteur || 'Non défini'}`}
-                  action={
-                    <Chip
-                      label={`Score Global: ${formatScore(entrepriseDetails.score_global)}`}
-                      color={getNiveauColor(entrepriseDetails.niveau_global || '')}
-                    />
-                  }
+                  // SUPPRIMÉ l'affichage du score global
                 />
                 <CardContent>
                   <Typography variant="body2">
-                    <strong>Niveau:</strong> {entrepriseDetails.niveau_global || 'Non défini'}
+                    <strong>Fonctions évaluées:</strong> {entrepriseDetails.fonctions.length}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>
-                    <strong>Recommandations:</strong> {entrepriseDetails.recommandations_globales || 'Aucune recommandation disponible'}
+                    <strong>Secteur d'activité:</strong> {entrepriseDetails.secteur || 'Non défini'}
                   </Typography>
                 </CardContent>
               </Card>
@@ -618,7 +537,7 @@ const AnalysesFonctions: React.FC = () => {
         </Grid>
 
         {/* Function list */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Card>
             <CardHeader title="Fonctions Analysées" />
             <CardContent sx={{ p: 0 }}>
@@ -665,7 +584,7 @@ const AnalysesFonctions: React.FC = () => {
         </Grid>
 
         {/* Selected function analysis */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           {fonctionDetails ? (
             <Card>
               <CardHeader
@@ -687,7 +606,7 @@ const AnalysesFonctions: React.FC = () => {
                   sx={{ mb: 2 }}
                 >
                   <Tab label="Vue d'ensemble" />
-                  <Tab label="Recommandations Qwanza" />
+                  <Tab label="Nos Recommandations" />
                   <Tab label="Recommandations LLM Publics" />
                 </Tabs>
 
@@ -780,8 +699,8 @@ const AnalysesFonctions: React.FC = () => {
                         {benchmarkDataLLM && (
                           <Alert severity="info" sx={{ mt: 2 }}>
                             <Typography variant="body2">
-                              <strong>Benchmark basé sur :</strong> {benchmarkDataLLM.metadata.sources_utilisees.join(', ')} | 
-                              <strong> Fiabilité :</strong> {benchmarkDataLLM.metadata.fiabilite_globale}% | 
+                              <strong>Benchmark basé sur :</strong> {benchmarkDataLLM.metadata?.sources_utilisees?.join(', ') || 'Sources non disponibles'} | 
+                              <strong> Fiabilité :</strong> {benchmarkDataLLM.metadata?.fiabilite_globale || 'N/A'}% | 
                               <strong> Analyse du :</strong> {new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR')}
                             </Typography>
                           </Alert>
@@ -835,11 +754,11 @@ const AnalysesFonctions: React.FC = () => {
                   </Box>
                 )}
 
-                {/* Recommandations Qwanza tab */}
+                {/* Recommandations ST Digital tab */}
                 {tabValue === 1 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Recommandations Qwanza
+                      Nos Recommandations 
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 2 }}>
                       <strong>Recommandations générales pour la fonction:</strong>
@@ -888,7 +807,7 @@ const AnalysesFonctions: React.FC = () => {
                       Recommandations LLM Publics
                     </Typography>
                     
-                    {benchmarkDataLLM && benchmarkDataLLM.thematiques.length > 0 ? (
+                    {benchmarkDataLLM && benchmarkDataLLM.thematiques && benchmarkDataLLM.thematiques.length > 0 ? (
                       <Box>
                         {/* Métadonnées de l'analyse */}
                         <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
@@ -897,17 +816,17 @@ const AnalysesFonctions: React.FC = () => {
                               Informations sur l'analyse benchmark
                             </Typography>
                             <Grid container spacing={2}>
-                              <Grid item xs={12} sm={4}>
+                              <Grid size={{ xs: 12, sm: 4 }}>
                                 <Typography variant="body2">
-                                  <strong>Sources:</strong> {benchmarkDataLLM.metadata.sources_utilisees.join(', ')}
+                                  <strong>Sources:</strong> {benchmarkDataLLM.metadata?.sources_utilisees?.join(', ') || 'Sources non disponibles'}
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={4}>
+                              <Grid size={{ xs: 12, sm: 4 }}>
                                 <Typography variant="body2">
-                                  <strong>Fiabilité globale:</strong> {benchmarkDataLLM.metadata.fiabilite_globale}%
+                                  <strong>Fiabilité globale:</strong> {benchmarkDataLLM.metadata?.fiabilite_globale || 'N/A'}%
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={4}>
+                              <Grid size={{ xs: 12, sm: 4 }}>
                                 <Typography variant="body2">
                                   <strong>Date d'analyse:</strong> {new Date(benchmarkDataLLM.date_analyse).toLocaleDateString('fr-FR')}
                                 </Typography>
@@ -924,12 +843,12 @@ const AnalysesFonctions: React.FC = () => {
                               action={
                                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                   <Chip
-                                    label={`Score moyen: ${thematique.score_moyen.toFixed(1)}`}
+                                    label={`Score moyen: ${(thematique.score_moyen || 0).toFixed(1)}`}
                                     color="primary"
                                     size="small"
                                   />
                                   <Chip
-                                    label={`Écart-type: ${thematique.ecart_type.toFixed(2)}`}
+                                    label={`Écart-type: ${(thematique.ecart_type || 0).toFixed(2)}`}
                                     variant="outlined"
                                     size="small"
                                   />
@@ -939,8 +858,8 @@ const AnalysesFonctions: React.FC = () => {
                             <CardContent>
                               {/* Recommandations de chaque LLM */}
                               <Grid container spacing={2}>
-                                {thematique.recommandations_llm.map((rec, recIndex) => (
-                                  <Grid item xs={12} md={4} key={recIndex}>
+                                {(thematique.recommandations_llm || []).map((rec, recIndex) => (
+                                  <Grid size={{ xs: 12, md: 4 }} key={recIndex}>
                                     <Card variant="outlined" sx={{ height: '100%' }}>
                                       <CardHeader
                                         title={rec.source}
@@ -965,10 +884,10 @@ const AnalysesFonctions: React.FC = () => {
                                         action={
                                           <Box sx={{ textAlign: 'right' }}>
                                             <Typography variant="body2" fontWeight="bold">
-                                              {rec.score.toFixed(1)}/5
+                                              {(rec.score || 0).toFixed(1)}/5
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                              Confiance: {rec.niveau_confiance}%
+                                              Confiance: {rec.niveau_confiance || 0}%
                                             </Typography>
                                           </Box>
                                         }
@@ -976,7 +895,7 @@ const AnalysesFonctions: React.FC = () => {
                                       />
                                       <CardContent sx={{ pt: 0 }}>
                                         <Typography variant="body2">
-                                          {rec.recommandation}
+                                          {rec.recommandation || 'Recommandation non disponible'}
                                         </Typography>
                                       </CardContent>
                                     </Card>

@@ -31,7 +31,7 @@ const dbConfig = {
 
 // Chemins des scripts SQL - adaptez les chemins selon votre structure de projet
 const insertScriptPath = path.join(__dirname, './insert_data_script.sql');
-const calculateScriptPath = path.join(__dirname, './calculate_scores_script.sql');
+const calculateScriptPath = path.join(__dirname, './calculate_scores_script.sql'); 
 
 // Fonction pour lire un fichier SQL
 async function readSqlFile(filePath) {

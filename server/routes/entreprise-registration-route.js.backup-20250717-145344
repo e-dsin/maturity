@@ -1,0 +1,637 @@
+﻿// server/routes/entreprise-registration-route.js
+const express = require('express');
+const router = express.Router();
+const { pool } = require('../db/dbConnection');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
+const { body, validationResult } = require('express-validator');
+
+// Validation des données d'entrée
+const validateEnterpriseRegistration = [
+  body('nom_entreprise').isLength({ min: 2 }).withMessage('Nom d\'entreprise trop court'),
+  body('secteur').isIn([
+    'Banque/Finance', 'Assurance', 'Industrie', 'Commerce/Distribution',
+    'AgroPastoral', 'Santé', 'Éducation', 'Administration publique',
+    'Transport/Logistique', 'Énergie/Utilities', 'Télécommunications',
+    'Services et conseils', 'Autre'
+  ]).withMessage('Secteur invalide'),
+  body('email').isEmail().withMessage('Email entreprise invalide'),
+  body('taille_entreprise').isIn(['TPE', 'PME', 'ETI', 'GE']).withMessage('Taille d\'entreprise invalide'),
+  body('chiffre_affaires').isNumeric().optional().withMessage('Chiffre d\'affaires invalide'),
+  body('effectif_total').isInt({ min: 1 }).withMessage('Effectif total invalide'),
+  body('manager_nom_prenom').isLength({ min: 2 }).withMessage('Nom du manager trop court'),
+  body('manager_email').isEmail().withMessage('Email du manager invalide'),
+  body('manager_mot_de_passe').isLength({ min: 8 }).withMessage('Mot de passe trop court (minimum 8 caractères)'),
+  
+  // Validation des membres (optionnelle)
+  body('membres').optional().isArray().withMessage('Les membres doivent être un tableau'),
+  body('membres.*.nom_prenom').optional().isLength({ min: 2 }).withMessage('Nom du membre requis'),
+  body('membres.*.email').optional().isEmail().withMessage('Email du membre invalide'),
+  body('membres.*.fonction').optional().isLength({ min: 1 }).withMessage('Fonction du membre requise'),
+  
+  // Validation des motivations (nouvelle)
+  body('vision_transformation_numerique').optional().isLength({ min: 10 }).withMessage('Vision trop courte'),
+  body('motivations').optional().isArray().withMessage('Les motivations doivent être un tableau'),
+  body('motivations.*.code_fonction').optional().isLength({ min: 1 }).withMessage('Code fonction requis'),
+  body('motivations.*.motivation').optional().isString(),
+  body('motivations.*.but').optional().isString(),
+  body('motivations.*.objectif').optional().isString(),
+  body('motivations.*.mesure').optional().isString()
+];
+
+// Helper function to get or create Manager role
+const getOrCreateManagerRole = async (connection) => {
+  try {
+    const [roles] = await connection.query(
+      'SELECT id_role FROM roles WHERE nom_role = ?',
+      ['MANAGER']
+    );
+    
+    if (roles.length > 0) {
+      return roles[0].id_role;
+    }
+    
+    const roleId = uuidv4();
+    await connection.query(`
+      INSERT INTO roles (
+        id_role, nom_role, description, niveau_acces
+      ) VALUES (?, ?, ?, ?)
+    `, [
+      roleId,
+      'MANAGER',
+      'Manager d\'entreprise - Responsable de l\'évaluation de maturité',
+      'ENTREPRISE'
+    ]);
+    
+    logger.info('Rôle MANAGER créé automatiquement:', roleId);
+    return roleId;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération/création du rôle MANAGER:', error);
+    throw error;
+  }
+};
+
+// Helper function to get or create Intervenant role
+const getOrCreateIntervenantRole = async (connection) => {
+  try {
+    const [roles] = await connection.query(
+      'SELECT id_role FROM roles WHERE nom_role = ?',
+      ['INTERVENANT']
+    );
+    
+    if (roles.length > 0) {
+      return roles[0].id_role;
+    }
+    
+    const roleId = uuidv4();
+    await connection.query(`
+      INSERT INTO roles (
+        id_role, nom_role, description, niveau_acces
+      ) VALUES (?, ?, ?, ?)
+    `, [
+      roleId,
+      'INTERVENANT',
+      'Intervenant dans l\'évaluation de maturité - Participant aux questionnaires',
+      'ENTREPRISE'
+    ]);
+    
+    logger.info('Rôle INTERVENANT créé automatiquement:', roleId);
+    return roleId;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération/création du rôle INTERVENANT:', error);
+    throw error;
+  }
+};
+
+// POST /api/entreprise-registration - Création complète avec motivations
+router.post('/', validateEnterpriseRegistration, async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+    
+    // Vérification des erreurs de validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Données de validation invalides',
+        errors: errors.array()
+      });
+    }
+    
+    const {
+      // Données entreprise
+      nom_entreprise,
+      secteur,
+      description = '',
+      adresse = '',
+      telephone = '',
+      email,
+      site_web = '',
+      taille_entreprise,
+      chiffre_affaires,
+      effectif_total,
+      ville_siege_social,
+      pays_siege_social = 'France',
+      
+      // Données manager
+      manager_nom_prenom,
+      manager_email,
+      manager_mot_de_passe,
+      
+      // Données membres
+      membres = [],
+      
+      // Données motivation (nouveau)
+      vision_transformation_numerique = '',
+      motivations = []
+    } = req.body;
+    
+    logger.info('🏢 Début création entreprise complète:', { 
+      nom_entreprise, 
+      manager_email, 
+      nombreMembres: membres.length,
+      nombreMotivations: motivations.length 
+    });
+    
+    // 1. Vérifier que l'email entreprise n'existe pas
+    const [existingEnterprise] = await connection.query(
+      'SELECT id_entreprise FROM entreprises WHERE email = ?',
+      [email]
+    );
+    
+    if (existingEnterprise.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Une entreprise avec cet email existe déjà'
+      });
+    }
+    
+    // 2. Vérifier que l'email manager n'existe pas
+    const [existingManager] = await connection.query(
+      'SELECT id_acteur FROM acteurs WHERE email = ?',
+      [manager_email]
+    );
+    
+    if (existingManager.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'Un utilisateur avec cet email existe déjà'
+      });
+    }
+    
+    // 3. Vérifier que les emails des membres n'existent pas
+    for (const membre of membres) {
+      const [existingMember] = await connection.query(
+        'SELECT id_acteur FROM acteurs WHERE email = ?',
+        [membre.email]
+      );
+      
+      if (existingMember.length > 0) {
+        await connection.rollback();
+        return res.status(400).json({
+          message: `Un utilisateur avec l'email ${membre.email} existe déjà`
+        });
+      }
+    }
+    
+    // 4. Créer l'entreprise avec la vision
+    const id_entreprise = uuidv4();
+    const generatedPassword = uuidv4().substring(0, 8);
+    
+    await connection.query(`
+      INSERT INTO entreprises (
+        id_entreprise, nom_entreprise, secteur, description,
+        adresse, telephone, email, site_web,
+        taille_entreprise, chiffre_affaires, effectif_total,
+        ville_siege_social, pays_siege_social,
+        mot_de_passe_initial, statut_evaluation,
+        vision_transformation_numerique
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'EN_ATTENTE', ?)
+    `, [
+      id_entreprise, nom_entreprise, secteur, description,
+      adresse, telephone, email, site_web,
+      taille_entreprise, chiffre_affaires || null, effectif_total,
+      ville_siege_social, pays_siege_social,
+      generatedPassword,
+      vision_transformation_numerique
+    ]);
+    
+    logger.info('✅ Entreprise créée:', id_entreprise);
+    
+    // 5. Créer les motivations par fonction
+    if (motivations && motivations.length > 0) {
+      for (const motivation of motivations) {
+        const id_motivation = uuidv4();
+        await connection.query(`
+          INSERT INTO entreprise_motivations (
+            id_motivation, id_entreprise, code_fonction,
+            motivation, but, objectif, mesure
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+          id_motivation,
+          id_entreprise,
+          motivation.code_fonction,
+          motivation.motivation || '',
+          motivation.but || '',
+          motivation.objectif || '',
+          motivation.mesure || ''
+        ]);
+      }
+      logger.info(`✅ ${motivations.length} motivations créées pour l'entreprise`);
+    }
+    
+    // 6. Créer le manager
+    const roleIdManager = await getOrCreateManagerRole(connection);
+    const id_acteur_manager = uuidv4();
+    const hashedPassword = await bcrypt.hash(manager_mot_de_passe, 10);
+    
+    await connection.query(`
+      INSERT INTO acteurs (
+        id_acteur, nom_prenom, email, organisation,
+        id_entreprise, id_role, mot_de_passe,
+        anciennete_role, est_manager
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, true)
+    `, [
+      id_acteur_manager,
+      manager_nom_prenom,
+      manager_email,
+      nom_entreprise,
+      id_entreprise,
+      roleIdManager,
+      hashedPassword,
+      '0-1'
+    ]);
+    
+    logger.info('✅ Manager créé:', id_acteur_manager);
+    
+    // 7. Créer les membres de l'équipe (si fournis)
+    const createdMembers = [];
+    const roleIdIntervenant = await getOrCreateIntervenantRole(connection);
+    
+    for (const membre of membres) {
+      const id_acteur_membre = uuidv4();
+      const tempPassword = uuidv4().substring(0, 12);
+      const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+      
+      await connection.query(`
+        INSERT INTO acteurs (
+          id_acteur, nom_prenom, email, organisation,
+          id_entreprise, id_role, mot_de_passe,
+          anciennete_role, est_manager, fonction
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, false, ?)
+      `, [
+        id_acteur_membre,
+        membre.nom_prenom,
+        membre.email,
+        nom_entreprise,
+        id_entreprise,
+        roleIdIntervenant,
+        hashedTempPassword,
+        '0-1',
+        membre.fonction || 'Non spécifié'
+      ]);
+      
+      createdMembers.push({
+        id_acteur: id_acteur_membre,
+        nom_prenom: membre.nom_prenom,
+        email: membre.email,
+        fonction: membre.fonction || 'Non spécifié',
+        role: 'INTERVENANT',
+        tempPassword // À ne pas retourner en production
+      });
+      
+      logger.info(`✅ Membre créé: ${membre.nom_prenom}`);
+    }
+    
+    // 8. Créer l'évaluation initiale
+    const evaluationId = uuidv4();
+    await connection.query(`
+      INSERT INTO evaluations_maturite_globale (
+        id_evaluation, id_entreprise, id_acteur, 
+        statut, date_debut
+      ) VALUES (?, ?, ?, 'EN_COURS', NOW())
+    `, [evaluationId, id_entreprise, id_acteur_manager]);
+    
+    logger.info('✅ Évaluation créée:', evaluationId);
+    
+    // 9. Créer les invitations pour tous les acteurs
+    const invitationLinks = [];
+    
+    // Invitation du manager
+    const managerToken = Buffer.from(`${id_acteur_manager}:${Date.now()}`).toString('base64');
+    const managerInviteId = uuidv4();
+    
+    await connection.query(`
+      INSERT INTO invitations_evaluation (
+        id_invite, id_evaluation, id_acteur_invitant, id_acteur_invite,
+        nom_prenom, email, fonction, role, token,
+        date_invitation, statut, type_invitation
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ENVOYEE', 'CREATION')
+    `, [
+      managerInviteId,
+      evaluationId,
+      id_acteur_manager,
+      id_acteur_manager,
+      manager_nom_prenom,
+      manager_email,
+      'Manager',
+      'MANAGER',
+      managerToken
+    ]);
+    
+    invitationLinks.push({
+      id_invite: managerInviteId,
+      nom_prenom: manager_nom_prenom,
+      email: manager_email,
+      fonction: 'Manager',
+      role: 'MANAGER',
+      inviteLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/evaluation-invite/${managerToken}`,
+      actorId: id_acteur_manager
+    });
+    
+    // Invitations des membres
+    for (const membre of createdMembers) {
+      const memberToken = Buffer.from(`${membre.id_acteur}:${Date.now()}`).toString('base64');
+      const memberInviteId = uuidv4();
+      
+      await connection.query(`
+        INSERT INTO invitations_evaluation (
+          id_invite, id_evaluation, id_acteur_invitant, id_acteur_invite,
+          nom_prenom, email, fonction, role, token,
+          date_invitation, statut, type_invitation
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ENVOYEE', 'CREATION')
+      `, [
+        memberInviteId,
+        evaluationId,
+        id_acteur_manager,
+        membre.id_acteur,
+        membre.nom_prenom,
+        membre.email,
+        membre.fonction,
+        'INTERVENANT',
+        memberToken
+      ]);
+      
+      invitationLinks.push({
+        id_invite: memberInviteId,
+        nom_prenom: membre.nom_prenom,
+        email: membre.email,
+        fonction: membre.fonction,
+        role: 'INTERVENANT',
+        inviteLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/evaluation-invite/${memberToken}`,
+        actorId: membre.id_acteur
+      });
+    }
+    
+    logger.info(`✅ ${invitationLinks.length} invitations créées`);
+    
+    // 10. Créer les permissions (optionnel)
+    try {
+      const [modules] = await connection.query('SELECT id_module, nom_module FROM modules WHERE actif = true');
+      
+      // Permissions pour le manager
+      for (const module of modules) {
+        const permissionId = uuidv4();
+        await connection.query(`
+          INSERT INTO permissions (
+            id_permission, id_acteur, id_module, type_ressource,
+            peut_voir, peut_editer, peut_supprimer, peut_administrer,
+            conditions
+          ) VALUES (?, ?, ?, 'GENERAL', true, true, true, true, ?)
+        `, [
+          permissionId,
+          id_acteur_manager,
+          module.id_module,
+          JSON.stringify({ entreprise_id: id_entreprise })
+        ]);
+      }
+      
+      // Permissions pour les membres
+      for (const membre of createdMembers) {
+        for (const module of modules) {
+          const permissionId = uuidv4();
+          const permissions = module.nom_module === 'Evaluation' 
+            ? { peut_voir: true, peut_editer: true, peut_supprimer: false, peut_administrer: false }
+            : { peut_voir: true, peut_editer: false, peut_supprimer: false, peut_administrer: false };
+          
+          await connection.query(`
+            INSERT INTO permissions (
+              id_permission, id_acteur, id_module, type_ressource,
+              peut_voir, peut_editer, peut_supprimer, peut_administrer,
+              conditions
+            ) VALUES (?, ?, ?, 'GENERAL', ?, ?, ?, ?, ?)
+          `, [
+            permissionId,
+            membre.id_acteur,
+            module.id_module,
+            permissions.peut_voir,
+            permissions.peut_editer,
+            permissions.peut_supprimer,
+            permissions.peut_administrer,
+            JSON.stringify({ entreprise_id: id_entreprise })
+          ]);
+        }
+      }
+      
+      logger.info('✅ Permissions créées pour tous les acteurs');
+    } catch (permError) {
+      logger.warn('Erreur lors de la création des permissions (non bloquant):', permError.message);
+    }
+    
+    // 11. Commit de la transaction
+    await connection.commit();
+    
+    // 12. Récupérer les données complètes pour la réponse
+    const [managerData] = await connection.query(`
+      SELECT a.*, r.nom_role, e.nom_entreprise
+      FROM acteurs a
+      JOIN roles r ON a.id_role = r.id_role
+      JOIN entreprises e ON a.id_entreprise = e.id_entreprise
+      WHERE a.id_acteur = ?
+    `, [id_acteur_manager]);
+    
+    const [enterpriseData] = await connection.query(
+      'SELECT * FROM entreprises WHERE id_entreprise = ?',
+      [id_entreprise]
+    );
+    
+    logger.info('🎉 Création entreprise complète terminée avec succès');
+    
+    // 13. Réponse avec toutes les données créées
+    res.status(201).json({
+      message: 'Entreprise, manager, membres et motivations créés avec succès',
+      entreprise: enterpriseData[0],
+      manager: {
+        id_acteur: managerData[0].id_acteur,
+        nom_prenom: managerData[0].nom_prenom,
+        email: managerData[0].email,
+        role: managerData[0].nom_role,
+        id_entreprise: managerData[0].id_entreprise,
+        nom_entreprise: managerData[0].nom_entreprise
+      },
+      membres: createdMembers.map(m => ({
+        id_acteur: m.id_acteur,
+        nom_prenom: m.nom_prenom,
+        email: m.email,
+        fonction: m.fonction,
+        role: m.role
+      })),
+      evaluation: {
+        id_evaluation: evaluationId,
+        statut: 'EN_COURS'
+      },
+      invitations: invitationLinks,
+      motivations_count: motivations.length
+    });
+    
+  } catch (error) {
+    await connection.rollback();
+    logger.error('❌ Erreur création entreprise complète:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la création de l\'entreprise',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  } finally {
+    connection.release();
+  }
+});
+
+// GET /api/enterprise-registration/sectors - Get available sectors
+router.get('/sectors', async (req, res) => {
+  try {
+    const sectors = [
+      'Agriculture et agroalimentaire',
+      'Automobile', 
+      'Banque/Finance',
+      'Assurance',
+      'BTP et construction',
+      'Commerce/Distribution',
+      'Conseil et services',
+      'Éducation',
+      'Énergie/Utilities',
+      'Finance et investissement',
+      'Immobilier',
+      'Industrie',
+      'AgroPastoral',
+      'Médias et communication',
+      'Santé',
+      'Technologies et numérique',
+      'Transport/Logistique',
+      'Tourisme et hôtellerie',
+      'Administration publique',
+      'Télécommunications',
+      'Services et conseils',
+      'Associations et ONG',
+      'Autre'
+    ];
+    
+    res.json({
+      sectors: sectors.sort(),
+      total: sectors.length
+    });
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération des secteurs:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la récupération des secteurs'
+    });
+  }
+});
+
+// GET /api/enterprise-registration/company-sizes - Get company size definitions
+router.get('/company-sizes', async (req, res) => {
+  try {
+    const companySizes = [
+      {
+        code: 'TPE',
+        label: 'Très Petite Entreprise',
+        description: 'Moins de 10 salariés',
+        criteria: {
+          effectif_max: 9,
+          ca_max: 2000000
+        }
+      },
+      {
+        code: 'PME',
+        label: 'Petite et Moyenne Entreprise',
+        description: '10 à 249 salariés',
+        criteria: {
+          effectif_min: 10,
+          effectif_max: 249,
+          ca_max: 50000000
+        }
+      },
+      {
+        code: 'ETI',
+        label: 'Entreprise de Taille Intermédiaire',
+        description: '250 à 4999 salariés',
+        criteria: {
+          effectif_min: 250,
+          effectif_max: 4999,
+          ca_max: 1500000000
+        }
+      },
+      {
+        code: 'GE',
+        label: 'Grande Entreprise',
+        description: '5000 salariés et plus',
+        criteria: {
+          effectif_min: 5000
+        }
+      }
+    ];
+    
+    res.json({
+      company_sizes: companySizes
+    });
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération des tailles d\'entreprise:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la récupération des tailles d\'entreprise'
+    });
+  }
+});
+
+// POST /api/enterprise-registration/validate-email - Validate if email is available
+router.post('/validate-email', async (req, res) => {
+  try {
+    const { email, type = 'enterprise' } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        message: 'Email requis pour la validation'
+      });
+    }
+    
+    const table = type === 'manager' ? 'acteurs' : 'entreprises';
+    const [existing] = await pool.query(
+      `SELECT email FROM ${table} WHERE email = ?`,
+      [email]
+    );
+    
+    const isAvailable = existing.length === 0;
+    
+    res.json({
+      email,
+      type,
+      available: isAvailable,
+      message: isAvailable 
+        ? 'Email disponible' 
+        : `Cet email est déjà utilisé ${type === 'manager' ? 'par un utilisateur' : 'par une entreprise'}`
+    });
+    
+  } catch (error) {
+    logger.error('Erreur lors de la validation d\'email:', error);
+    res.status(500).json({
+      message: 'Erreur lors de la validation de l\'email'
+    });
+  }
+});
+
+module.exports = router;
